@@ -1,6 +1,6 @@
 {
   "name": "uhtml",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A micro HTML/SVG render",
   "main": "cjs/index.js",
   "scripts": {
@@ -11,7 +11,11 @@
     "min": "uglifyjs index.js --support-ie8 --comments=/^!/ -c -m -o min.js",
     "size": "cat min.js | gzip -9 | wc -c && cat min.js | brotli | wc -c && cat new.js | gzip -9 | wc -c && cat new.js | brotli | wc -c"
   },
-  "keywords": ["micro", "HTML", "render"],
+  "keywords": [
+    "micro",
+    "HTML",
+    "render"
+  ],
   "author": "Andrea Giammarchi",
   "license": "ISC",
   "devDependencies": {
