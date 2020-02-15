@@ -1,0 +1,6 @@
+.nyc_output/
+node_modules/
+rollup/
+test/
+package-lock.json
+.travis.yml

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>uHTML</title>
+  <script src="../index.js"></script>
+  <script>
+  this.onload = function () {
+    var render = uhtml.render;
+    var html = uhtml.html;
+    this.update = function () {
+      var names = render(
+        document.body,
+        html(['<h1 name="title">Hello 👋 uHTML</h1>'])
+      );
+      names.title.style.textDecoration = 'underline';
+    };
+    this.update();
+  };
+  </script>
+</head>
+<body>
+</body>
+</html>
