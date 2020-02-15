@@ -119,7 +119,7 @@ var uhtml = (function (exports) {
 
     for (var i = 1, length = arguments.length; i < length; i++) {
       var value = arguments[i];
-      markup.push(isArray(value) ? value.join('') : value, template[i]);
+      markup.push(isArray(value) ? value.join(' ') : value, template[i]);
     }
 
     var content = createContent(markup.join(''), '' + this);

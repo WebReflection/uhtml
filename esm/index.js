@@ -37,7 +37,7 @@ function parse(template) {
   const markup = [template[0]];
   for (let i = 1, {length} = arguments; i < length; i++) {
     const value = arguments[i];
-    markup.push(isArray(value) ? value.join('') : value, template[i]);
+    markup.push(isArray(value) ? value.join(' ') : value, template[i]);
   }
   const content = createContent(markup.join(''), '' + this);
   fragment.set(template, content);
