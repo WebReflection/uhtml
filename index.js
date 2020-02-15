@@ -81,6 +81,7 @@ var uhtml = (function (exports) {
 
   var create = Object.create;
   var forEach = [].forEach;
+  var isArray = Array.isArray;
   var content = new WeakMap();
   var fragment = new WeakMap();
   var nope = {
@@ -117,7 +118,8 @@ var uhtml = (function (exports) {
     var markup = [template[0]];
 
     for (var i = 1, length = arguments.length; i < length; i++) {
-      markup.push(arguments[i], template[i]);
+      var value = arguments[i];
+      markup.push(isArray(value) ? value.join('') : value, template[i]);
     }
 
     var content = createContent(markup.join(''), '' + this);

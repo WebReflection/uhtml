@@ -4,6 +4,7 @@ const importNode = (m => m.__esModule ? /* istanbul ignore next */ m.default : /
 
 const {create} = Object;
 const {forEach} = [];
+const {isArray} = Array;
 
 const content = new WeakMap;
 const fragment = new WeakMap;
@@ -38,8 +39,10 @@ function attach(element) {
 
 function parse(template) {
   const markup = [template[0]];
-  for (let i = 1, {length} = arguments; i < length; i++)
-    markup.push(arguments[i], template[i]);
+  for (let i = 1, {length} = arguments; i < length; i++) {
+    const value = arguments[i];
+    markup.push(isArray(value) ? value.join('') : value, template[i]);
+  }
   const content = createContent(markup.join(''), '' + this);
   fragment.set(template, content);
   return content;
