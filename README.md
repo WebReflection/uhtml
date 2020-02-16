@@ -11,8 +11,8 @@ A micro HTML/SVG render
 The key of _uhtml_ is size and simplicity: nothing is transformed, transpiled, or mapped, you have full freedom to define layouts and enrich these later on.
 
 ```js
-import {render, html} from 'uhtml';
-const {render, html} = require('uhtml');
+import {render, html, svg} from 'uhtml';
+const {render, html, svg} = require('uhtml');
 // https://unpkg.com/uhtml
 ```
 
@@ -38,6 +38,8 @@ title.style.textDecoration = 'underline';
 kind.textContent = 'new';
 ```
 
+Feel free to check this **[live counter demo](https://codepen.io/WebReflection/pen/bGdpEKB)** to better understand how this works.
+
 ## F.A.Q.
 
 <details>
@@ -47,11 +49,11 @@ kind.textContent = 'new';
 
   _uhtml_ never pollutes, trash, or recreate, content defined via a template literal.
 
-  In case you didn't know, [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals) are unique per scope, so that defining some HTML or SVG content for a specific node passed as `render` argument, never replaces the content that was previously there.
+  In case you didn't know, [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals) are unique per scope, so that defining some HTML or SVG content for a specific node passed as `render` argument, never replaces the content that was previously there, if the template literal is exactly the same.
 
   Moreover, if you use `innerHTML` for SVG content, that won't work the way you'd expect.
 
-  _uhtml_ does the minimum amount of processing to ensure your HTML or SVG content is injected once, and only if the template literal is different from the previous one.
+  _uhtml_ does indeed the minimum amount of processing to ensure your HTML or SVG content is injected once, and only if the template literal is different from the previous one.
 
 </details>
 
