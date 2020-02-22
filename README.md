@@ -1,5 +1,7 @@
 # µHTML v1
 
+<sup>**Social Media Photo by [Andrii Ganzevych](https://unsplash.com/@odya_kun) on [Unsplash](https://unsplash.com/)**</sup>
+
 A _~2.5K_ HTML/SVG render based on parts of [lighterhtml](https://github.com/WebReflection/lighterhtml#readme) and [domdiff](https://github.com/WebReflection/domdiff#readme), without any extra cruft.
 
 ```js
