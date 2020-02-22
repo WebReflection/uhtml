@@ -98,19 +98,17 @@ const handleAttribute = (node, attribute, name, isSVG) => {
   // events
   if (name.slice(0, 2) === 'on') {
     removeAttributeNode(node, attribute);
-    return (node, name) => {
-      let type = name.slice(2);
-      if (name.toLowerCase() in node)
-        type = type.toLowerCase();
-      return newValue => {
-        if (oldValue !== newValue) {
-          if (oldValue)
-            node.removeEventListener(type, oldValue, false);
-          oldValue = newValue;
-          if (newValue)
-            node.addEventListener(type, newValue, false);
-        }
-      };
+    let type = name.slice(2);
+    if (name.toLowerCase() in node)
+      type = type.toLowerCase();
+    return newValue => {
+      if (oldValue !== newValue) {
+        if (oldValue)
+          node.removeEventListener(type, oldValue, false);
+        oldValue = newValue;
+        if (newValue)
+          node.addEventListener(type, newValue, false);
+      }
     };
   }
 

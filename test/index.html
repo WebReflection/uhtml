@@ -5,33 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>uHTML</title>
   <script src="../index.js"></script>
-  <script>
-  this.onload = function () {
-    const {render, html, svg} = uhtml;
-    let i = 0;
-    setInterval(
-      () => {
-        render(document.body, html`
-          <section>
-            <div test=${i++} id=${null}>
-              ${'whatever'}
-            </div>
-            <not-void />
-            <p test="123">
-              ${i++}
-              ${'whatever'}
-            </p>
-          </section>
-          <textarea>
-            ${'content' + i}
-          </textarea>
-        `);
-      },
-      1000
-    );
-  };
+  <script type="module">
+  import {define, useState} from 'https://unpkg.com/hooked-elements?module';
+  const {render, html} = uhtml;
+  define("my-counter", element => {
+    const [count, update] = useState(0);
+    render(element, html`
+      <button class="large btn" onclick="${() => update(count - 1)}">-</button>
+      <span class="large value">${count}</span>
+      <button class="large btn" onclick="${() => update(count + 1)}">+</button>
+    `);
+  });
   </script>
 </head>
 <body>
+  <my-counter></my-counter>
 </body>
 </html>

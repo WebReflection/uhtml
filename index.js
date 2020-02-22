@@ -376,16 +376,14 @@ var uhtml = (function (exports) {
 
     if (name.slice(0, 2) === 'on') {
       removeAttributeNode(node, attribute);
-      return function (node, name) {
-        var type = name.slice(2);
-        if (name.toLowerCase() in node) type = type.toLowerCase();
-        return function (newValue) {
-          if (oldValue !== newValue) {
-            if (oldValue) node.removeEventListener(type, oldValue, false);
-            oldValue = newValue;
-            if (newValue) node.addEventListener(type, newValue, false);
-          }
-        };
+      var type = name.slice(2);
+      if (name.toLowerCase() in node) type = type.toLowerCase();
+      return function (newValue) {
+        if (oldValue !== newValue) {
+          if (oldValue) node.removeEventListener(type, oldValue, false);
+          oldValue = newValue;
+          if (newValue) node.addEventListener(type, newValue, false);
+        }
       };
     } // all other cases
 
