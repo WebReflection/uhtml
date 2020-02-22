@@ -95,7 +95,7 @@ var uhtml = (function (exports) {
     };
   }(document, 'appendChild', 'cloneNode', 'createTextNode', 'importNode');
 
-  var isArray$1 = Array.isArray;
+  var isArray = Array.isArray;
   var _ref = [],
       indexOf = _ref.indexOf,
       slice$1 = _ref.slice;
@@ -588,7 +588,7 @@ var uhtml = (function (exports) {
       var hole = values[i];
 
       if (typeof(hole) === 'object' && hole) {
-        if (hole instanceof Hole) values[i] = unroll(info, hole, counter);else if (isArray$1(hole)) {
+        if (hole instanceof Hole) values[i] = unroll(info, hole, counter);else if (isArray(hole)) {
           for (var _i2 = 0, _length = hole.length; _i2 < _length; _i2++) {
             var inner = hole[_i2];
 
