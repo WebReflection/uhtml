@@ -98,7 +98,7 @@ var uhtml = (function (exports) {
   var isArray = Array.isArray;
   var _ref = [],
       indexOf = _ref.indexOf,
-      slice$1 = _ref.slice;
+      slice = _ref.slice;
 
   var empty = '';
   var trimStart = empty.trimStart || function (str) {
@@ -140,7 +140,7 @@ var uhtml = (function (exports) {
     var childNodes = fragment.childNodes;
     var length = childNodes.length;
     if (length === 1) return childNodes[0];
-    var nodes = slice$1.call(childNodes, 0);
+    var nodes = slice.call(childNodes, 0);
     return defineProperties(fragment, {
       remove: {
         value: function value() {

@@ -1,5 +1,5 @@
 'use strict';
-const {isArray} = require('./array.js');
+const {isArray, slice} = require('./array.js');
 const {getNode, noChildNodes, removeAttributeNode} = require('./node.js');
 const {quickdiff} = require('./quickdiff.js');
 

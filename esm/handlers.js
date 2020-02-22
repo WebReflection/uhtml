@@ -1,4 +1,4 @@
-import {isArray} from './array.js';
+import {isArray, slice} from './array.js';
 import {getNode, noChildNodes, removeAttributeNode} from './node.js';
 import {quickdiff} from './quickdiff.js';
 
