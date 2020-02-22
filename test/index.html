@@ -7,16 +7,28 @@
   <script src="../index.js"></script>
   <script>
   this.onload = function () {
-    var render = uhtml.render;
-    var html = uhtml.html;
-    this.update = function () {
-      var names = render(
-        document.body,
-        html(['<h1 name="title">Hello 👋 uHTML</h1>'])
-      );
-      names.title.style.textDecoration = 'underline';
-    };
-    this.update();
+    const {render, html, svg} = uhtml;
+    let i = 0;
+    setInterval(
+      () => {
+        render(document.body, html`
+          <section>
+            <div test=${i++} id=${null}>
+              ${'whatever'}
+            </div>
+            <not-void />
+            <p test="123">
+              ${i++}
+              ${'whatever'}
+            </p>
+          </section>
+          <textarea>
+            ${'content' + i}
+          </textarea>
+        `);
+      },
+      1000
+    );
   };
   </script>
 </head>
