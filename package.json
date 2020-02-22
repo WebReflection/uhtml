@@ -4,12 +4,12 @@
   "description": "A micro HTML/SVG render",
   "main": "cjs/index.js",
   "scripts": {
-    "build": "npm run cjs && npm run rollup:new && npm run rollup:babel && npm run min && npm run size",
+    "build": "npm run cjs && npm run rollup:new && npm run rollup:babel && drop-babel-typeof ./index.js && npm run min && npm run size",
     "cjs": "ascjs esm cjs",
     "rollup:new": "rollup --config rollup/new.config.js",
     "rollup:babel": "rollup --config rollup/babel.config.js",
     "min": "uglifyjs index.js --support-ie8 --comments=/^!/ -c -m -o min.js",
-    "size": "cat min.js | gzip -9 | wc -c && cat min.js | brotli | wc -c && cat new.js | gzip -9 | wc -c && cat new.js | brotli | wc -c"
+    "size": "cat min.js | brotli | wc -c && cat new.js | brotli | wc -c"
   },
   "keywords": [
     "micro",
@@ -23,6 +23,7 @@
     "@babel/preset-env": "^7.8.4",
     "@ungap/degap": "^0.1.6",
     "ascjs": "^3.1.2",
+    "drop-babel-typeof": "^1.0.3",
     "rollup": "^1.31.1",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-includepaths": "^0.2.3",

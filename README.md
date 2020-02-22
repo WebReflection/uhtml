@@ -1,83 +1,45 @@
-# uHTML
+# µHTML v1
 
-A micro HTML/SVG render
-
-  * no diffing whatsoever, it's just a faster, and smarter `innerHTML` equivalent
-  * nodes with a `name="..."` attribute are collected once
-  * arrays in holes are joined with a space in between
-  * no repeated render, per each node, when same template literal is used
-  * a perfect tiny companion for [wickedElements](https://github.com/WebReflection/wicked-elements#readme) or [hookedElements](https://github.com/WebReflection/hooked-elements#readme)
-
-The key of _uhtml_ is size and simplicity: nothing is transformed, transpiled, or mapped, you have full freedom to define layouts and enrich these later on.
+A _~2.5K_ HTML/SVG render based on parts of [lighterhtml](https://github.com/WebReflection/lighterhtml#readme) and [domdiff](https://github.com/WebReflection/domdiff#readme), without any extra cruft.
 
 ```js
 import {render, html, svg} from 'uhtml';
-const {render, html, svg} = require('uhtml');
-// https://unpkg.com/uhtml
+// const {render, html, svg} = require('uhtml');
+// <script src="https://unpkg.com/uhtml"></script>
+
+render(document.body, html`<h1>Hello 👋 µHTML</h1>`);
 ```
 
-## API and Features in a Nutshell
 
-Anything in the template gets in as is, with the exception of arrays, joined via a space, so that classes, as well as list of elements, can get in too.
+#### Where is v0 ?
 
-```js
-import {render, html, svg} from 'uhtml';
+The previous attempt to make it essential resulted ... well, too essential, but it's still [usable](./V0.md) via `npm i uhtml@0`.
 
-const {title, kind} = render(
-  document.body,
-  html`
-    <h1 name="title" class="${['a', 'b', 'c']}">Hello uHTML!</h1>
-    <p>
-      Welcome to this <span name="kind">old</span> adventure!
-    </p>
-  `
-);
 
-// every name in the template results into an element
-title.style.textDecoration = 'underline';
-kind.textContent = 'new';
-```
+## Differently from `lighterhtml`
 
-Feel free to check this **[live counter demo](https://codepen.io/WebReflection/pen/bGdpEKB)** to better understand how this works.
+  * there are **no sparse attributes**, each attribute *must* have a single interpolated value: `attribute=${value}` is OK, `attribute="${a}${b}"` is not.
+  * the parser is `RegExp` based: smaller, faster, but not as robust as the DOM based one used in _lighterhtml_
+  * there are no keyed helpers: no `html.for(...)` and no `html.node`. Use the `render(...)` and just `html` or `svg`
+  * the interpolations are simple: primitive, or array of primitives, and nodes, or array of nodes.
+  * the `style` attribute is not special at all, if you want to pass objects there, please transform these as you prefer.
+  * the _domdiff_ rip-off has been simplified to bail out sooner than the original module, performing extremely well for a reduced, but common, set of use cases: prepend, append, remove one to many, and replace one with many. Unless you keep shuffling all nodes in a list all the time, you'll likely not notice any real-world difference.
+  * this is not as battle tested as _lighterhtml_, but I'm planning to reproduce most demoes and see if it's robust enough, as most code was a cleanup after copy and paste.
+  * the `template` argument is not normalized. If you target browsers with issue with such argument, please be sure you transpile with latest _Babel_ your code, or simply load the library already transpiled via [unpkg](https://unpkg.com/uhtml)
+  * no _domtagger_ whatsoever, you can't change the current behavior of the library in any way
 
-## F.A.Q.
 
-<details>
-  <summary>
-    <strong>How is this any better than <code>innerHTML</code> ?</strong>
-  </summary>
+## Similarly or better than `lighterhtml`
 
-  _uhtml_ never pollutes, trash, or recreate, content defined via a template literal.
+  * nested `html` and `svg` are allowed like in _lighterhtml_. V0 didn't allow that, hence it was more "_surprise prone_".
+  * the `ref=${...}` attribute works same as _lighterhtml_, enabling hooks, or _React_ style, out of the box.
+  * the `.attribute=${...}` is still available, although _uhtml_ should *not* suffer any of the IE11/Edge issues, as the parsing is done differently
+  * the wire / parsing logic has been simplified even more, likely resulting in better bootstrap performance
+  * it's half of the production size, mostly because ...
+  * there are no 3rd parts dependencies, except `@ungap/create-content` and `@ungap/import-node`, both removable via [@ungap/degap](https://github.com/ungap/degap#readme) or [babel-plugin-remove-ungap](https://github.com/cfware/babel-plugin-remove-ungap#readme). The compressed final size difference is just _~0.5K_ though.
 
-  In case you didn't know, [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals) are unique per scope, so that defining some HTML or SVG content for a specific node passed as `render` argument, never replaces the content that was previously there, if the template literal is exactly the same.
+## Goals of this module
 
-  Moreover, if you use `innerHTML` for SVG content, that won't work the way you'd expect.
-
-  _uhtml_ does indeed the minimum amount of processing to ensure your HTML or SVG content is injected once, and only if the template literal is different from the previous one.
-
-</details>
-
-<details>
-  <summary>
-    <strong>Can I use nested <code>html</code> or <code>svg</code> in the template ?</strong>
-  </summary>
-
-  The _TL;DR_ answer is **no**, 'cause those utilities are there to define the kind of content you want for that specific node, instrumenting few DOM APIs to provide such content within fragments.
-
-  This boils down to the inability, or the anti-pattern, to have lists created within a template, unless you take over such list, through a named element, in a way that allows you to update, replace, or drop, such list later on.
-
-  The [domdiff](https://github.com/WebReflection/domdiff#readme) module, in such cases, might be a solution, otherwise you are in charge of handling inner lists changes.
-
-</details>
-
-<details>
-  <summary>
-    <strong>Should I <em>hydrate</em> each content manually ?</strong>
-  </summary>
-
-  The `name` attribute simplifies the retrieval of elements within the template.
-  From that time on, you are in charge of populating, or manipulating, anything you like, and per each named node.
-
-  Please note that a query such as `[name]` will return anything found in the template, so that name clashing is inevitable, if you use the same attribute within other elements/components defined in your template.
-
-</details>
+  * be an essential/ideal companion for [wickedElements](https://github.com/WebReflection/wicked-elements#readme) and [hookedElements](https://github.com/WebReflection/hooked-elements#readme).
+  * keep it as simple as possible, but not simpler
+  * see if there is room for improvements in _lighterhtml_ whenever simplifications allow to be ported there

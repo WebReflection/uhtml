@@ -1,45 +1,17 @@
-import createContent from '@ungap/create-content';
-import importNode from '@ungap/import-node';
+import {cache, setCache} from './cache.js';
+import {Hole, retrieve} from './rabbit.js';
 
-const {create} = Object;
-const {forEach} = [];
-const {isArray} = Array;
-
-const content = new WeakMap;
-const fragment = new WeakMap;
-const nope = {what: null};
+export const html = (template, ...values) => new Hole('html', template, values);
+export const svg = (template, ...values) => new Hole('svg', template, values);
 
 export const render = (where, what) => {
-  let info = content.get(where) || nope;
-  if (info.what !== what) {
+  const hole = typeof what === 'function' ? what() : what;
+  const info = cache.get(where) || setCache(where);
+  const wire = hole instanceof Hole ? retrieve(info, hole) : hole;
+  if (wire !== info.wire) {
+    info.wire = wire;
     where.textContent = '';
-    where.appendChild(importNode.call(where.ownerDocument, what, true));
-    const names = create(null);
-    forEach.call(where.querySelectorAll('[name]'), attach, names);
-    content.set(where, info = {what, names});
+    where.appendChild(wire.valueOf());
   }
-  return info.names;
+  return where;
 };
-
-export function html(template) {
-  return fragment.get(template) || parse.apply('html', arguments);
-};
-
-export function svg(template) {
-  return fragment.get(template) || parse.apply('svg', arguments);
-};
-
-function attach(element) {
-  this[element.getAttribute('name')] = element;
-}
-
-function parse(template) {
-  const markup = [template[0]];
-  for (let i = 1, {length} = arguments; i < length; i++) {
-    const value = arguments[i];
-    markup.push(isArray(value) ? value.join(' ') : value, template[i]);
-  }
-  const content = createContent(markup.join(''), '' + this);
-  fragment.set(template, content);
-  return content;
-}
