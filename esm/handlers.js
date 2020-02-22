@@ -1,5 +1,5 @@
 import {isArray, slice} from './array.js';
-import {getNode, noChildNodes, removeAttributeNode} from './node.js';
+import {getNode, noChildNodes} from './node.js';
 import {quickdiff} from './quickdiff.js';
 
 const get = (item, i) => item.nodeType === 11 ?
@@ -78,14 +78,13 @@ const handleAnything = (node, childNodes) => {
   return anyContent;
 };
 
-const handleAttribute = (node, attribute, name, isSVG) => {
+const handleAttribute = (node, name, isSVG) => {
   // hooks and ref
   if (name === 'ref')
     return ref => { ref.current = node; };
 
   // direct setters
   if (name.slice(0, 1) === '.') {
-    removeAttributeNode(node, attribute);
     return isSVG ?
       value => {
         try { node[name] = value; }
@@ -98,7 +97,6 @@ const handleAttribute = (node, attribute, name, isSVG) => {
 
   // events
   if (name.slice(0, 2) === 'on') {
-    removeAttributeNode(node, attribute);
     let type = name.slice(2);
     if (name.toLowerCase() in node)
       type = type.toLowerCase();
@@ -114,13 +112,14 @@ const handleAttribute = (node, attribute, name, isSVG) => {
   }
 
   // all other cases
-  let noOwner = false;
+  let noOwner = true;
+  const attribute = node.ownerDocument.createAttribute(name);
   return newValue => {
     if (oldValue !== newValue) {
       oldValue = newValue;
       if (oldValue == null) {
         if (!noOwner) {
-          removeAttributeNode(node, attribute);
+          node.removeAttributeNode(attribute);
           noOwner = true;
         }
       }
@@ -148,12 +147,7 @@ const handleText = node => {
 export function handlers({type, path, name}) {
   const node = path.reduce(getNode, this);
   return type === 'attr' ?
-    handleAttribute(
-      node,
-      node.getAttributeNode(name),
-      name,
-      type === 'svg'
-    ) :
+    handleAttribute(node, name, type === 'svg') :
     (noChildNodes(name) ?
       handleText(node) :
       handleAnything(node, []));

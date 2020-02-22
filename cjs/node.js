@@ -5,7 +5,7 @@ const {trimStart, trimEnd} = require('./string.js');
 const edgeCases = 'textarea,style';
 
 const findNode = (content, selector) => {
-  const search = `<${selector}></${selector}>`;
+  const search = `<${selector}></${selector}><!--${selector}-->`;
   const nodes = content.querySelectorAll(edgeCases);
   for (let i = 0, {length} = nodes; i < length; i++) {
     if (trimStart.call(trimEnd.call(nodes[i].textContent)) === search)
@@ -67,8 +67,3 @@ exports.noChildNodes = noChildNodes;
 
 const isVoid = name => /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i.test(name);
 exports.isVoid = isVoid;
-
-const removeAttributeNode = (node, attribute) => {
-  node.removeAttributeNode(attribute);
-};
-exports.removeAttributeNode = removeAttributeNode;

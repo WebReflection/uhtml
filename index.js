@@ -110,7 +110,7 @@ var uhtml = (function (exports) {
 
   var edgeCases = 'textarea,style';
   var findNode = function findNode(content, selector) {
-    var search = "<".concat(selector, "></").concat(selector, ">");
+    var search = "<".concat(selector, "></").concat(selector, "><!--").concat(selector, "-->");
     var nodes = content.querySelectorAll(edgeCases);
 
     for (var i = 0, length = nodes.length; i < length; i++) {
@@ -170,9 +170,6 @@ var uhtml = (function (exports) {
   };
   var isVoid = function isVoid(name) {
     return /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i.test(name);
-  };
-  var removeAttributeNode = function removeAttributeNode(node, attribute) {
-    node.removeAttributeNode(attribute);
   };
 
   var append = function append(get, parent, children, start, end, before) {
@@ -353,14 +350,13 @@ var uhtml = (function (exports) {
     return anyContent;
   };
 
-  var handleAttribute = function handleAttribute(node, attribute, name, isSVG) {
+  var handleAttribute = function handleAttribute(node, name, isSVG) {
     // hooks and ref
     if (name === 'ref') return function (ref) {
       ref.current = node;
     }; // direct setters
 
     if (name.slice(0, 1) === '.') {
-      removeAttributeNode(node, attribute);
       return isSVG ? function (value) {
         try {
           node[name] = value;
@@ -375,7 +371,6 @@ var uhtml = (function (exports) {
     var oldValue; // events
 
     if (name.slice(0, 2) === 'on') {
-      removeAttributeNode(node, attribute);
       var type = name.slice(2);
       if (name.toLowerCase() in node) type = type.toLowerCase();
       return function (newValue) {
@@ -388,14 +383,15 @@ var uhtml = (function (exports) {
     } // all other cases
 
 
-    var noOwner = false;
+    var noOwner = true;
+    var attribute = node.ownerDocument.createAttribute(name);
     return function (newValue) {
       if (oldValue !== newValue) {
         oldValue = newValue;
 
         if (oldValue == null) {
           if (!noOwner) {
-            removeAttributeNode(node, attribute);
+            node.removeAttributeNode(attribute);
             noOwner = true;
           }
         } else {
@@ -425,7 +421,7 @@ var uhtml = (function (exports) {
         path = _ref.path,
         name = _ref.name;
     var node = path.reduce(getNode, this);
-    return type === 'attr' ? handleAttribute(node, node.getAttributeNode(name), name, type === 'svg') : noChildNodes(name) ? handleText(node) : handleAnything(node, []);
+    return type === 'attr' ? handleAttribute(node, name, type === 'svg') : noChildNodes(name) ? handleText(node) : handleAnything(node, []);
   }
 
   var prefix = 'no-';
@@ -449,23 +445,28 @@ var uhtml = (function (exports) {
     var text = [];
     var selectors = [];
 
-    for (var i = 0, length = template.length; i < length; i++) {
+    var _loop = function _loop(i, length) {
       var chunk = i < 1 ? trimStart.call(template[i]) : template[i];
 
       if (/([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/.test(chunk)) {
         var name = RegExp.$1;
-        text.push(chunk.replace(/([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/, "".concat(prefix, "$1=$2").concat(i)));
-        selectors.push("[".concat(prefix).concat(name, "=\"").concat(i, "\"]"));
+        text.push(chunk.replace(/([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/, function (_, $1, $2) {
+          return "".concat(prefix).concat(i, "=").concat($2 ? $2 : '"').concat($1).concat($2 ? '' : '"');
+        }));
+        selectors.push("[".concat(prefix).concat(i, "=\"").concat(name, "\"]"));
       } else {
         text.push(chunk);
 
         if (i + 1 < length) {
-          text.push("<".concat(prefix).concat(i, "></").concat(prefix).concat(i, ">"));
+          text.push("<".concat(prefix).concat(i, "></").concat(prefix).concat(i, "><!--").concat(prefix).concat(i, "-->"));
           selectors.push(prefix + i);
         }
       }
-    } // console.log(trimEnd.call(text.join('')).replace(re, place));
+    };
 
+    for (var i = 0, length = template.length; i < length; i++) {
+      _loop(i, length);
+    }
 
     return {
       text: trimEnd.call(text.join('')).replace(re, place),
@@ -484,13 +485,11 @@ var uhtml = (function (exports) {
     for (var i = 0, length = selectors.length; i < length; i++) {
       var selector = selectors[i];
       var placeholder = content.querySelector(selector) || findNode(content, selector);
-      var ownerDocument = placeholder.ownerDocument;
 
       if (selector.charAt(0) === '[') {
-        var name = selector.slice(1 + prefix.length, selector.indexOf('='));
-        placeholder.removeAttribute(prefix + name);
-        var attribute = ownerDocument.createAttribute(name);
-        placeholder.setAttributeNode(attribute);
+        var fake = selector.slice(1, selector.indexOf('='));
+        var name = placeholder.getAttribute(fake);
+        placeholder.removeAttribute(fake);
         nodes.push({
           type: 'attr',
           path: getPath(placeholder),
@@ -503,11 +502,7 @@ var uhtml = (function (exports) {
           path: getPath(placeholder),
           name: tagName
         });
-
-        if (!noChildNodes(tagName)) {
-          var comment = placeholder.ownerDocument.createComment('µ');
-          placeholder.parentNode.replaceChild(comment, placeholder);
-        }
+        if (!noChildNodes(tagName)) placeholder.parentNode.removeChild(placeholder);
       }
     }
 

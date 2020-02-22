@@ -4,7 +4,7 @@ import {trimStart, trimEnd} from './string.js';
 const edgeCases = 'textarea,style';
 
 export const findNode = (content, selector) => {
-  const search = `<${selector}></${selector}>`;
+  const search = `<${selector}></${selector}><!--${selector}-->`;
   const nodes = content.querySelectorAll(edgeCases);
   for (let i = 0, {length} = nodes; i < length; i++) {
     if (trimStart.call(trimEnd.call(nodes[i].textContent)) === search)
@@ -60,7 +60,3 @@ export const getWire = fragment => {
 export const noChildNodes = name => /^(?:style|textarea)$/i.test(name);
 
 export const isVoid = name => /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i.test(name);
-
-export const removeAttributeNode = (node, attribute) => {
-  node.removeAttributeNode(attribute);
-};

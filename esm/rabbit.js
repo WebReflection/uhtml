@@ -23,18 +23,20 @@ const instrument = template => {
     const chunk = i < 1 ? trimStart.call(template[i]) : template[i];
     if (/([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/.test(chunk)) {
       const {$1: name} = RegExp;
-      text.push(chunk.replace(/([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/, `${prefix}$1=$2${i}`));
-      selectors.push(`[${prefix}${name}="${i}"]`);
+      text.push(chunk.replace(
+        /([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/,
+        (_, $1, $2) => `${prefix}${i}=${$2 ? $2 : '"'}${$1}${$2 ? '' : '"'}`
+      ));
+      selectors.push(`[${prefix}${i}="${name}"]`);
     }
     else {
       text.push(chunk);
       if ((i + 1) < length) {
-        text.push(`<${prefix}${i}></${prefix}${i}>`);
+        text.push(`<${prefix}${i}></${prefix}${i}><!--${prefix}${i}-->`);
         selectors.push(prefix + i);
       }
     }
   }
-  // console.log(trimEnd.call(text.join('')).replace(re, place));
   return {text: trimEnd.call(text.join('')).replace(re, place), selectors};
 };
 
@@ -46,12 +48,10 @@ const mapTemplate = (type, template) => {
     const selector = selectors[i];
     const placeholder = content.querySelector(selector) ||
                         findNode(content, selector);
-    const {ownerDocument} = placeholder;
     if (selector.charAt(0) === '[') {
-      const name = selector.slice(1 + prefix.length, selector.indexOf('='));
-      placeholder.removeAttribute(prefix + name);
-      const attribute = ownerDocument.createAttribute(name);
-      placeholder.setAttributeNode(attribute);
+      const fake = selector.slice(1, selector.indexOf('='));
+      const name = placeholder.getAttribute(fake);
+      placeholder.removeAttribute(fake);
       nodes.push({
         type: 'attr',
         path: getPath(placeholder),
@@ -65,10 +65,8 @@ const mapTemplate = (type, template) => {
         path: getPath(placeholder),
         name: tagName
       });
-      if (!noChildNodes(tagName)) {
-        const comment = placeholder.ownerDocument.createComment('µ');
-        placeholder.parentNode.replaceChild(comment, placeholder);
-      }
+      if (!noChildNodes(tagName))
+        placeholder.parentNode.removeChild(placeholder);
     }
   }
   return {content, nodes};

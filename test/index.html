@@ -11,9 +11,11 @@
   define("my-counter", element => {
     const [count, update] = useState(0);
     render(element, html`
-      <button class="large btn" onclick="${() => update(count - 1)}">-</button>
+      <button class="large btn" .test=${123} onclick="${() => update(count - 1)}">-</button>
       <span class="large value">${count}</span>
       <button class="large btn" onclick="${() => update(count + 1)}">+</button>
+      <textarea>${count}</textarea>
+      <table>${html`<tr>meh</tr>`}</table>
     `);
   });
   </script>
