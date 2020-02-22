@@ -420,7 +420,7 @@ var uhtml = (function (exports) {
     };
   };
 
-  function hole(_ref) {
+  function handlers(_ref) {
     var type = _ref.type,
         path = _ref.path,
         name = _ref.name;
@@ -523,7 +523,7 @@ var uhtml = (function (exports) {
         nodes = _ref.nodes;
 
     var fragment = importNode.call(document, content, true);
-    var updates = nodes.map(hole, fragment);
+    var updates = nodes.map(handlers, fragment);
     return {
       wire: getWire(fragment),
       updates: updates
@@ -585,12 +585,12 @@ var uhtml = (function (exports) {
 
   var unrollArray = function unrollArray(info, values, counter) {
     for (var i = 0, length = values.length; i < length; i++) {
-      var _hole = values[i];
+      var hole = values[i];
 
-      if (typeof(_hole) === 'object' && _hole) {
-        if (_hole instanceof Hole) values[i] = unroll(info, _hole, counter);else if (isArray$1(_hole)) {
-          for (var _i2 = 0, _length = _hole.length; _i2 < _length; _i2++) {
-            var inner = _hole[_i2];
+      if (typeof(hole) === 'object' && hole) {
+        if (hole instanceof Hole) values[i] = unroll(info, hole, counter);else if (isArray$1(hole)) {
+          for (var _i2 = 0, _length = hole.length; _i2 < _length; _i2++) {
+            var inner = hole[_i2];
 
             if (typeof(inner) === 'object' && inner && inner instanceof Hole) {
               var sub = info.sub;
@@ -598,7 +598,7 @@ var uhtml = (function (exports) {
                   aLength = counter.aLength;
               if (a === aLength) counter.aLength = sub.push(cacheInfo());
               counter.a++;
-              _hole[_i2] = retrieve(sub[a], inner);
+              hole[_i2] = retrieve(sub[a], inner);
             }
           }
         }

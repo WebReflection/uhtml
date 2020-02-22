@@ -3,7 +3,7 @@ const createContent = (m => m.__esModule ? /* istanbul ignore next */ m.default 
 const importNode = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/import-node'));
 
 const {cacheInfo} = require('./cache.js');
-const {hole} = require('./hole.js');
+const {handlers} = require('./handlers.js');
 const {isArray} = require('./array.js');
 const {findNode, getPath, getWire, isVoid, noChildNodes} = require('./node.js');
 const {trimStart, trimEnd} = require('./string.js');
@@ -78,7 +78,7 @@ const mapTemplate = (type, template) => {
 const mapUpdates = (type, template) => {
   const {content, nodes} = templates.get(template) || setTemplate(type, template);
   const fragment = importNode.call(document, content, true);
-  const updates = nodes.map(hole, fragment);
+  const updates = nodes.map(handlers, fragment);
   return {wire: getWire(fragment), updates};
 };
 

@@ -144,7 +144,7 @@ const handleText = node => {
   };
 };
 
-export function hole({type, path, name}) {
+export function handlers({type, path, name}) {
   const node = path.reduce(getNode, this);
   return type === 'attr' ?
     handleAttribute(
@@ -156,4 +156,4 @@ export function hole({type, path, name}) {
     (noChildNodes(name) ?
       handleText(node) :
       handleAnything(node, []));
-}
+};

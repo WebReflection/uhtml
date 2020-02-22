@@ -2,7 +2,7 @@ import createContent from '@ungap/create-content';
 import importNode from '@ungap/import-node';
 
 import {cacheInfo} from './cache.js';
-import {hole} from './hole.js';
+import {handlers} from './handlers.js';
 import {isArray} from './array.js';
 import {findNode, getPath, getWire, isVoid, noChildNodes} from './node.js';
 import {trimStart, trimEnd} from './string.js';
@@ -77,7 +77,7 @@ const mapTemplate = (type, template) => {
 const mapUpdates = (type, template) => {
   const {content, nodes} = templates.get(template) || setTemplate(type, template);
   const fragment = importNode.call(document, content, true);
-  const updates = nodes.map(hole, fragment);
+  const updates = nodes.map(handlers, fragment);
   return {wire: getWire(fragment), updates};
 };
 
