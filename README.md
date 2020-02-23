@@ -179,7 +179,9 @@ The module exports the following functionalities:
 
 ### µhtml vs lighterhtml
 
-Following a list of points to consider when choosing _µhtml_ instead of _lighterhtml_ (or vice-versa).
+The first thing to keep in mind, is that _lighterhtml_ is at pair with _uhtml_ features, but not vice-versa, meaning if you need anything more, you can always switch to _lighterhtml_ without changing a single line of code.
+
+Following a list of other points to consider when choosing _µhtml_ instead of _lighterhtml_ (or vice-versa).
 
 
 #### Differently from lighterhtml
@@ -195,9 +197,10 @@ Following a list of points to consider when choosing _µhtml_ instead of _lighte
 
 #### Similarly or better than lighterhtml
 
+  * _uhtml_ should *not* suffer any of the IE11/Edge issues, or invalid SVG attributes warnings, as the parsing is done differently 🎉
   * nested `html` and `svg` are allowed like in _lighterhtml_. `v0` didn't allow that, hence it was more "_surprise prone_". _uhtml_ in that sense is more like a drop-in replacement for _lighterhtml_, and vice-versa
   * the `ref=${...}` attribute works same as _lighterhtml_, enabling hooks, or _React_ style, out of the box
-  * the `.property=${...}` *direct setter* is still available, although _uhtml_ should *not* suffer any of the IE11/Edge issues, as the parsing is done differently 🎉
+  * the `.property=${...}` *direct setter* is still available
   * self closing nodes are also supported, go wild with `<custom-elements />` or even `<span />`
   * the wire parsing logic has been simplified even more, resulting in slightly [better bootstrap and update performance](https://github.com/krausest/js-framework-benchmark/pull/698)
   * it's half of _lighterhtml_ production size, mostly because ...
