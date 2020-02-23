@@ -40,7 +40,7 @@ The previous attempt to make it essential resulted ... well, too essential, but 
   * self closing nodes are also supported, go wild with `<custom-elements />` or even `<span />`
   * the wire parsing logic has been simplified even more, likely resulting in better bootstrap and update performance (which is also *not* an issue in _lighterhtml_)
   * it's half of _lighterhtml_ production size, mostly because ...
-  * there are no 3rd parts dependencies, except `@ungap/create-content` and `@ungap/import-node`, both removable via [@ungap/degap](https://github.com/ungap/degap#readme), same way I've done it [here](./rollup/new.config.js), or [babel-plugin-remove-ungap](https://github.com/cfware/babel-plugin-remove-ungap#readme). The compressed final size difference is just _~0.5K_ though.
+  * there are no 3rd parts dependencies, except for `@ungap/create-content`, removable via [@ungap/degap](https://github.com/ungap/degap#readme), same way I've done it [here](./rollup/new.config.js), or [babel-plugin-remove-ungap](https://github.com/cfware/babel-plugin-remove-ungap#readme). The compressed final size difference is just _~0.2K_ though.
 
 ## Goals of this module
 
