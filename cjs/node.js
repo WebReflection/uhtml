@@ -1,4 +1,6 @@
 'use strict';
+const createContent = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/create-content'));
+
 const {indexOf, slice} = require('./array.js');
 
 const getNode = (node, i) => node.childNodes[i];
@@ -48,10 +50,27 @@ const getWire = fragment => {
 };
 exports.getWire = getWire;
 
-const importFragment = importNode.length ?
-  fragment => fragment :
-  fragment => importNode.call(document, fragment, true);
-exports.importFragment = importFragment;
-
-const importNode = document.importNode;
+const {createTreeWalker, importNode} = document;
+exports.createTreeWalker = createTreeWalker;
 exports.importNode = importNode;
+
+const IE = !importNode.length;
+
+const createFragment = IE ?
+  (text, type) => importNode.call(
+    document,
+    createContent(text, type),
+    true
+  ) :
+  createContent;
+exports.createFragment = createFragment;
+
+// to support IE10 and IE9 I could pass a callback instead
+// with an `acceptNode` mode that's the callback itself
+// function acceptNode() { return 1; } acceptNode.acceptNode = acceptNode;
+// however, I really don't care about IE10 and IE9, as these would require
+// also a WeakMap polyfill, and have no reason to exist.
+const createWalker = IE ?
+  fragment => createTreeWalker.call(document, fragment, 1 | 128, null, false) :
+  fragment => createTreeWalker.call(document, fragment, 1 | 128);
+exports.createWalker = createWalker;

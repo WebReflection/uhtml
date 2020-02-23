@@ -17,6 +17,11 @@ var uhtml = (function (exports) {
 
   
 
+  var isArray = Array.isArray;
+  var _ref = [],
+      indexOf = _ref.indexOf,
+      slice = _ref.slice;
+
   /*! (c) Andrea Giammarchi - ISC */
   var createContent = function (document) {
 
@@ -72,11 +77,6 @@ var uhtml = (function (exports) {
     }
   }(document);
 
-  var isArray = Array.isArray;
-  var _ref = [],
-      indexOf = _ref.indexOf,
-      slice = _ref.slice;
-
   var getNode = function getNode(node, i) {
     return node.childNodes[i];
   };
@@ -123,12 +123,23 @@ var uhtml = (function (exports) {
       }
     });
   };
-  var importFragment = importNode.length ? function (fragment) {
-    return fragment;
+  var _document = document,
+      createTreeWalker = _document.createTreeWalker,
+      importNode = _document.importNode;
+  var IE = !importNode.length;
+  var createFragment = IE ? function (text, type) {
+    return importNode.call(document, createContent(text, type), true);
+  } : createContent; // to support IE10 and IE9 I could pass a callback instead
+  // with an `acceptNode` mode that's the callback itself
+  // function acceptNode() { return 1; } acceptNode.acceptNode = acceptNode;
+  // however, I really don't care about IE10 and IE9, as these would require
+  // also a WeakMap polyfill, and have no reason to exist.
+
+  var createWalker = IE ? function (fragment) {
+    return createTreeWalker.call(document, fragment, 1 | 128, null, false);
   } : function (fragment) {
-    return importNode.call(document, fragment, true);
+    return createTreeWalker.call(document, fragment, 1 | 128);
   };
-  var importNode = document.importNode;
 
   var append = function append(get, parent, children, start, end, before) {
     var isSelect = 'selectedIndex' in parent;
@@ -379,11 +390,11 @@ var uhtml = (function (exports) {
   }
 
   var empty = '';
-  var trimStart = empty.trimStart || function (str) {
-    return str.replace(/^[ \f\n\r\t]+/, empty);
+  var trimStart = empty.trimStart || function () {
+    return this.replace(/^[ \f\n\r\t]+/, empty);
   };
-  var trimEnd = empty.trimEnd || function (str) {
-    return str.replace(/[ \f\n\r\t]+$/, empty);
+  var trimEnd = empty.trimEnd || function () {
+    return this.replace(/[ \f\n\r\t]+$/, empty);
   };
 
   var prefix = 'no-';
@@ -424,8 +435,8 @@ var uhtml = (function (exports) {
 
   var mapTemplate = function mapTemplate(type, template) {
     var text = instrument(template);
-    var content = importFragment(createContent(text, type));
-    var tw = document.createTreeWalker(content, 1 | 128);
+    var content = createFragment(text, type);
+    var tw = createWalker(content);
     var nodes = [];
     var length = template.length - 1;
     var i = 0;

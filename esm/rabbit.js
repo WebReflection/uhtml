@@ -1,10 +1,12 @@
-import createContent from '@ungap/create-content';
-
 import {cacheInfo} from './cache.js';
 import {handlers} from './handlers.js';
 import {isArray} from './array.js';
-import {getPath, getWire, importNode, importFragment} from './node.js';
 import {trimStart, trimEnd} from './string.js';
+import {
+  createFragment, createWalker,
+  getPath, getWire,
+  importNode
+} from './node.js';
 
 const prefix = 'no-';
 const attr = /([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/;
@@ -37,8 +39,8 @@ const instrument = template => {
 
 const mapTemplate = (type, template) => {
   const text = instrument(template);
-  const content = importFragment(createContent(text, type));
-  const tw = document.createTreeWalker(content, 1 | 128);
+  const content = createFragment(text, type);
+  const tw = createWalker(content);
   const nodes = [];
   const length = template.length - 1;
   let i = 0;

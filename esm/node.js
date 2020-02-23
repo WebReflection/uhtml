@@ -1,3 +1,5 @@
+import createContent from '@ungap/create-content';
+
 import {indexOf, slice} from './array.js';
 
 export const getNode = (node, i) => node.childNodes[i];
@@ -44,8 +46,24 @@ export const getWire = fragment => {
   });
 };
 
-export const importFragment = importNode.length ?
-  fragment => fragment :
-  fragment => importNode.call(document, fragment, true);
+const {createTreeWalker, importNode} = document;
+export {createTreeWalker, importNode};
 
-export const importNode = document.importNode;
+const IE = !importNode.length;
+
+export const createFragment = IE ?
+  (text, type) => importNode.call(
+    document,
+    createContent(text, type),
+    true
+  ) :
+  createContent;
+
+// to support IE10 and IE9 I could pass a callback instead
+// with an `acceptNode` mode that's the callback itself
+// function acceptNode() { return 1; } acceptNode.acceptNode = acceptNode;
+// however, I really don't care about IE10 and IE9, as these would require
+// also a WeakMap polyfill, and have no reason to exist.
+export const createWalker = IE ?
+  fragment => createTreeWalker.call(document, fragment, 1 | 128, null, false) :
+  fragment => createTreeWalker.call(document, fragment, 1 | 128);
