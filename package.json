@@ -1,6 +1,6 @@
 {
   "name": "uhtml",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A micro HTML/SVG render",
   "main": "cjs/index.js",
   "scripts": {
