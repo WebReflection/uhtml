@@ -337,9 +337,13 @@ var uhtml = (function (exports) {
       ref.current = node;
     }; // direct setters
 
-    if (name.slice(0, 1) === '.') return function (value) {
-      node[name] = value;
-    };
+    if (name.slice(0, 1) === '.') {
+      var setter = name.slice(1);
+      return function (value) {
+        node[setter] = value;
+      };
+    }
+
     var oldValue; // events
 
     if (name.slice(0, 2) === 'on') {

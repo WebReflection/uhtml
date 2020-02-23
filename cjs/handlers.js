@@ -85,8 +85,10 @@ const handleAttribute = (node, name) => {
     return ref => { ref.current = node; };
 
   // direct setters
-  if (name.slice(0, 1) === '.')
-    return value => { node[name] = value; }
+  if (name.slice(0, 1) === '.') {
+    const setter = name.slice(1);
+    return value => { node[setter] = value; }
+  }
 
   let oldValue;
 
