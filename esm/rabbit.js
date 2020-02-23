@@ -37,6 +37,9 @@ const instrument = template => {
   );
 };
 
+// TODO: I am not sure this is really necessary
+//       I might rather set an extra DON'T rule
+//       Let's play it safe for the time being.
 const isNode = (template, i) => {
   while (i--) {
     const chunk = template[i];

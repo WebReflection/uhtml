@@ -431,7 +431,10 @@ var uhtml = (function (exports) {
     }
 
     return text.join('').replace(/<([A-Za-z]+[A-Za-z0-9:._-]*)([^>]*?)(\/>)/g, unvoid);
-  };
+  }; // TODO: I am not sure this is really necessary
+  //       I might rather set an extra DON'T rule
+  //       Let's play it safe for the time being.
+
 
   var isNode = function isNode(template, i) {
     while (i--) {
