@@ -47,3 +47,11 @@ const getWire = fragment => {
   });
 };
 exports.getWire = getWire;
+
+const importFragment = importNode.length ?
+  fragment => fragment :
+  fragment => importNode.call(document, fragment, true);
+exports.importFragment = importFragment;
+
+const importNode = document.importNode;
+exports.importNode = importNode;

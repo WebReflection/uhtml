@@ -43,3 +43,9 @@ export const getWire = fragment => {
     }
   });
 };
+
+export const importFragment = importNode.length ?
+  fragment => fragment :
+  fragment => importNode.call(document, fragment, true);
+
+export const importNode = document.importNode;

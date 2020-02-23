@@ -34,8 +34,7 @@
   "module": "esm/index.js",
   "unpkg": "min.js",
   "dependencies": {
-    "@ungap/create-content": "^0.1.4",
-    "@ungap/import-node": "^0.1.0"
+    "@ungap/create-content": "^0.1.4"
   },
   "repository": {
     "type": "git",

@@ -1,10 +1,9 @@
 import createContent from '@ungap/create-content';
-import importNode from '@ungap/import-node';
 
 import {cacheInfo} from './cache.js';
 import {handlers} from './handlers.js';
 import {isArray} from './array.js';
-import {getPath, getWire} from './node.js';
+import {getPath, getWire, importNode, importFragment} from './node.js';
 import {trimStart, trimEnd} from './string.js';
 
 const prefix = 'no-';
@@ -38,7 +37,7 @@ const instrument = template => {
 
 const mapTemplate = (type, template) => {
   const text = instrument(template);
-  const content = createContent(text, type);
+  const content = importFragment(createContent(text, type));
   const tw = document.createTreeWalker(content, 1 | 128);
   const nodes = [];
   const length = template.length - 1;

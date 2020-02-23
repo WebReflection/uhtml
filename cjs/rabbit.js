@@ -1,11 +1,10 @@
 'use strict';
 const createContent = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/create-content'));
-const importNode = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/import-node'));
 
 const {cacheInfo} = require('./cache.js');
 const {handlers} = require('./handlers.js');
 const {isArray} = require('./array.js');
-const {getPath, getWire} = require('./node.js');
+const {getPath, getWire, importNode, importFragment} = require('./node.js');
 const {trimStart, trimEnd} = require('./string.js');
 
 const prefix = 'no-';
@@ -39,7 +38,7 @@ const instrument = template => {
 
 const mapTemplate = (type, template) => {
   const text = instrument(template);
-  const content = createContent(text, type);
+  const content = importFragment(createContent(text, type));
   const tw = document.createTreeWalker(content, 1 | 128);
   const nodes = [];
   const length = template.length - 1;

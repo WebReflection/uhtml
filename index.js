@@ -72,29 +72,6 @@ var uhtml = (function (exports) {
     }
   }(document);
 
-  /*! (c) Andrea Giammarchi - ISC */
-  var importNode = function (document, appendChild, cloneNode, createTextNode, importNode) {
-    var _native = importNode in document; // IE 11 has problems with cloning templates:
-    // it "forgets" empty childNodes. This feature-detects that.
-
-
-    var fragment = document.createDocumentFragment();
-    fragment[appendChild](document[createTextNode]('g'));
-    fragment[appendChild](document[createTextNode](''));
-    var content = _native ? document[importNode](fragment, true) : fragment[cloneNode](true);
-    return content.childNodes.length < 2 ? function importNode(node, deep) {
-      var clone = node[cloneNode]();
-
-      for (var childNodes = node.childNodes || [], length = childNodes.length, i = 0; deep && i < length; i++) {
-        clone[appendChild](importNode(childNodes[i], deep));
-      }
-
-      return clone;
-    } : _native ? document[importNode] : function (node, deep) {
-      return node[cloneNode](!!deep);
-    };
-  }(document, 'appendChild', 'cloneNode', 'createTextNode', 'importNode');
-
   var isArray = Array.isArray;
   var _ref = [],
       indexOf = _ref.indexOf,
@@ -146,6 +123,12 @@ var uhtml = (function (exports) {
       }
     });
   };
+  var importFragment = importNode.length ? function (fragment) {
+    return fragment;
+  } : function (fragment) {
+    return importNode.call(document, fragment, true);
+  };
+  var importNode = document.importNode;
 
   var append = function append(get, parent, children, start, end, before) {
     var isSelect = 'selectedIndex' in parent;
@@ -441,7 +424,7 @@ var uhtml = (function (exports) {
 
   var mapTemplate = function mapTemplate(type, template) {
     var text = instrument(template);
-    var content = createContent(text, type);
+    var content = importFragment(createContent(text, type));
     var tw = document.createTreeWalker(content, 1 | 128);
     var nodes = [];
     var length = template.length - 1;
