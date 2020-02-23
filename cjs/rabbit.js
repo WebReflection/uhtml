@@ -20,7 +20,7 @@ const instrument = template => {
   const text = [];
   for (let i = 0, {length} = template; i < length; i++) {
     const chunk = i < 1 ? trimStart.call(template[i]) : template[i];
-    if (attr.test(chunk) /* && isNode(template, i + 1) */)
+    if (attr.test(chunk) && isNode(template, i + 1))
       text.push(chunk.replace(attr, (_, $1, $2) =>
         `${prefix}${i}=${$2 ? $2 : '"'}${$1}${$2 ? '' : '"'}`));
     else {
@@ -36,15 +36,16 @@ const instrument = template => {
   );
 };
 
-/*
 const isNode = (template, i) => {
   while (i--) {
-    if (/<[A-Za-z][^>]+$/.test(template[i]))
+    const chunk = template[i];
+    if (/<[A-Za-z][^>]+$/.test(chunk))
       return true;
+    if (/>[^<>]*$/.test(chunk))
+      return false;
   }
   return false;
 };
-*/
 
 const mapTemplate = (type, template) => {
   const text = instrument(template);

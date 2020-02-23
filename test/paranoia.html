@@ -10,9 +10,11 @@
       uhtml.render(
         document.body,
         uhtml.html`
-          <div a=${'a'} b=${'b'}>
-            test "${123}"
+          <div a=${1} b=${2}>
+            test="${3}" test=${4}
+            test='${5}'
           </div>
+          <br test=${6} />
         `
       );
     };
