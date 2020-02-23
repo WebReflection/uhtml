@@ -151,6 +151,14 @@ const unvoid = (_, name, extra) =>
   /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i.test(name) ?
     _ : `<${name}${extra}></${name}>`;
 
+
+/**
+ * Holds all necessary details needed to render the content further on. 
+ * @constructor
+ * @param {string} type The hole type, either `html` or `svg`.
+ * @param {Array} template The template literals used to the define the content.
+ * @param {Array} values Zero, one, or more interpolated values to render.
+ */
 export function Hole(type, template, values) {
   this.type = type;
   this.template = template;

@@ -134,7 +134,7 @@ render(document.body, html`
   <summary><strong>About Rendering Content</strong></summary>
   <div>
 
-Since each interpolation accepts DOM nodes too, it is possible to render within a render.
+The second `what` argument of the `render(where, what)` signature can be either a function, which returning value will be used to populate the content, the result of `html` or `svg` tags, or a DOM node, so that it is possible to render within a render.
 
 
 ```js
