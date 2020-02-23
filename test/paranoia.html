@@ -9,7 +9,11 @@
       'use strict';
       uhtml.render(
         document.body,
-        uhtml.html(['<input id="delay" type="number" .value="','">'], 0)
+        uhtml.html`
+          <div>
+            test="${123}"
+          </div>
+        `
       );
     };
     </script>
