@@ -5,7 +5,7 @@
   "main": "cjs/index.js",
   "scripts": {
     "build": "npm run cjs && npm run rollup:new && npm run rollup:babel && drop-babel-typeof ./index.js && npm run min && npm run size",
-    "cjs": "ascjs esm cjs",
+    "cjs": "rm cjs/* && ascjs esm cjs",
     "rollup:new": "rollup --config rollup/new.config.js",
     "rollup:babel": "rollup --config rollup/babel.config.js",
     "min": "uglifyjs index.js --support-ie8 --comments=/^!/ -c -m -o min.js",
