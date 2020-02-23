@@ -419,11 +419,9 @@ var uhtml = (function (exports) {
 
     var _loop = function _loop(i, length) {
       var chunk = i < 1 ? trimStart.call(template[i]) : template[i];
-      if (attr.test(chunk)
-      /* && isNode(template, i + 1) */
-      ) text.push(chunk.replace(attr, function (_, $1, $2) {
-          return "".concat(prefix).concat(i, "=").concat($2 ? $2 : '"').concat($1).concat($2 ? '' : '"');
-        }));else {
+      if (attr.test(chunk) && isNode(template, i + 1)) text.push(chunk.replace(attr, function (_, $1, $2) {
+        return "".concat(prefix).concat(i, "=").concat($2 ? $2 : '"').concat($1).concat($2 ? '' : '"');
+      }));else {
         if (i + 1 < length) text.push(chunk, "<!--".concat(prefix).concat(i, "-->"));else text.push(trimEnd.call(chunk));
       }
     };
@@ -434,16 +432,16 @@ var uhtml = (function (exports) {
 
     return text.join('').replace(/<([A-Za-z]+[A-Za-z0-9:._-]*)([^>]*?)(\/>)/g, unvoid);
   };
-  /*
-  const isNode = (template, i) => {
+
+  var isNode = function isNode(template, i) {
     while (i--) {
-      if (/<[A-Za-z][^>]+$/.test(template[i]))
-        return true;
+      var chunk = template[i];
+      if (/<[A-Za-z][^>]+$/.test(chunk)) return true;
+      if (/>[^<>]*$/.test(chunk)) return false;
     }
+
     return false;
   };
-  */
-
 
   var mapTemplate = function mapTemplate(type, template) {
     var text = instrument(template);
