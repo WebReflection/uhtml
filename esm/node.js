@@ -43,7 +43,3 @@ export const getWire = fragment => {
     }
   });
 };
-
-export const noChildNodes = name => /^(?:style|textarea)$/i.test(name);
-
-export const isVoid = name => /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i.test(name);

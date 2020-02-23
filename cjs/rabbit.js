@@ -5,12 +5,11 @@ const importNode = (m => m.__esModule ? /* istanbul ignore next */ m.default : /
 const {cacheInfo} = require('./cache.js');
 const {handlers} = require('./handlers.js');
 const {isArray} = require('./array.js');
-const {getPath, getWire, isVoid, noChildNodes} = require('./node.js');
+const {getPath, getWire} = require('./node.js');
 const {trimStart, trimEnd} = require('./string.js');
 
 const prefix = 'no-';
 const attr = /([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/;
-const re = /<([A-Za-z]+[A-Za-z0-9:._-]*)([^>]*?)(\/>)/g;
 const templates = new WeakMap;
 
 const createEntry = (type, template) => {
@@ -32,7 +31,10 @@ const instrument = template => {
         text.push(trimEnd.call(chunk));
     }
   }
-  return text.join('').replace(re, place);
+  return text.join('').replace(
+    /<([A-Za-z]+[A-Za-z0-9:._-]*)([^>]*?)(\/>)/g,
+    unvoid
+  );
 };
 
 const mapTemplate = (type, template) => {
@@ -65,7 +67,7 @@ const mapTemplate = (type, template) => {
         search = `${prefix}${++i}`;
       }
       if (
-        noChildNodes(node.tagName) &&
+        /^(?:style|textarea)$/i.test(node.tagName) &&
         trimStart.call(trimEnd.call(node.textContent)) === `<!--${search}-->`
       ){
         nodes.push({type: 'text', path: getPath(node)});
@@ -82,8 +84,6 @@ const mapUpdates = (type, template) => {
   const updates = nodes.map(handlers, fragment);
   return {wire: getWire(fragment), updates};
 };
-
-const place = (_, name, extra) => isVoid(name) ? _ : `<${name}${extra}></${name}>`;
 
 const retrieve = (info, hole) => {
   const {sub, stack} = info;
@@ -147,6 +147,10 @@ const unrollArray = (info, values, counter) => {
     }
   }
 };
+
+const unvoid = (_, name, extra) =>
+  /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i.test(name) ?
+    _ : `<${name}${extra}></${name}>`;
 
 function Hole(type, template, values) {
   this.type = type;

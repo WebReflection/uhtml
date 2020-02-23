@@ -146,12 +146,6 @@ var uhtml = (function (exports) {
       }
     });
   };
-  var noChildNodes = function noChildNodes(name) {
-    return /^(?:style|textarea)$/i.test(name);
-  };
-  var isVoid = function isVoid(name) {
-    return /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i.test(name);
-  };
 
   var append = function append(get, parent, children, start, end, before) {
     var isSelect = 'selectedIndex' in parent;
@@ -411,7 +405,6 @@ var uhtml = (function (exports) {
 
   var prefix = 'no-';
   var attr = /([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/;
-  var re = /<([A-Za-z]+[A-Za-z0-9:._-]*)([^>]*?)(\/>)/g;
   var templates = new WeakMap();
 
   var createEntry = function createEntry(type, template) {
@@ -443,7 +436,7 @@ var uhtml = (function (exports) {
       _loop(i, length);
     }
 
-    return text.join('').replace(re, place);
+    return text.join('').replace(/<([A-Za-z]+[A-Za-z0-9:._-]*)([^>]*?)(\/>)/g, unvoid);
   };
 
   var mapTemplate = function mapTemplate(type, template) {
@@ -479,7 +472,7 @@ var uhtml = (function (exports) {
           search = "".concat(prefix).concat(++i);
         }
 
-        if (noChildNodes(node.tagName) && trimStart.call(trimEnd.call(node.textContent)) === "<!--".concat(search, "-->")) {
+        if (/^(?:style|textarea)$/i.test(node.tagName) && trimStart.call(trimEnd.call(node.textContent)) === "<!--".concat(search, "-->")) {
           nodes.push({
             type: 'text',
             path: getPath(node)
@@ -506,10 +499,6 @@ var uhtml = (function (exports) {
       wire: getWire(fragment),
       updates: updates
     };
-  };
-
-  var place = function place(_, name, extra) {
-    return isVoid(name) ? _ : "<".concat(name).concat(extra, "></").concat(name, ">");
   };
 
   var retrieve = function retrieve(info, hole) {
@@ -582,6 +571,10 @@ var uhtml = (function (exports) {
         }
       }
     }
+  };
+
+  var unvoid = function unvoid(_, name, extra) {
+    return /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i.test(name) ? _ : "<".concat(name).concat(extra, "></").concat(name, ">");
   };
 
   function Hole(type, template, values) {
