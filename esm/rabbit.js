@@ -8,7 +8,7 @@ import {
   importNode
 } from './node.js';
 
-const prefix = 'no-';
+const prefix = 'isµ';
 const attr = /([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/;
 const templates = new WeakMap;
 

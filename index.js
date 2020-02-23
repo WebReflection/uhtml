@@ -397,7 +397,7 @@ var uhtml = (function (exports) {
     return this.replace(/[ \f\n\r\t]+$/, empty);
   };
 
-  var prefix = 'no-';
+  var prefix = 'isµ';
   var attr = /([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/;
   var templates = new WeakMap();
 
