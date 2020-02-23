@@ -1,17 +1,4 @@
 import {indexOf, slice} from './array.js';
-import {trimStart, trimEnd} from './string.js';
-
-const edgeCases = 'textarea,style';
-
-export const findNode = (content, selector) => {
-  const search = `<${selector}></${selector}><!--${selector}-->`;
-  const nodes = content.querySelectorAll(edgeCases);
-  for (let i = 0, {length} = nodes; i < length; i++) {
-    if (trimStart.call(trimEnd.call(nodes[i].textContent)) === search)
-      return nodes[i];
-  }
-  throw new Error(`${edgeCases} bad content`);
-};
 
 export const getNode = (node, i) => node.childNodes[i];
 

@@ -1,5 +1,5 @@
 import {isArray, slice} from './array.js';
-import {getNode, noChildNodes} from './node.js';
+import {getNode} from './node.js';
 import {quickdiff} from './quickdiff.js';
 
 const get = (item, i) => item.nodeType === 11 ?
@@ -78,20 +78,14 @@ const handleAnything = (node, childNodes) => {
   return anyContent;
 };
 
-const handleAttribute = (node, name, isSVG) => {
+const handleAttribute = (node, name) => {
   // hooks and ref
   if (name === 'ref')
     return ref => { ref.current = node; };
 
   // direct setters
-  if (name.slice(0, 1) === '.') {
-    return isSVG ?
-      value => {
-        try { node[name] = value; }
-        catch (nope) { node.setAttribute(name, value); }
-      } :
-      value => { node[name] = value; };
-  }
+  if (name.slice(0, 1) === '.')
+    return value => { node[name] = value; }
 
   let oldValue;
 
@@ -144,11 +138,12 @@ const handleText = node => {
   };
 };
 
-export function handlers({type, path, name}) {
+export function handlers(options) {
+  const {type, path} = options;
   const node = path.reduce(getNode, this);
-  return type === 'attr' ?
-    handleAttribute(node, name, type === 'svg') :
-    (noChildNodes(name) ?
-      handleText(node) :
-      handleAnything(node, []));
+  if (type === 'node')
+    return handleAnything(node, []);
+  if (type === 'attr')
+    return handleAttribute(node, options.name);
+  return handleText(node);
 };

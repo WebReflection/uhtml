@@ -22,14 +22,13 @@ The previous attempt to make it essential resulted ... well, too essential, but 
 
 ## Differently from `lighterhtml`
 
-  * there are **no sparse attributes**, each attribute *must* have a single interpolated value: `attribute=${value}` is OK, `attribute="${a}${b}"` is not.
-  * the parser is `RegExp` based: smaller, faster, but not as robust as the DOM based one used in _lighterhtml_
-  * there are no keyed helpers: no `html.for(...)` and no `html.node`. Use the `render(...)` and just `html` or `svg`
+  * there are **no sparse attributes**, each attribute *must* have a single interpolated value: `attribute=${value}` is OK, `attribute="${a}${b}"` is not, and `attribute="some ${'partial'}"` is not allowed neither.
+  * the template parser is different: smaller, probably faster, but not as battle tested as the _lighterhtml_ one
+  * there are no keyed helpers: no `html.for(...)` and no `html.node`. Use the `render(...)`, `html` or `svg`, and don't worry about keys
   * the interpolations are simple: primitive, or array of primitives, and nodes, or array of nodes.
-  * the `style` attribute is not special at all, if you want to pass objects there, please transform these as you prefer.
+  * the `style` attribute is not special at all: if you want to pass objects there, please transform these as you prefer.
   * the _domdiff_ rip-off has been simplified to bail out sooner than the original module, performing extremely well for a reduced, but common, set of use cases: prepend, append, remove one to many, and replace one with many. Unless you keep shuffling all nodes in a list all the time, you won't likely notice any real-world difference.
-  * this is not as battle tested as _lighterhtml_, but I'm planning to reproduce most demoes and see if it's robust enough, as most code was a cleanup after copy and paste.
-  * the `template` argument is not normalized. If you target browsers with issue with such argument, please be sure you transpile with latest _Babel_ your code
+  * the `template` argument is not normalized. If you target browsers with issue with such argument, please be sure you transpile your code with latest _Babel_ before shipping to production
   * no _domtagger_ whatsoever, you can't change the current behavior of the library in any way
 
 

@@ -4,10 +4,11 @@ import importNode from '@ungap/import-node';
 import {cacheInfo} from './cache.js';
 import {handlers} from './handlers.js';
 import {isArray} from './array.js';
-import {findNode, getPath, getWire, isVoid, noChildNodes} from './node.js';
+import {getPath, getWire, isVoid, noChildNodes} from './node.js';
 import {trimStart, trimEnd} from './string.js';
 
 const prefix = 'no-';
+const attr = /([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/;
 const re = /<([A-Za-z]+[A-Za-z0-9:._-]*)([^>]*?)(\/>)/g;
 const templates = new WeakMap;
 
@@ -18,55 +19,57 @@ const createEntry = (type, template) => {
 
 const instrument = template => {
   const text = [];
-  const selectors = [];
   for (let i = 0, {length} = template; i < length; i++) {
     const chunk = i < 1 ? trimStart.call(template[i]) : template[i];
-    if (/([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/.test(chunk)) {
-      const {$1: name} = RegExp;
-      text.push(chunk.replace(
-        /([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/,
-        (_, $1, $2) => `${prefix}${i}=${$2 ? $2 : '"'}${$1}${$2 ? '' : '"'}`
-      ));
-      selectors.push(`[${prefix}${i}="${name}"]`);
-    }
+    if (attr.test(chunk))
+      text.push(chunk.replace(attr, (_, $1, $2) =>
+        `${prefix}${i}=${$2 ? $2 : '"'}${$1}${$2 ? '' : '"'}`));
     else {
-      text.push(chunk);
-      if ((i + 1) < length) {
-        text.push(`<${prefix}${i}></${prefix}${i}><!--${prefix}${i}-->`);
-        selectors.push(prefix + i);
-      }
+      if ((i + 1) < length)
+        text.push(chunk, `<!--${prefix}${i}-->`);
+      else
+        text.push(trimEnd.call(chunk));
     }
   }
-  return {text: trimEnd.call(text.join('')).replace(re, place), selectors};
+  return text.join('').replace(re, place);
 };
 
 const mapTemplate = (type, template) => {
-  const {text, selectors} = instrument(template);
+  const text = instrument(template);
   const content = createContent(text, type);
+  const tw = document.createTreeWalker(content, 1 | 128);
   const nodes = [];
-  for (let i = 0, {length} = selectors; i < length; i++) {
-    const selector = selectors[i];
-    const placeholder = content.querySelector(selector) ||
-                        findNode(content, selector);
-    if (selector.charAt(0) === '[') {
-      const fake = selector.slice(1, selector.indexOf('='));
-      const name = placeholder.getAttribute(fake);
-      placeholder.removeAttribute(fake);
-      nodes.push({
-        type: 'attr',
-        path: getPath(placeholder),
-        name
-      });
+  const length = template.length - 1;
+  let i = 0;
+  let search = `${prefix}${i}`;
+  while (i < length) {
+    const node = tw.nextNode();
+    if (!node)
+      throw `bad template: ${text}`;
+    if (node.nodeType === 8) {
+      if (node.textContent === search) {
+        nodes.push({type: 'node', path: getPath(node)});
+        search = `${prefix}${++i}`;
+      }
     }
     else {
-      const {tagName} = placeholder;
-      nodes.push({
-        type: 'node',
-        path: getPath(placeholder),
-        name: tagName
-      });
-      if (!noChildNodes(tagName))
-        placeholder.parentNode.removeChild(placeholder);
+      while (node.hasAttribute(search)) {
+        nodes.push({
+          type: 'attr',
+          path: getPath(node),
+          name: node.getAttribute(search),
+          // svg: type === 'svg'
+        });
+        node.removeAttribute(search);
+        search = `${prefix}${++i}`;
+      }
+      if (
+        noChildNodes(node.tagName) &&
+        trimStart.call(trimEnd.call(node.textContent)) === `<!--${search}-->`
+      ){
+        nodes.push({type: 'text', path: getPath(node)});
+        search = `${prefix}${++i}`;
+      }
     }
   }
   return {content, nodes};

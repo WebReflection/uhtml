@@ -100,25 +100,6 @@ var uhtml = (function (exports) {
       indexOf = _ref.indexOf,
       slice = _ref.slice;
 
-  var empty = '';
-  var trimStart = empty.trimStart || function (str) {
-    return str.replace(/^[ \f\n\r\t]+/, empty);
-  };
-  var trimEnd = empty.trimEnd || function (str) {
-    return str.replace(/[ \f\n\r\t]+$/, empty);
-  };
-
-  var edgeCases = 'textarea,style';
-  var findNode = function findNode(content, selector) {
-    var search = "<".concat(selector, "></").concat(selector, "><!--").concat(selector, "-->");
-    var nodes = content.querySelectorAll(edgeCases);
-
-    for (var i = 0, length = nodes.length; i < length; i++) {
-      if (trimStart.call(trimEnd.call(nodes[i].textContent)) === search) return nodes[i];
-    }
-
-    throw new Error("".concat(edgeCases, " bad content"));
-  };
   var getNode = function getNode(node, i) {
     return node.childNodes[i];
   };
@@ -350,24 +331,15 @@ var uhtml = (function (exports) {
     return anyContent;
   };
 
-  var handleAttribute = function handleAttribute(node, name, isSVG) {
+  var handleAttribute = function handleAttribute(node, name) {
     // hooks and ref
     if (name === 'ref') return function (ref) {
       ref.current = node;
     }; // direct setters
 
-    if (name.slice(0, 1) === '.') {
-      return isSVG ? function (value) {
-        try {
-          node[name] = value;
-        } catch (nope) {
-          node.setAttribute(name, value);
-        }
-      } : function (value) {
-        node[name] = value;
-      };
-    }
-
+    if (name.slice(0, 1) === '.') return function (value) {
+      node[name] = value;
+    };
     var oldValue; // events
 
     if (name.slice(0, 2) === 'on') {
@@ -416,15 +388,25 @@ var uhtml = (function (exports) {
     };
   };
 
-  function handlers(_ref) {
-    var type = _ref.type,
-        path = _ref.path,
-        name = _ref.name;
+  function handlers(options) {
+    var type = options.type,
+        path = options.path;
     var node = path.reduce(getNode, this);
-    return type === 'attr' ? handleAttribute(node, name, type === 'svg') : noChildNodes(name) ? handleText(node) : handleAnything(node, []);
+    if (type === 'node') return handleAnything(node, []);
+    if (type === 'attr') return handleAttribute(node, options.name);
+    return handleText(node);
   }
 
+  var empty = '';
+  var trimStart = empty.trimStart || function (str) {
+    return str.replace(/^[ \f\n\r\t]+/, empty);
+  };
+  var trimEnd = empty.trimEnd || function (str) {
+    return str.replace(/[ \f\n\r\t]+$/, empty);
+  };
+
   var prefix = 'no-';
+  var attr = /([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/;
   var re = /<([A-Za-z]+[A-Za-z0-9:._-]*)([^>]*?)(\/>)/g;
   var templates = new WeakMap();
 
@@ -443,24 +425,13 @@ var uhtml = (function (exports) {
 
   var instrument = function instrument(template) {
     var text = [];
-    var selectors = [];
 
     var _loop = function _loop(i, length) {
       var chunk = i < 1 ? trimStart.call(template[i]) : template[i];
-
-      if (/([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/.test(chunk)) {
-        var name = RegExp.$1;
-        text.push(chunk.replace(/([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/, function (_, $1, $2) {
-          return "".concat(prefix).concat(i, "=").concat($2 ? $2 : '"').concat($1).concat($2 ? '' : '"');
-        }));
-        selectors.push("[".concat(prefix).concat(i, "=\"").concat(name, "\"]"));
-      } else {
-        text.push(chunk);
-
-        if (i + 1 < length) {
-          text.push("<".concat(prefix).concat(i, "></").concat(prefix).concat(i, "><!--").concat(prefix).concat(i, "-->"));
-          selectors.push(prefix + i);
-        }
+      if (attr.test(chunk)) text.push(chunk.replace(attr, function (_, $1, $2) {
+        return "".concat(prefix).concat(i, "=").concat($2 ? $2 : '"').concat($1).concat($2 ? '' : '"');
+      }));else {
+        if (i + 1 < length) text.push(chunk, "<!--".concat(prefix).concat(i, "-->"));else text.push(trimEnd.call(chunk));
       }
     };
 
@@ -468,41 +439,49 @@ var uhtml = (function (exports) {
       _loop(i, length);
     }
 
-    return {
-      text: trimEnd.call(text.join('')).replace(re, place),
-      selectors: selectors
-    };
+    return text.join('').replace(re, place);
   };
 
   var mapTemplate = function mapTemplate(type, template) {
-    var _instrument = instrument(template),
-        text = _instrument.text,
-        selectors = _instrument.selectors;
-
+    var text = instrument(template);
     var content = createContent(text, type);
+    var tw = document.createTreeWalker(content, 1 | 128);
     var nodes = [];
+    var length = template.length - 1;
+    var i = 0;
+    var search = "".concat(prefix).concat(i);
 
-    for (var i = 0, length = selectors.length; i < length; i++) {
-      var selector = selectors[i];
-      var placeholder = content.querySelector(selector) || findNode(content, selector);
+    while (i < length) {
+      var node = tw.nextNode();
+      if (!node) throw "bad template: ".concat(text);
 
-      if (selector.charAt(0) === '[') {
-        var fake = selector.slice(1, selector.indexOf('='));
-        var name = placeholder.getAttribute(fake);
-        placeholder.removeAttribute(fake);
-        nodes.push({
-          type: 'attr',
-          path: getPath(placeholder),
-          name: name
-        });
+      if (node.nodeType === 8) {
+        if (node.textContent === search) {
+          nodes.push({
+            type: 'node',
+            path: getPath(node)
+          });
+          search = "".concat(prefix).concat(++i);
+        }
       } else {
-        var tagName = placeholder.tagName;
-        nodes.push({
-          type: 'node',
-          path: getPath(placeholder),
-          name: tagName
-        });
-        if (!noChildNodes(tagName)) placeholder.parentNode.removeChild(placeholder);
+        while (node.hasAttribute(search)) {
+          nodes.push({
+            type: 'attr',
+            path: getPath(node),
+            name: node.getAttribute(search) // svg: type === 'svg'
+
+          });
+          node.removeAttribute(search);
+          search = "".concat(prefix).concat(++i);
+        }
+
+        if (noChildNodes(node.tagName) && trimStart.call(trimEnd.call(node.textContent)) === "<!--".concat(search, "-->")) {
+          nodes.push({
+            type: 'text',
+            path: getPath(node)
+          });
+          search = "".concat(prefix).concat(++i);
+        }
       }
     }
 

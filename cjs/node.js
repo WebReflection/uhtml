@@ -1,19 +1,5 @@
 'use strict';
 const {indexOf, slice} = require('./array.js');
-const {trimStart, trimEnd} = require('./string.js');
-
-const edgeCases = 'textarea,style';
-
-const findNode = (content, selector) => {
-  const search = `<${selector}></${selector}><!--${selector}-->`;
-  const nodes = content.querySelectorAll(edgeCases);
-  for (let i = 0, {length} = nodes; i < length; i++) {
-    if (trimStart.call(trimEnd.call(nodes[i].textContent)) === search)
-      return nodes[i];
-  }
-  throw new Error(`${edgeCases} bad content`);
-};
-exports.findNode = findNode;
 
 const getNode = (node, i) => node.childNodes[i];
 exports.getNode = getNode;
