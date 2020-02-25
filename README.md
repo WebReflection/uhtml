@@ -1,4 +1,4 @@
-# µhtml v1
+# µhtml
 
 <sup>**Social Media Photo by [Andrii Ganzevych](https://unsplash.com/@odya_kun) on [Unsplash](https://unsplash.com/)**</sup>
 
@@ -28,6 +28,11 @@ Alternatively you can use a CDN such as _unpkg_:
 ```
 
 **[Live Demo](https://codepen.io/WebReflection/pen/bGdBjjL?editors=0010)**
+
+
+#### ... and what about Custom Elements ?
+
+Micro Custom ELements are brought you you via [µce](https://github.com/WebReflection/uce#readme), a 3K library based on _µhtml_, but of course, you can use _µhtml_ also with vanilla Custom Elements and built-ins.
 
 
 ## API Usage
