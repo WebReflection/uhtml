@@ -54,7 +54,7 @@ const {createTreeWalker, importNode} = document;
 exports.createTreeWalker = createTreeWalker;
 exports.importNode = importNode;
 
-const IE = 1 < importNode.length;
+const IE = importNode.length != 1;
 
 const createFragment = IE ?
   (text, type) => importNode.call(

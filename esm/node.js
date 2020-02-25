@@ -49,7 +49,7 @@ export const getWire = fragment => {
 const {createTreeWalker, importNode} = document;
 export {createTreeWalker, importNode};
 
-const IE = 1 < importNode.length;
+const IE = importNode.length != 1;
 
 export const createFragment = IE ?
   (text, type) => importNode.call(

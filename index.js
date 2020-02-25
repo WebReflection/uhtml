@@ -126,7 +126,7 @@ var uhtml = (function (exports) {
   var _document = document,
       createTreeWalker = _document.createTreeWalker,
       importNode = _document.importNode;
-  var IE = 1 < importNode.length;
+  var IE = importNode.length != 1;
   var createFragment = IE ? function (text, type) {
     return importNode.call(document, createContent(text, type), true);
   } : createContent; // to support IE10 and IE9 I could pass a callback instead
