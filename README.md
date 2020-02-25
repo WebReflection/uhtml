@@ -115,7 +115,7 @@ render(document.body, html`
 `);
 ```
 
-Beside nodes where the content will be inevitable just text, like it is for `style` or `textarea`, as example, every other interpolation can contain primitives, as strings, numbers, or even booleans, or the returned value of `html` or `svg`, plus regular DOM nodes.
+Beside nodes where the content will be inevitably just text, like it is for `style` or `textarea`, as example, every other interpolation can contain primitives, as strings, numbers, or even booleans, or the returned value of `html` or `svg`, plus regular DOM nodes.
 
 The only special case are _Array_ of either primitives, or returned values from `html` or `svg`.
 
