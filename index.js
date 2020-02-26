@@ -587,7 +587,7 @@ var uhtml = (function (exports) {
    * Holds all necessary details needed to render the content further on. 
    * @constructor
    * @param {string} type The hole type, either `html` or `svg`.
-   * @param {Array} template The template literals used to the define the content.
+   * @param {string[]} template The template literals used to the define the content.
    * @param {Array} values Zero, one, or more interpolated values to render.
    */
 
@@ -598,41 +598,49 @@ var uhtml = (function (exports) {
     this.values = values;
   }
 
-  /**
-   * Used as template literal function tag, creates once the specified HTML content and it populates it via interpolations.
-   * @param {Array} template The template literal with the HTML content to render.
-   * @param  {...any} values Any interpolated value to use within the template.
-   * @returns {Hole} An instance of Hole that will be normalized as DOM content once rendered.
-   */
+  var create = Object.create,
+      defineProperties$1 = Object.defineProperties;
 
-  var html = function html(template) {
-    for (var _len = arguments.length, values = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-      values[_key - 1] = arguments[_key];
-    }
+  var util = function util(type) {
+    var cache = new WeakMap();
 
-    return new Hole('html', template, values);
+    var fixed = function fixed(info) {
+      return function (template) {
+        for (var _len = arguments.length, values = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+          values[_key - 1] = arguments[_key];
+        }
+
+        return retrieve(info, new Hole(type, template, values));
+      };
+    };
+
+    return defineProperties$1(function (template) {
+      for (var _len2 = arguments.length, values = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        values[_key2 - 1] = arguments[_key2];
+      }
+
+      return new Hole(type, template, values);
+    }, {
+      "for": {
+        value: function value(ref, id) {
+          var memo = cache.get(ref) || cache.set(ref, create(null)).get(ref);
+          return memo[id] || (memo[id] = fixed(cacheInfo()));
+        }
+      },
+      node: {
+        value: function value(template) {
+          for (var _len3 = arguments.length, values = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+            values[_key3 - 1] = arguments[_key3];
+          }
+
+          return retrieve(cacheInfo(), new Hole(type, template, values));
+        }
+      }
+    });
   };
-  /**
-   * Used as template literal function tag, creates once the specified SVG content and it populates it via interpolations.
-   * @param {Array} template The template literal with the SVG content to render.
-   * @param  {...any} values Any interpolated value to use within the template.
-   * @returns {Hole} An instance of Hole that will be normalized as DOM content once rendered.
-   */
 
-  var svg = function svg(template) {
-    for (var _len2 = arguments.length, values = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-      values[_key2 - 1] = arguments[_key2];
-    }
-
-    return new Hole('svg', template, values);
-  };
-  /**
-   * Render some content within the passed DOM node.
-   * @param {Element} where The DOM node where to render some content.
-   * @param {Element | Function | Hole} what A DOM node, a html/svg Hole, or a a function that returns previous values once invoked.
-   * @returns {Element} The same DOM node where the content was rendered.
-   */
-
+  var html = util('html');
+  var svg = util('svg');
   var render = function render(where, what) {
     var hole = typeof what === 'function' ? what() : what;
     var info = cache.get(where) || setCache(where);

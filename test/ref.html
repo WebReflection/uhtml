@@ -20,7 +20,7 @@
     var state = useState(0);
     var count = state[0];
     var update = state[1];
-    render(element, html(
+    render(element, html.for(element, 'OK')(
       content,
       123,
       update.bind(null, count - 1),

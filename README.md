@@ -2,7 +2,7 @@
 
 <sup>**Social Media Photo by [Andrii Ganzevych](https://unsplash.com/@odya_kun) on [Unsplash](https://unsplash.com/)**</sup>
 
-A _~2.5K_ HTML/SVG render based on parts of [lighterhtml](https://github.com/WebReflection/lighterhtml#readme) and [domdiff](https://github.com/WebReflection/domdiff#readme), without any extra cruft.
+A _~2.6K_ [lighterhtml](https://github.com/WebReflection/lighterhtml#readme) subset.
 
 
 ## How To Use µhtml
@@ -167,16 +167,38 @@ clicker(0);
   </div>
 </details>
 
+<details>
+  <summary><strong>About keyed renders</strong></summary>
+  <div>
+
+_µhtml_ `html` and `svg` tags implement exact same API offered by _lighterhtml_.
+
+This means that both `html.for(reference[, id])` and `svg.for(reference[, id])` will weakly relate the node with the reference, and an optional unique id, instead of using its internal auto-referenced algorithm.
+
+```js
+render(document.body, html`
+  <ul>
+    ${items.map(item => html.for(item)`
+      <li>Keyed row with content: ${item.text}</li>
+    `)}
+  </ul>
+`);
+```
+
+  </div>
+</details>
 
 ## API & Compatibility
 
-This module works in IE11, Edge, and every other Desktop to Mobile browser.
+This module works in IE11, Edge, and every other Desktop to Mobile browser, including KaiOS.
 
 The module exports the following functionalities:
 
   * a `render(where, what)` function to populate the `where` DOM node with `what` content, which can be a DOM node, or the returning value of `html` and `svg` tags. The `render` function returns the `where` DOM node itself.
   * a `html` template literal [tag](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates), to produce any sort of _HTML_ content
   * a `svg` template literal [tag](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates), to produce any sort of _SVG_ content
+  * both `html` and `svg` implements a `.for(reference[, id])` template tag function for _keyed_ weak relationships within the node
+  * both `html` and `svg` implements a `.node` template tag function for one-off HTML or SVG creation
 
 
 <hr>
@@ -184,7 +206,7 @@ The module exports the following functionalities:
 
 ### µhtml vs lighterhtml
 
-The first thing to keep in mind, is that _lighterhtml_ is at pair with _uhtml_ features, but not vice-versa, meaning if you need anything more, you can always switch to _lighterhtml_ without changing a single line of code.
+The first thing to keep in mind, is that _lighterhtml_ is at pair with _uhtml_ features, but not vice-versa, meaning if you need anything more, you can always switch to _lighterhtml_ later on, and without changing a single line of code.
 
 Following a list of other points to consider when choosing _µhtml_ instead of _lighterhtml_ (or vice-versa).
 
@@ -192,7 +214,6 @@ Following a list of other points to consider when choosing _µhtml_ instead of _
 #### Differently from lighterhtml
 
   * there are **no sparse attributes**, each attribute *must* have a single interpolated value: `attribute=${value}` is OK, `attribute="${a}${b}"` is not, and `attribute="some ${'partial'}"` is not allowed neither.
-  * there are no keyed helpers: no `html.for(...)` and no `html.node`. Use the `render(...)`, `html` or `svg`, and don't worry about keys
   * the interpolations are simple: primitive, or array of primitives, and nodes, or array of nodes.
   * the `style` attribute is not special at all: if you want to pass objects there, please transform these as you prefer.
   * the _domdiff_ rip-off has been simplified to bail out sooner than the original module, performing extremely well for a reduced, but common, set of use cases: prepend, append, remove one to many, and replace one with many. Unless you keep shuffling all nodes in a list all the time, you won't likely notice any real-world difference.
@@ -204,6 +225,7 @@ Following a list of other points to consider when choosing _µhtml_ instead of _
 
   * _uhtml_ should *not* suffer any of the IE11/Edge issues, or invalid SVG attributes warnings, as the parsing is done differently 🎉
   * nested `html` and `svg` are allowed like in _lighterhtml_. `v0` didn't allow that, hence it was more "_surprise prone_". _uhtml_ in that sense is more like a drop-in replacement for _lighterhtml_, and vice-versa
+  * keyed results via `htmlfor(...)` or `svg.for(...)`, as well as one-off node creation, via `html.node` or `svg.node` are the same found in _lighterhtml_
   * the `ref=${...}` attribute works same as _lighterhtml_, enabling hooks, or _React_ style, out of the box
   * the `.property=${...}` *direct setter* is still available
   * self closing nodes are also supported, go wild with `<custom-elements />` or even `<span />`
