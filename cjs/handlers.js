@@ -1,7 +1,8 @@
 'use strict';
+const udomdiff = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('udomdiff'));
+
 const {isArray, slice} = require('./array.js');
 const {getNode} = require('./node.js');
-const {quickdiff} = require('./quickdiff.js');
 
 const get = (item, i) => item.nodeType === 11 ?
   (
@@ -23,7 +24,7 @@ const handleAnything = (node, childNodes) => {
         if (oldValue !== newValue) {
           oldValue = newValue;
           text.textContent = newValue;
-          childNodes = quickdiff(
+          childNodes = udomdiff(
             node.parentNode,
             childNodes,
             [text],
@@ -35,14 +36,14 @@ const handleAnything = (node, childNodes) => {
       case 'object':
       case 'undefined':
         if (newValue == null) {
-          childNodes = quickdiff(node.parentNode, childNodes, [], get, node);
+          childNodes = udomdiff(node.parentNode, childNodes, [], get, node);
           break;
         }
       default:
         oldValue = newValue;
         if (isArray(newValue)) {
           if (newValue.length === 0)
-            childNodes = quickdiff(node.parentNode, childNodes, [], get, node);
+            childNodes = udomdiff(node.parentNode, childNodes, [], get, node);
           else {
             switch (typeof newValue[0]) {
               case 'string':
@@ -51,7 +52,7 @@ const handleAnything = (node, childNodes) => {
                 anyContent(String(newValue));
                 break;
               default:
-                childNodes = quickdiff(
+                childNodes = udomdiff(
                   node.parentNode,
                   childNodes,
                   newValue,
@@ -63,7 +64,7 @@ const handleAnything = (node, childNodes) => {
           }
         }
         else if ('ELEMENT_NODE' in newValue) {
-          childNodes = quickdiff(
+          childNodes = udomdiff(
             node.parentNode,
             childNodes,
             newValue.nodeType === 11 ?
