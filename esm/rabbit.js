@@ -170,7 +170,7 @@ const unvoid = (_, name, extra) =>
  * Holds all necessary details needed to render the content further on. 
  * @constructor
  * @param {string} type The hole type, either `html` or `svg`.
- * @param {Array} template The template literals used to the define the content.
+ * @param {string[]} template The template literals used to the define the content.
  * @param {Array} values Zero, one, or more interpolated values to render.
  */
 export function Hole(type, template, values) {
