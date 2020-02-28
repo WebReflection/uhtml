@@ -159,9 +159,6 @@ var uhtml = (function (exports) {
     return (node.remove || dropChild).call(node);
   };
 
-  var next = function next(get, list, i, length, before) {
-    return i < length ? get(list[i], 0) : 0 < i ? get(list[i - 1], -0).nextSibling : before;
-  };
   var remove = function remove(get, children, start, end) {
     while (start < end) {
       drop(get(children[start++], -1));
@@ -211,7 +208,7 @@ var uhtml = (function (exports) {
     if (currentSame && futureSame) return futureNodes; // only stuff to add
 
     if (currentSame && futureStart < futureEnd) {
-      append(get, parentNode, futureNodes, futureStart, futureEnd, next(get, currentNodes, currentStart, currentLength, before));
+      append(get, parentNode, futureNodes, futureStart, futureEnd, before);
       return futureNodes;
     } // only stuff to remove
 
@@ -351,7 +348,7 @@ var uhtml = (function (exports) {
   };
 
   var get = function get(item, i) {
-    return item.nodeType === 11 ? 1 / i < 0 ? i ? item.remove() : item.lastChild : i ? item.valueOf() : item.firstChild : item;
+    return item.nodeType === 11 ? i < 0 ? item.remove() : i ? item.valueOf() : item.firstChild : item;
   };
 
   var handleAnything = function handleAnything(node, childNodes) {

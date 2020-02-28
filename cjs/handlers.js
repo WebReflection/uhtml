@@ -6,8 +6,7 @@ const {getNode} = require('./node.js');
 
 const get = (item, i) => item.nodeType === 11 ?
   (
-    (1 / i) < 0 ?
-      (i ? item.remove() : item.lastChild) :
+    i < 0 ? item.remove() :
       (i ? item.valueOf() : item.firstChild)
   ) :
   item
