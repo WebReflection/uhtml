@@ -4,10 +4,9 @@ import {isArray, slice} from './array.js';
 import {getNode} from './node.js';
 
 const get = (item, i) => item.nodeType === 11 ?
-  (
-    i < 0 ? item.remove() :
-      (i ? item.valueOf() : item.firstChild)
-  ) :
+  ((1 / i) < 0 ?
+    (i ? item.remove() : item.lastChild) :
+    (i ? item.valueOf() : item.firstChild)) :
   item
 ;
 

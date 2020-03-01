@@ -250,7 +250,7 @@ var uhtml = (function (exports) {
   };
 
   var get = function get(item, i) {
-    return item.nodeType === 11 ? i < 0 ? item.remove() : i ? item.valueOf() : item.firstChild : item;
+    return item.nodeType === 11 ? 1 / i < 0 ? i ? item.remove() : item.lastChild : i ? item.valueOf() : item.firstChild : item;
   };
 
   var handleAnything = function handleAnything(node, childNodes) {
