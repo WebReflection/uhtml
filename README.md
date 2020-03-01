@@ -2,7 +2,7 @@
 
 <sup>**Social Media Photo by [Andrii Ganzevych](https://unsplash.com/@odya_kun) on [Unsplash](https://unsplash.com/)**</sup>
 
-A _~2.8K_ [lighterhtml](https://github.com/WebReflection/lighterhtml#readme) subset.
+A _~2.5K_ [lighterhtml](https://github.com/WebReflection/lighterhtml#readme) subset.
 
 
 ## How To Use µhtml
@@ -216,7 +216,7 @@ Following a list of other points to consider when choosing _µhtml_ instead of _
   * there are **no sparse attributes**, each attribute *must* have a single interpolated value: `attribute=${value}` is OK, `attribute="${a}${b}"` is not, and `attribute="some ${'partial'}"` is not allowed neither.
   * the interpolations are simple: primitive, or array of primitives, and nodes, or array of nodes.
   * the `style` attribute is not special at all: if you want to pass objects there, please transform these as you prefer.
-  * the _domdiff_ has been replaced with [udomdiff](https://github.com/WebReflection/udomdiff#readme), which is essential enough, but it performs generally fine with keyed results too
+  * the _domdiff_ has been replaced with [udomdiff](https://github.com/WebReflection/udomdiff#readme), with a new blazing fast and super small diffing algorithm written from scratch
   * the `template` argument is not normalized. If you target browsers with issue with such argument, please be sure you transpile your code with latest _Babel_ before shipping to production
   * no _domtagger_ whatsoever, you can't change the current behavior of the library in any way
 
