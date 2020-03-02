@@ -21,7 +21,7 @@
   "devDependencies": {
     "@babel/core": "^7.8.6",
     "@babel/preset-env": "^7.8.6",
-    "@ungap/degap": "^0.1.6",
+    "@ungap/degap": "^0.1.7",
     "ascjs": "^3.1.2",
     "drop-babel-typeof": "^1.0.3",
     "rollup": "^1.32.0",
@@ -35,6 +35,8 @@
   "unpkg": "min.js",
   "dependencies": {
     "@ungap/create-content": "^0.1.4",
+    "@ungap/trim-end": "^0.1.0",
+    "@ungap/trim-start": "^0.1.1",
     "udomdiff": "^1.0.0"
   },
   "repository": {

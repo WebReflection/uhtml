@@ -6,7 +6,9 @@ export default {
   plugins: [
     includePaths({
       include: {
-        '@ungap/create-content': 'node_modules/@ungap/degap/create-content.js'
+        '@ungap/create-content': 'node_modules/@ungap/degap/create-content.js',
+        '@ungap/trim-start': 'node_modules/@ungap/degap/trim-start.js',
+        '@ungap/trim-end': 'node_modules/@ungap/degap/trim-end.js'
       },
     }),
     resolve({module: true}),

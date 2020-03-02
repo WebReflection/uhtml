@@ -1,7 +1,9 @@
+import trimStart from '@ungap/trim-start';
+import trimEnd from '@ungap/trim-end';
+
 import {cacheInfo} from './cache.js';
 import {handlers} from './handlers.js';
 import {isArray} from './array.js';
-import {trimStart, trimEnd} from './string.js';
 import {
   createFragment, createWalker,
   getPath, getWire,

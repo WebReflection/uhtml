@@ -1,8 +1,10 @@
 'use strict';
+const trimStart = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/trim-start'));
+const trimEnd = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/trim-end'));
+
 const {cacheInfo} = require('./cache.js');
 const {handlers} = require('./handlers.js');
 const {isArray} = require('./array.js');
-const {trimStart, trimEnd} = require('./string.js');
 const {
   createFragment, createWalker, getPath, getWire, importNode
 } = require('./node.js');
