@@ -17,14 +17,6 @@ var uhtml = (function (exports) {
 
   
 
-  var trimStart = ''.trimStart || function () {
-    return this.replace(/^[\s\uFEFF\xA0]+/, '');
-  };
-
-  var trimEnd = ''.trimEnd || function () {
-    return this.replace(/[\s\uFEFF\xA0]+$/, '');
-  };
-
   /**
    * ISC License
    *
@@ -384,7 +376,7 @@ var uhtml = (function (exports) {
   }
 
   var prefix = 'isµ';
-  var attr = /([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/;
+  var attr = /([^\s\\>"'=]+)\s*=\s*(['"]?)$/;
   var templates = new WeakMap();
 
   var createEntry = function createEntry(type, template) {
@@ -404,11 +396,11 @@ var uhtml = (function (exports) {
     var text = [];
 
     var _loop = function _loop(i, length) {
-      var chunk = i < 1 ? trimStart.call(template[i]) : template[i];
+      var chunk = template[i];
       if (attr.test(chunk) && isNode(template, i + 1)) text.push(chunk.replace(attr, function (_, $1, $2) {
         return "".concat(prefix).concat(i, "=").concat($2 ? $2 : '"').concat($1).concat($2 ? '' : '"');
       }));else {
-        if (i + 1 < length) text.push(chunk, "<!--".concat(prefix).concat(i, "-->"));else text.push(trimEnd.call(chunk));
+        if (i + 1 < length) text.push(chunk, "<!--".concat(prefix).concat(i, "-->"));else text.push(chunk);
       }
     };
 
@@ -416,7 +408,7 @@ var uhtml = (function (exports) {
       _loop(i, length);
     }
 
-    return text.join('').replace(/<([A-Za-z]+[A-Za-z0-9:._-]*)([^>]*?)(\/>)/g, unvoid);
+    return text.join('').trim().replace(/<([A-Za-z]+[A-Za-z0-9:._-]*)([^>]*?)(\/>)/g, unvoid);
   }; // TODO: I am not sure this is really necessary
   //       I might rather set an extra DON'T rule
   //       Let's play it safe for the time being.
@@ -465,7 +457,7 @@ var uhtml = (function (exports) {
           search = "".concat(prefix).concat(++i);
         }
 
-        if (/^(?:style|textarea)$/i.test(node.tagName) && trimStart.call(trimEnd.call(node.textContent)) === "<!--".concat(search, "-->")) {
+        if (/^(?:style|textarea)$/i.test(node.tagName) && node.textContent.trim() === "<!--".concat(search, "-->")) {
           nodes.push({
             type: 'text',
             path: getPath(node)

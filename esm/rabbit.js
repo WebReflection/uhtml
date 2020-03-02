@@ -1,6 +1,3 @@
-import trimStart from '@ungap/trim-start';
-import trimEnd from '@ungap/trim-end';
-
 import {cacheInfo} from './cache.js';
 import {handlers} from './handlers.js';
 import {isArray} from './array.js';
@@ -11,7 +8,7 @@ import {
 } from './node.js';
 
 const prefix = 'isµ';
-const attr = /([^ \f\n\r\t\\>"'=]+)\s*=\s*(['"]?)$/;
+const attr = /([^\s\\>"'=]+)\s*=\s*(['"]?)$/;
 const templates = new WeakMap;
 
 const createEntry = (type, template) => {
@@ -22,7 +19,7 @@ const createEntry = (type, template) => {
 const instrument = template => {
   const text = [];
   for (let i = 0, {length} = template; i < length; i++) {
-    const chunk = i < 1 ? trimStart.call(template[i]) : template[i];
+    const chunk = template[i];
     if (attr.test(chunk) && isNode(template, i + 1))
       text.push(chunk.replace(attr, (_, $1, $2) =>
         `${prefix}${i}=${$2 ? $2 : '"'}${$1}${$2 ? '' : '"'}`));
@@ -30,10 +27,10 @@ const instrument = template => {
       if ((i + 1) < length)
         text.push(chunk, `<!--${prefix}${i}-->`);
       else
-        text.push(trimEnd.call(chunk));
+        text.push(chunk);
     }
   }
-  return text.join('').replace(
+  return text.join('').trim().replace(
     /<([A-Za-z]+[A-Za-z0-9:._-]*)([^>]*?)(\/>)/g,
     unvoid
   );
@@ -84,7 +81,7 @@ const mapTemplate = (type, template) => {
       }
       if (
         /^(?:style|textarea)$/i.test(node.tagName) &&
-        trimStart.call(trimEnd.call(node.textContent)) === `<!--${search}-->`
+        node.textContent.trim() === `<!--${search}-->`
       ){
         nodes.push({type: 'text', path: getPath(node)});
         search = `${prefix}${++i}`;
