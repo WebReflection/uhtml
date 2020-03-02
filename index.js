@@ -15,6 +15,9 @@ var uhtml = (function (exports) {
     return info;
   };
 
+  var create = Object.create,
+      defineProperties = Object.defineProperties;
+
   
 
   /**
@@ -209,7 +212,6 @@ var uhtml = (function (exports) {
 
     return path;
   };
-  var defineProperties = Object.defineProperties;
   var getWire = function getWire(fragment) {
     var childNodes = fragment.childNodes;
     var length = childNodes.length;
@@ -582,9 +584,6 @@ var uhtml = (function (exports) {
     this.values = values;
   }
 
-  var create = Object.create,
-      defineProperties$1 = Object.defineProperties;
-
   var util = function util(type) {
     var cache = new WeakMap();
 
@@ -598,7 +597,7 @@ var uhtml = (function (exports) {
       };
     };
 
-    return defineProperties$1(function (template) {
+    return defineProperties(function (template) {
       for (var _len2 = arguments.length, values = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
         values[_key2 - 1] = arguments[_key2];
       }

@@ -1,6 +1,7 @@
 'use strict';
 const createContent = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/create-content'));
 
+const {defineProperties} = require('./object.js');
 const {indexOf, slice} = require('./array.js');
 
 const getNode = (node, i) => node.childNodes[i];
@@ -18,7 +19,6 @@ const getPath = node => {
 };
 exports.getPath = getPath;
 
-const {defineProperties} = Object;
 const getWire = fragment => {
   const {childNodes} = fragment;
   const {length} = childNodes;

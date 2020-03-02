@@ -1,5 +1,6 @@
 import createContent from '@ungap/create-content';
 
+import {defineProperties} from './object.js';
 import {indexOf, slice} from './array.js';
 
 export const getNode = (node, i) => node.childNodes[i];
@@ -15,7 +16,6 @@ export const getPath = node => {
   return path;
 };
 
-const {defineProperties} = Object;
 export const getWire = fragment => {
   const {childNodes} = fragment;
   const {length} = childNodes;

@@ -1,7 +1,6 @@
 import {cache, cacheInfo, setCache} from './cache.js';
+import {create, defineProperties} from './object.js';
 import {Hole, retrieve} from './rabbit.js';
-
-const {create, defineProperties} = Object;
 
 const util = type => {
   const cache = new WeakMap;
