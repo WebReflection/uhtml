@@ -99,8 +99,7 @@ const handleAttribute = (node, name) => {
       if (oldValue !== newValue) {
         if (oldValue)
           node.removeEventListener(type, oldValue, false);
-        oldValue = newValue;
-        if (newValue)
+        if (oldValue = newValue)
           node.addEventListener(type, newValue, false);
       }
     };
@@ -142,9 +141,9 @@ const handleText = node => {
 export function handlers(options) {
   const {type, path} = options;
   const node = path.reduce(getNode, this);
-  if (type === 'node')
-    return handleAnything(node, []);
-  if (type === 'attr')
-    return handleAttribute(node, options.name);
-  return handleText(node);
+  return type === 'node' ?
+    handleAnything(node, []) :
+    (type === 'attr' ?
+      handleAttribute(node, options.name) :
+      handleText(node));
 };

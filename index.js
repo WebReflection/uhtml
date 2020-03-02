@@ -218,6 +218,12 @@ var uhtml = (function (exports) {
     if (length === 1) return childNodes[0];
     var nodes = slice.call(childNodes, 0);
     return defineProperties(fragment, {
+      firstChild: {
+        value: nodes[0]
+      },
+      lastChild: {
+        value: nodes[length - 1]
+      },
       remove: {
         value: function value() {
           var range = document.createRange();
@@ -336,8 +342,7 @@ var uhtml = (function (exports) {
       return function (newValue) {
         if (oldValue !== newValue) {
           if (oldValue) node.removeEventListener(type, oldValue, false);
-          oldValue = newValue;
-          if (newValue) node.addEventListener(type, newValue, false);
+          if (oldValue = newValue) node.addEventListener(type, newValue, false);
         }
       };
     } // all other cases
@@ -380,9 +385,7 @@ var uhtml = (function (exports) {
     var type = options.type,
         path = options.path;
     var node = path.reduce(getNode, this);
-    if (type === 'node') return handleAnything(node, []);
-    if (type === 'attr') return handleAttribute(node, options.name);
-    return handleText(node);
+    return type === 'node' ? handleAnything(node, []) : type === 'attr' ? handleAttribute(node, options.name) : handleText(node);
   }
 
   var prefix = 'isµ';

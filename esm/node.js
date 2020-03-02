@@ -23,6 +23,8 @@ export const getWire = fragment => {
     return childNodes[0];
   const nodes = slice.call(childNodes, 0);
   return defineProperties(fragment, {
+    firstChild: {value: nodes[0]},
+    lastChild: {value: nodes[length - 1]},
     remove: {
       value() {
         const range = document.createRange();
