@@ -35,8 +35,6 @@
   "unpkg": "min.js",
   "dependencies": {
     "@ungap/create-content": "^0.1.4",
-    "@ungap/trim-end": "^0.1.0",
-    "@ungap/trim-start": "^0.1.1",
     "udomdiff": "^1.0.0"
   },
   "repository": {
