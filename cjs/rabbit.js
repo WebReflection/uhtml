@@ -22,12 +22,10 @@ const instrument = template => {
     if (attr.test(chunk) && isNode(template, i + 1))
       text.push(chunk.replace(attr, (_, $1, $2) =>
         `${prefix}${i}=${$2 ? $2 : '"'}${$1}${$2 ? '' : '"'}`));
-    else {
-      if ((i + 1) < length)
-        text.push(chunk, `<!--${prefix}${i}-->`);
-      else
-        text.push(chunk);
-    }
+    else if ((i + 1) < length)
+      text.push(chunk, `<!--${prefix}${i}-->`);
+    else
+      text.push(chunk);
   }
   return text.join('').trim().replace(
     /<([A-Za-z]+[A-Za-z0-9:._-]*)([^>]*?)(\/>)/g,

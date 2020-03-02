@@ -34,6 +34,16 @@ var uhtml = (function (exports) {
    * OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
    * PERFORMANCE OF THIS SOFTWARE.
    */
+
+  /**
+   * @param {Node} parentNode The container where children live
+   * @param {Node[]} a The list of current/live children
+   * @param {Node[]} b The list of future children
+   * @param {(entry: Node, action: number) => Node} get
+   * The callback invoked per each entry related DOM operation.
+   * @param {Node} [before] The optional node used as anchor to insert before.
+   * @returns {Node[]} The same list of future children.
+   */
   var udomdiff = (function (parentNode, a, b, get, before) {
     var bLength = b.length;
     var aEnd = a.length;
@@ -66,9 +76,7 @@ var uhtml = (function (exports) {
             } // single swap
             else if (aEnd - aStart === 1 && bEnd - bStart === 1) {
                 if (bMap && bMap.has(a[aStart])) {
-                  parentNode.insertBefore(get(b[bStart], 1), get(bEnd < bLength ?
-                  /* istanbul ignore next */
-                  b[bEnd] : before, 0));
+                  parentNode.insertBefore(get(b[bStart], 1), get(bEnd < bLength ? b[bEnd] : before, 0));
                 } else parentNode.replaceChild(get(b[bStart], 1), get(a[aStart], -1));
 
                 aStart++;
@@ -117,7 +125,7 @@ var uhtml = (function (exports) {
                           }
                       } // otherwise move the source forward
                       else aStart++;
-                    } // otherwise drop node
+                    } // otherwise drop the node and move the source forward
                     else parentNode.removeChild(get(a[aStart++], -1));
                   }
     }
@@ -399,9 +407,7 @@ var uhtml = (function (exports) {
       var chunk = template[i];
       if (attr.test(chunk) && isNode(template, i + 1)) text.push(chunk.replace(attr, function (_, $1, $2) {
         return "".concat(prefix).concat(i, "=").concat($2 ? $2 : '"').concat($1).concat($2 ? '' : '"');
-      }));else {
-        if (i + 1 < length) text.push(chunk, "<!--".concat(prefix).concat(i, "-->"));else text.push(chunk);
-      }
+      }));else if (i + 1 < length) text.push(chunk, "<!--".concat(prefix).concat(i, "-->"));else text.push(chunk);
     };
 
     for (var i = 0, length = template.length; i < length; i++) {
