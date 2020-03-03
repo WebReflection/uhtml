@@ -3,4 +3,5 @@ node_modules/
 rollup/
 test/
 package-lock.json
+uhtml-head.jpg
 .travis.yml
