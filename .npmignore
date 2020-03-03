@@ -4,4 +4,5 @@ rollup/
 test/
 package-lock.json
 uhtml-head.jpg
+LOGO.txt
 .travis.yml
