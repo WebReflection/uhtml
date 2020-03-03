@@ -2,10 +2,11 @@
 
 <sup>**Social Media Photo by [Andrii Ganzevych](https://unsplash.com/@odya_kun) on [Unsplash](https://unsplash.com/)**</sup>
 
-A _~2.5K_ [lighterhtml](https://github.com/WebReflection/lighterhtml#readme) subset.
+_micro html_ is a _~2.5K_ [lighterhtml](https://github.com/WebReflection/lighterhtml#readme) subset to build declarative and reactive UI via template literals tags.
 
 
-## How To Use µhtml
+
+### How To Use µhtml
 
 Install the module via `npm i uhtml` and consume it as such:
 
@@ -13,31 +14,40 @@ Install the module via `npm i uhtml` and consume it as such:
 // as ECMAScript standard module
 import {render, html, svg} from 'uhtml';
 
-// or as CommonJS module
 // const {render, html, svg} = require('uhtml');
-
-render(document.body, html`<h1>Hello 👋 µHTML</h1>`);
+render(document.body, html`<h1>Hello 👋 µhtml</h1>`);
 ```
 
-Alternatively you can use a CDN such as _unpkg_:
+Alternatively you can use a CDN such as _unpkg_, as shown in [this demo](https://codepen.io/WebReflection/pen/bGdBjjL?editors=0010).
 ```html
-<script src="https://unpkg.com/uhtml"></script>
-<script>
-  const {render, html, svg} = uhtml;
+<script src="https://unpkg.com/uhtml">/* global uhtml */</script>
+<!-- or -->
+<script type="module">
+import {render, html, svg} from 'https://unpkg.com/uhtml?module';
 </script>
 ```
 
-**[Live Demo](https://codepen.io/WebReflection/pen/bGdBjjL?editors=0010)**
 
 
-#### ... and what about Custom Elements ?
+### API Summary & Compatibility
 
-Micro Custom ELements are brought you you via [µce](https://github.com/WebReflection/uce#readme), a 3K library based on _µhtml_, but of course, you can use _µhtml_ also with vanilla Custom Elements and built-ins.
+This module works in IE11, Edge, and every other Desktop to Mobile browser, including KaiOS.
+
+The module exports the following functionalities:
+
+  * a `render(where, what)` function to populate the `where` DOM node with `what` content, which can be a DOM node, or the returning value of `html` and `svg` tags. The `render` function returns the `where` DOM node itself.
+  * a `html` template literal [tag](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates), to produce any sort of _HTML_ content
+  * a `svg` template literal [tag](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates), to produce any sort of _SVG_ content
+  * both `html` and `svg` implements a `.for(reference[, id])` template tag function for _keyed_ weak relationships within the node
+  * both `html` and `svg` implements a `.node` template tag function for one-off HTML or SVG creation
+
+<hr>
 
 
-## API Usage
 
-Following a detailed information about _µhtml_ usage and constrains.
+## API Documentation
+
+Following a detailed information about _µhtml_ usage and its constrains.
 
 <details>
   <summary><strong>About Attributes</strong></summary>
@@ -188,30 +198,28 @@ render(document.body, html`
   </div>
 </details>
 
-## API & Compatibility
+<details>
+  <summary><strong>About Custom Elements</strong></summary>
+  <div>
 
-This module works in IE11, Edge, and every other Desktop to Mobile browser, including KaiOS.
+Custom Elements are either brought you, in a simplified manner, via [µce](https://github.com/WebReflection/uce#readme) (_micro custom elements_), which is a 3K library based on _µhtml_, or via vanilla JS, as demoed in [WebComponents.dev](https://webcomponents.dev/edit/dP0G85PrChRv7CsAvGXb).
 
-The module exports the following functionalities:
-
-  * a `render(where, what)` function to populate the `where` DOM node with `what` content, which can be a DOM node, or the returning value of `html` and `svg` tags. The `render` function returns the `where` DOM node itself.
-  * a `html` template literal [tag](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates), to produce any sort of _HTML_ content
-  * a `svg` template literal [tag](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates), to produce any sort of _SVG_ content
-  * both `html` and `svg` implements a `.for(reference[, id])` template tag function for _keyed_ weak relationships within the node
-  * both `html` and `svg` implements a `.node` template tag function for one-off HTML or SVG creation
-
+  </div>
+</details>
 
 <hr>
 
 
-### µhtml vs lighterhtml
 
-The first thing to keep in mind, is that _lighterhtml_ is at pair with _uhtml_ features, but not vice-versa, meaning if you need anything more, you can always switch to _lighterhtml_ later on, and without changing a single line of code.
+### µhtml vs [lighterhtml](https://github.com/WebReflection/lighterhtml#readme)
+
+You could read an [exhaustive summary of features differences](https://gist.github.com/WebReflection/761052d6dae7c8207d2fcba7cdede295#dom-engines-features-comparison), but the first thing to keep in mind, is that _lighterhtml_ is at pair with _uhtml_ features, but not vice-versa, meaning if you need anything more, you can always switch to _lighterhtml_ later on, and without changing a single line of code.
 
 Following a list of other points to consider when choosing _µhtml_ instead of _lighterhtml_ (or vice-versa).
 
-
-#### Differently from lighterhtml
+<details>
+  <summary><strong>Differently from <em>lighterhtml</em></strong></summary>
+  <div>
 
   * there are **no sparse attributes**, each attribute *must* have a single interpolated value: `attribute=${value}` is OK, `attribute="${a}${b}"` is not, and `attribute="some ${'partial'}"` is not allowed neither.
   * the interpolations are simple: primitive, or array of primitives, and nodes, or array of nodes.
@@ -220,11 +228,15 @@ Following a list of other points to consider when choosing _µhtml_ instead of _
   * the `template` argument is not normalized. If you target browsers with issue with such argument, please be sure you transpile your code with latest _Babel_ before shipping to production
   * no _domtagger_ whatsoever, you can't change the current behavior of the library in any way
 
+  </div>
+</details>
 
-#### Similarly or better than lighterhtml
+<details>
+  <summary><strong>Similarly or better than <em>lighterhtml</em></strong></summary>
+  <div>
 
   * _uhtml_ should *not* suffer any of the IE11/Edge issues, or invalid SVG attributes warnings, as the parsing is done differently 🎉
-  * nested `html` and `svg` are allowed like in _lighterhtml_. `v0` didn't allow that, hence it was more "_surprise prone_". _uhtml_ in that sense is more like a drop-in replacement for _lighterhtml_, and vice-versa
+  * nested `html` and `svg` are allowed like in _lighterhtml_. The version `0` of this library didn't allow that, hence it was more "_surprise prone_". _uhtml_ in that sense is more like a drop-in replacement for _lighterhtml_, and vice-versa
   * keyed results via `htmlfor(...)` or `svg.for(...)`, as well as one-off node creation, via `html.node` or `svg.node` are the same found in _lighterhtml_
   * the `ref=${...}` attribute works same as _lighterhtml_, enabling hooks, or _React_ style, out of the box
   * the `.property=${...}` *direct setter* is still available
@@ -233,14 +245,16 @@ Following a list of other points to consider when choosing _µhtml_ instead of _
   * it's half of _lighterhtml_ production size, mostly because ...
   * there are no 3rd parts dependencies, except for `@ungap/create-content`, needed for IE11, but removable via [@ungap/degap](https://github.com/ungap/degap#readme), same way I've done it [here](./rollup/new.config.js), or [babel-plugin-remove-ungap](https://github.com/cfware/babel-plugin-remove-ungap#readme). The compressed final size difference is just _~0.2K_ though.
 
+  </div>
+</details>
 
-### µhtml goals
+<details>
+  <summary><strong>µhtml library goals</strong></summary>
+  <div>
 
   * be an essential/ideal companion for [wickedElements](https://github.com/WebReflection/wicked-elements#readme), [hookedElements](https://github.com/WebReflection/hooked-elements#readme), or any third part that would like a _lighterhtml_ like API, without the extra weight
   * keep it as simple as possible, but not simpler
   * see if there is room for improvements in _lighterhtml_ whenever _uhtml_ simplifications allow to be ported there
 
-
-### Where is v0 ?
-
-The previous attempt to make it essential resulted ... well, too essential, but it's still [usable](./V0.md) via `npm i uhtml@0`.
+  </div>
+</details>
