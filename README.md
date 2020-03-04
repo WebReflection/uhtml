@@ -13,10 +13,9 @@ _micro html_ is a _~2.5K_ [lighterhtml](https://github.com/WebReflection/lighter
 Install the module via `npm i uhtml` and consume it as such:
 
 ```js
-// as ECMAScript standard module
 import {render, html, svg} from 'uhtml';
-
 // const {render, html, svg} = require('uhtml');
+
 render(document.body, html`<h1>Hello 👋 µhtml</h1>`);
 ```
 
@@ -29,11 +28,15 @@ import {render, html, svg} from 'https://unpkg.com/uhtml?module';
 </script>
 ```
 
+- - -
 
+## API Documentation
 
-### API Summary & Compatibility
+Most information about _µhtml_ are written in the [documentation file](./DOCUMENTATION.md), but following you can read most essential details.
 
-This module works in IE11, Edge, and every other Desktop to Mobile browser, including KaiOS.
+<details>
+  <summary><strong>API Summary</strong></summary>
+  <div>
 
 The module exports the following functionalities:
 
@@ -43,13 +46,8 @@ The module exports the following functionalities:
   * both `html` and `svg` implements a `.for(reference[, id])` template tag function for _keyed_ weak relationships within the node
   * both `html` and `svg` implements a `.node` template tag function for one-off HTML or SVG creation
 
-<hr>
-
-
-
-## API Documentation
-
-Most information about _µhtml_ are written in the [documentation file](./DOCUMENTATION.md), but following you can read most essential details.
+  </div>
+</details>
 
 <details>
   <summary><strong>About Attributes</strong></summary>
@@ -209,7 +207,16 @@ Custom Elements are either brought you, in a simplified manner, via [µce](https
   </div>
 </details>
 
-<hr>
+<details>
+  <summary><strong>Compatibility</strong></summary>
+  <div>
+
+This module works in IE11, Edge, and every other Desktop to Mobile browser, including KaiOS.
+
+  </div>
+</details>
+
+- - -
 
 
 
@@ -245,7 +252,7 @@ Following a list of other points to consider when choosing _µhtml_ instead of _
   * self closing nodes are also supported, go wild with `<custom-elements />` or even `<span />`
   * the wire parsing logic has been simplified even more, resulting in slightly [better bootstrap and update performance](https://github.com/krausest/js-framework-benchmark/pull/698)
   * it's half of _lighterhtml_ production size, mostly because ...
-  * there are no 3rd parts dependencies, except for `@ungap/create-content`, needed for IE11, but removable via [@ungap/degap](https://github.com/ungap/degap#readme), same way I've done it [here](./rollup/new.config.js), or [babel-plugin-remove-ungap](https://github.com/cfware/babel-plugin-remove-ungap#readme). The compressed final size difference is just _~0.2K_ though.
+  * there are no 3rd parts dependencies, except for [µdomdiff](https://github.com/WebReflection/udomdiff#readme), and for `@ungap/create-content`, needed only for IE11, but removable via [@ungap/degap](https://github.com/ungap/degap#readme), same way I've done it [here](./rollup/new.config.js), or [babel-plugin-remove-ungap](https://github.com/cfware/babel-plugin-remove-ungap#readme). The compressed final size difference is just around _~0.2K_ though.
 
   </div>
 </details>
