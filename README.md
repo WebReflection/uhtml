@@ -49,7 +49,7 @@ The module exports the following functionalities:
 
 ## API Documentation
 
-Following a detailed information about _µhtml_ usage and its constrains.
+Most information about _µhtml_ are written in the [documentation file](./DOCUMENTATION.md), but following you can read most essential details.
 
 <details>
   <summary><strong>About Attributes</strong></summary>
