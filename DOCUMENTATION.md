@@ -7,6 +7,19 @@ A _getting started_ guide with most common questions and answers, covered by liv
 - - -
 
 
+### A Brief Introduction
+
+While _µhtml_, on the surface, is a library that resemble some naive usage of [innerHTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML), it's actually far away from being an `innerHTML` replacement, as it's capable of handling events listeners, special and normal attributes, plus various kind of content, that will be properly parsed, normalized, and repeatedly updated at light speed, without trashing the previous content like `innerHTML` would do per each operation.
+
+```js
+render(element, html`
+  <h1 onclick=${() => console.log('🎉')}>
+    Welcome to <em>µhtml</em>
+  </h1>
+`);
+```
+
+
 
 ## Use Cases
 
@@ -141,9 +154,10 @@ render(document.body, html`
 `);
 ```
 
+
 #### How Does The Parsing Work ?
 
-This part is extremely technical and likely irrelevant for a getting started page, but if you are curious to understand what happens behind the scene,you can find all steps in here.
+This part is extremely technical and likely irrelevant for a getting started page, but if you are curious to understand what happens behind the scene, you can find all steps in here.
 
 <details>
   <summary><strong>Internal Parsing Steps</strong></summary>
@@ -186,3 +200,145 @@ I also understand this list of steps might be "_a bit_" overwhelming, but these 
 It's also worth mentioning I've been fine-tuning all these steps since the beginning of 2017, so maybe it was unnecessary to describe them all, but "_the nitty-gritty_" at least is now written down somewhere 😅
 
 </details>
+
+
+
+## API In Details
+
+The module itself exports these three functions: `render`, `html`, and `svg`.
+
+
+### The `render(where, what)` Utility
+
+This function purpose is to update the content of the _where_ DOM node, which could be a custom element, or any other node that can contain other nodes.
+
+```js
+render(
+  // where to render
+  document.querySelector('#container'),
+  // what to render
+  html`content` || svg`content` || Node || callback
+);
+
+// Custom Element basic example
+class MyComponent extends HTMLElement {
+  connectedCallback() {
+    // render content, it could also be
+    // a Shadow root node
+    render(this, html`My CE Content`);
+  }
+}
+```
+
+If the value of _what_ is just a DOM node, and it's different from the one rendered before, it will clear the container and append it.
+
+If the value of _what_ is a callback, it will invoke it and use its result as content. Such result can be a _Node_, or the returning value of `html` or `svg` tags.
+
+
+### The `html` and `svg` Tags
+
+As the name would suggest, `html` is the tag to use when _HTML_ content is meant to be created, while `svg` should be used to created valid _SVG_ nodes.
+
+Beside this essential difference, both tags work in the exact same way, and both tags provide extra tags, such as `.node` and `.for(ref[, id])`.
+
+
+#### The `.node` Tag
+
+Both `html.node` and `svg.node` tags create a fresh new version of that specified content and return it.
+
+```js
+// use node to generate new DOM content
+const div = html.node`<div />`;
+
+// the div is 100% a node
+div.textContent = 'some µhtml content';
+document.body.appendChild(div);
+```
+
+It is also possible to create multiple sibling nodes at once:
+
+```js
+const fragment = html.node`
+  <span>first</span>
+  <span>second</span>
+  <span>third</span>
+`;
+
+document.body.appendChild(fragment);
+```
+
+The only special feature of fragments created via `html.node` or `svg.node`, is that these will always return `fragment.firstChild` and `fragment.lastChild` nodes, even after being appended live, where native regular fragments would instead lose all their children.
+
+_µhtml_ fragments have also two special methods: `valueOf()`, that allow you to move all nodes initially assigned to the fragment somewhere else, or `remove()`, which would remove all nodes initially assigned in one shot.
+
+```js
+// using the previous code example, then ...
+
+document.body.removeChild(fragment.remove());
+
+setTimeout(() => document.body.appendChild(fragment.valueOf()));
+```
+
+It is not super important to understand how to use fragments by hand, but these features are essential for the _µhtml_ DOM diffing engine called _[µdomdiff](https://github.com/WebReflection/udomdiff#readme)_, which is capable of updating, removing, or moving fragments around as needed.
+
+
+
+#### The `.for(ref[, id])` Tag
+
+If you are familiar with the _keyed_ and _non-keyed_ rendering concepts, this method allows just that: you can reference a specific node, and its optional id, to any object. By default, _µhtml_ uses a rendering stack to provide automatically, to each interpolation, and "_always same index_" during updates.
+
+```js
+// non-keyed rendered view
+const update = (items) => {
+  render(
+    document.querySelector('.list-items'),
+    html`
+    <ul>
+      ${items.map(
+        ({id, name}) =>
+          html`<li data-id=${id}>${name}</li>`
+      )}
+    </ul>`
+  );
+};
+
+const items = [
+  {id: 1, name: 'Article X'},
+  {id: 2, name: 'Article Y'},
+  {id: 3, name: 'Article Z'},
+];
+
+update(items);
+```
+
+While most of the time it's OK to use _non-keyed_ renders, there could be side effects when, instead of simple nodes, you have Custom Elements in the list, or you have special mutation observers somehow attached to the inner nodes.
+
+In these cases, whenever the list changes, nodes that were previously there will simply be updated with new content, attributes, and the rest, but if the Custom Element had an `attributeChangedCallback`, as example, that does something expensive, such as fetching new data, as example, this callback will be inevitably called multiple times every time an article changes position in the list, or the list is sorted, it shrinks, or it expands.
+
+But fear not, it is possible to relate a specific node through the tag returned by `.for(...)`:
+
+
+```js
+// *keyed* rendered view
+const update = (items) => {
+  const ref = document.querySelector('.list-items');
+  render(ref, html`
+    <ul>
+      ${items.map(
+        ({id, name}) =>
+          html.for(ref, id)`<li data-id=${id}>${name}</li>`
+      )}
+    </ul>`
+  );
+};
+
+const items = [
+  {id: 1, name: 'Article X'},
+  {id: 2, name: 'Article Y'},
+  {id: 3, name: 'Article Z'},
+];
+
+update(items);
+```
+
+With latest example, [live in codepen](https://codepen.io/WebReflection/pen/NWqvmJg?editors=0010), you can follow nodes moving around without ever changing any of their attributes or content, and this is how, and why, _keyed_ renders can be very important.

@@ -66,6 +66,10 @@ var uhtml = (function (exports) {
           bEnd--;
         } // append head, tail, or nodes in between: fast path
         else if (aEnd === aStart) {
+            // we could be in a situation where the rest of nodes that
+            // need to be added are not at the end, and in such case
+            // the node to `insertBefore`, if the index is more than 0
+            // must be retrieved, otherwise it's gonna be the first item.
             var node = bEnd < bLength ? bStart ? get(b[bStart - 1], -0).nextSibling : get(b[bEnd - bStart], 0) : before;
 
             while (bStart < bEnd) {
@@ -74,7 +78,9 @@ var uhtml = (function (exports) {
           } // remove head or tail: fast path
           else if (bEnd === bStart) {
               while (aStart < aEnd) {
-                parentNode.removeChild(get(a[aStart++], -1));
+                // remove the node only if it's unknown or not live
+                if (!map || !map.has(a[aStart])) parentNode.removeChild(get(a[aStart], -1));
+                aStart++;
               }
             } // single last swap: fast path
             else if (aEnd - aStart === 1 && bEnd - bStart === 1) {
@@ -84,19 +90,18 @@ var uhtml = (function (exports) {
                   // in the end or middle case, find out where to insert it
                   parentNode.insertBefore(get(b[bStart], 1), get(bEnd < bLength ? b[bEnd] : before, 0));
                 } // if the node is unknown, just replace it with the new one
-                else parentNode.replaceChild(get(b[bStart], 1), get(a[aStart], -1)); // move both indexes forward to finish the loop in the fast path
+                else parentNode.replaceChild(get(b[bStart], 1), get(a[aStart], -1)); // break the loop, as this was the very last operation to perform
 
 
-                aStart++;
-                bStart++;
+                break;
               } // reverse swap: also fast path
               else if (a[aStart] === b[bEnd - 1] && b[bStart] === a[aEnd - 1]) {
                   // this is a "shrink" operation that could happen in these cases:
                   // [1, 2, 3, 4, 5]
-                  // [1, 4, 3, 2]
+                  // [1, 4, 3, 2, 5]
                   // or asymmetric too
                   // [1, 2, 3, 4, 5]
-                  // [1, 2, 3, 5, 4, 6]
+                  // [1, 2, 3, 5, 6, 4]
                   var _node = get(a[--aEnd], -1).nextSibling;
                   parentNode.insertBefore(get(b[bStart++], 1), get(a[aStart++], -1).nextSibling);
                   parentNode.insertBefore(get(b[--bEnd], 1), _node); // mark the future index as identical (yeah, it's dirty, but cheap 👍)
@@ -133,7 +138,7 @@ var uhtml = (function (exports) {
 
                         var sequence = 1;
 
-                        while (++_i < aEnd) {
+                        while (++_i < aEnd && _i < bEnd) {
                           if (!map.has(a[_i]) || map.get(a[_i]) !== index + sequence) break;
                           sequence++;
                         } // effort decision here: if the sequence is longer than replaces

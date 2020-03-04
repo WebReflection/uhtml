@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../index.js"></script>
+  <script>
+  const {render, html} = uhtml;
+
+  const update = (items) => {
+    const ref = document.querySelector('.list-items');
+    render(ref, html`
+      <ul>
+        ${items.map(
+          ({id, name}) =>
+            html.for(ref, id)`<li data-id=${id}>${name}</li>`
+        )}
+      </ul>`
+    );
+  };
+
+  const items = [
+    {id: 1, name: 'Article X'},
+    {id: 2, name: 'Article Y'},
+    {id: 3, name: 'Article Z'},
+  ];
+
+  this.onload = () => {
+    update(items);
+    let i = setInterval(
+      (randomly) => {
+        items.sort(randomly);
+        try {
+          update(items);
+        }
+        catch(error) {
+          clearInterval(i);
+          throw error;
+        }
+      },
+      100,
+      () => Math.random() - Math.random()
+    );
+  };
+
+  </script>
+</head>
+<body>
+  <div class="list-items"></div>
+</body>
+</html>
