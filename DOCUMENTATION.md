@@ -1,4 +1,4 @@
-# What Is µhtml And How Does It Work
+# What Is µhtml <sup><sub>(micro html)</sub></sup> And How Does It Work
 
 ![snow flake](./uhtml-head.jpg)
 
@@ -14,10 +14,12 @@ While _µhtml_, on the surface, is a library that resemble some naive usage of [
 ```js
 render(element, html`
   <h1 onclick=${() => console.log('🎉')}>
-    Welcome to <em>µhtml</em>
+    Welcome to <em>µhtml</em> 👋
   </h1>
 `);
 ```
+
+As summary: _µhtml_ is the tiniest declarative UI library of the Web, it's safe by default, and it's based on standard JS templates literals features.
 
 
 
@@ -172,7 +174,7 @@ Taking the essential `Button(text, className)` component example, this is how _�
         * append an `<!--µhtml${index}-->` comment to the layout
       * otherwise append the chunk as is, it's the closing part
     * normalize all self-closing, [not void](https://developer.mozilla.org/en-US/docs/Glossary/empty_element), elements, so that the resulting joined layout contains `<span></span>` or `<custom-element></custom-element>` instead of `<span />` or `<custom-element />`, which is another handy _µhtml_ feature 😉
-    * le the browser engine parse the final layout through the native [Content Template element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template) and traverse it in search of all comments and attributes that are only related to _µhtml_
+    * let the browser engine parse the final layout through the native [Content Template element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template) and traverse it in search of all comments and attributes that are only related to _µhtml_
     * per each crawled node, using and `index` that goes from _zero_ to the length of passed values, as these are those to map and update in the future:
       * if the node is a _comment_, and its text content is exactly `µhtml${index}`, map recursively the position of that node to retrieve it later on, and move the `index` forward
       * if the node is not a comment:
@@ -195,7 +197,7 @@ As result, each `Button(text, className)` component will simply invoke just two 
 
 This might not look super useful for "_one-off_" created elements, but it's a performance game changer when the UI is frequently updated, as in lists, news feeds, chats, games, etc.
 
-I also understand this list of steps might be "_a bit_" overwhelming, but these describe pretty much everything that happens in both [rabbit.js](./esm/rabbit.js) and [rabbit.js](./esm/handlers.js) files, where _rabbit.js_ also takes care of the whole "_execution stack dance_", which enables nested rendered, with smart diff, and through the [µdomdiff](https://github.com/WebReflection/udomdiff#readme) module.
+I also understand this list of steps might be "_a bit_" overwhelming, but these describe pretty much everything that happens in the [rabbit.js](./esm/rabbit.js) file, which also takes care of the whole "_execution stack dance_", which enables nested rendered, with smart diff, and through the [µdomdiff](https://github.com/WebReflection/udomdiff#readme) module.
 
 It's also worth mentioning I've been fine-tuning all these steps since the beginning of 2017, so maybe it was unnecessary to describe them all, but "_the nitty-gritty_" at least is now written down somewhere 😅
 
