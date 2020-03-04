@@ -344,3 +344,117 @@ update(items);
 ```
 
 With latest example, [live in codepen](https://codepen.io/WebReflection/pen/NWqvmJg?editors=0010), you can follow nodes moving around without ever changing any of their attributes or content, and this is how, and why, _keyed_ renders can be very important.
+
+## API: Attributes
+
+Any element can have one or more attribute, either interpolated or not.
+
+```js
+render(document.body, html`
+  <div id="main"
+        class=${`content ${extra}`}
+        data-fancy=${fancy}>
+    <p contenteditable=${editable}
+        onclick=${listener}
+        class="${['container', 'user'].join(' ')}">
+      Hello ${user.name}, feel free to edit this content.
+    </p>
+  </div>
+`);
+```
+
+These are the rules to follow for attributes:
+
+  * interpolated attributes don't require the usage of quotes, but these work either ways. `name=${value}` is OK, and so is `name="${value}"` or even `name='${value}'`
+  * you cannot have sparse attribute interpolations: always use one interpolation to define each attribute that needs one, but never write things like `style="top:${x};left${y}"` as the parser will simply breaks with an error _bad template_. Use template literals within interpolations, if you want to obtain exact same result: ``style=${`top:${x};left${y}`}``
+  * if the passed value is `null` or `undefined`, the attribute will be removed. If the value is something else, it will be set as is as value. If the attribute was previously removed, the same attribute will be placed back again. If the value is the same as it was before, nothing happens
+  * if the attribute name starts with `on`, as example, `onclick=${...}`, it will be set as listener. If the listener changes, the previous one will be automatically removed
+  * if the attribute starts with a `.` dot, as in `.setter=${value}`, the value will be passed directly to the element per each update. If such value is a known setter, either native elements or defined via Custom Elements, the setter will be invoked per each update, even if the value is the same
+  * if the attribute name is `ref`, as in `ref=${object}`, the `object.current` property will be assigned to the node, once this is rendered, and per each update
+
+
+## API: HTML/SVG Content
+
+It is possible to place interpolations within any kind of node, and together with text or other nodes too.
+
+```js
+render(document.body, html`
+  <table>
+    ${lines.map((text, i) => html`
+      <tr><td>Row ${i} with text: ${text}</td></tr>
+    `)}
+  </table>
+`);
+```
+
+There are only two exceptional nodes that do not allow sparse content within themselves: the `style` element, and the `textarea` one.
+
+```js
+// DON'T DO THIS
+render(document.body, html`
+  <style>
+    body { font-size: ${fontSize}; }
+  </style>
+  <textarea>
+    Write here ${user.name}
+  </textarea>
+`);
+
+// DO THIS INSTEAD
+render(document.body, html`
+  <style>
+  ${`
+    body { font-size: ${fontSize}; }
+  `}
+  </style>
+  <textarea>
+  ${`
+    Write here ${user.name}
+  `}
+  </textarea>
+`);
+```
+
+Beside nodes where the content will be inevitably just text, like it is for `style` or `textarea`, as example, every other interpolation can contain primitives, as strings, numbers, or even booleans, or the returned value of `html` or `svg`, plus regular DOM nodes.
+
+The only special case are _Array_ of either primitives, or returned values from `html` or `svg`.
+
+
+```js
+render(document.body, html`
+  <ul>
+    <li>This is ${'primitive'}</li>
+    <li>This is joined as primitives: ${[1, 2, 3]}</li>
+    ${lines.map((text, i) => html`
+      <li>Row ${i} with content: ${text}</li>
+    `)}
+  </ul>
+`);
+```
+
+## API: Rendering
+
+The second `what` argument of the `render(where, what)` signature can be either a function, which returning value will be used to populate the content, the result of `html` or `svg` tags, or a DOM node, so that it is possible to render within a render.
+
+
+```js
+const Button = selector => {
+  const button = document.querySelector(selector);
+  return count => render(button, html`Clicks: ${count}`);
+};
+
+const Clicker = selector => {
+  const button = Button(selector);
+  return function update(count) {
+    return render(document.body, html`
+      <div onclick=${() => update(++count)}>
+        Click again:
+        ${button(count)}
+      </div>
+    `);
+  };
+}
+
+const clicker = Clicker('#btn-clicker');
+clicker(0);
+```
