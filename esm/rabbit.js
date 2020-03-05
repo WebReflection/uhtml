@@ -1,3 +1,4 @@
+import instrument from 'uparser';
 import {cacheInfo} from './cache.js';
 import {handlers} from './handlers.js';
 import {isArray} from './array.js';
@@ -8,7 +9,6 @@ import {
 } from './node.js';
 
 const prefix = 'isµ';
-const attr = /([^\s\\>"'=]+)\s*=\s*(['"]?)$/;
 const templates = new WeakMap;
 
 const createEntry = (type, template) => {
@@ -16,40 +16,8 @@ const createEntry = (type, template) => {
   return {type, template, wire, updates};
 };
 
-const instrument = template => {
-  const text = [];
-  for (let i = 0, {length} = template; i < length; i++) {
-    const chunk = template[i];
-    if (attr.test(chunk) && isNode(template, i + 1))
-      text.push(chunk.replace(attr, (_, $1, $2) =>
-        `${prefix}${i}=${$2 ? $2 : '"'}${$1}${$2 ? '' : '"'}`));
-    else if ((i + 1) < length)
-      text.push(chunk, `<!--${prefix}${i}-->`);
-    else
-      text.push(chunk);
-  }
-  return text.join('').trim().replace(
-    /<([A-Za-z]+[A-Za-z0-9:._-]*)([^>]*?)(\/>)/g,
-    unvoid
-  );
-};
-
-// TODO: I am not sure this is really necessary
-//       I might rather set an extra DON'T rule
-//       Let's play it safe for the time being.
-const isNode = (template, i) => {
-  while (i--) {
-    const chunk = template[i];
-    if (/<[A-Za-z][^>]+$/.test(chunk))
-      return true;
-    if (/>[^<>]*$/.test(chunk))
-      return false;
-  }
-  return false;
-};
-
 const mapTemplate = (type, template) => {
-  const text = instrument(template);
+  const text = instrument(template, prefix);
   const content = createFragment(text, type);
   const tw = createWalker(content);
   const nodes = [];
@@ -157,11 +125,6 @@ const unrollArray = (info, values, counter) => {
     }
   }
 };
-
-const unvoid = (_, name, extra) =>
-  /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i.test(name) ?
-    _ : `<${name}${extra}></${name}>`;
-
 
 /**
  * Holds all necessary details needed to render the content further on. 

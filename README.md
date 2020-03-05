@@ -252,7 +252,7 @@ Following a list of other points to consider when choosing _µhtml_ instead of _
   * self closing nodes are also supported, go wild with `<custom-elements />` or even `<span />`
   * the wire parsing logic has been simplified even more, resulting in slightly [better bootstrap and update performance](https://github.com/krausest/js-framework-benchmark/pull/698)
   * it's half of _lighterhtml_ production size, mostly because ...
-  * there are no 3rd parts dependencies, except for [µdomdiff](https://github.com/WebReflection/udomdiff#readme), and for `@ungap/create-content`, needed only for IE11, but removable via [@ungap/degap](https://github.com/ungap/degap#readme), same way I've done it [here](./rollup/new.config.js), or [babel-plugin-remove-ungap](https://github.com/cfware/babel-plugin-remove-ungap#readme). The compressed final size difference is just around _~0.2K_ though.
+  * there are no 3rd parts dependencies, except for [µparser](https://github.com/WebReflection/uparser#readme), [µdomdiff](https://github.com/WebReflection/udomdiff#readme), and for `@ungap/create-content`, needed only for IE11, but removable via [@ungap/degap](https://github.com/ungap/degap#readme), same way I've done it [here](./rollup/new.config.js), or [babel-plugin-remove-ungap](https://github.com/cfware/babel-plugin-remove-ungap#readme). The compressed final size difference is just around _~0.2K_ though.
 
   </div>
 </details>

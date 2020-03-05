@@ -35,7 +35,8 @@
   "unpkg": "min.js",
   "dependencies": {
     "@ungap/create-content": "^0.1.4",
-    "udomdiff": "^1.0.8"
+    "udomdiff": "^1.0.8",
+    "uparser": "^0.1.0"
   },
   "repository": {
     "type": "git",

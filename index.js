@@ -20,6 +20,44 @@ var uhtml = (function (exports) {
 
   
 
+  var attr = /([^\s\\>"'=]+)\s*=\s*(['"]?)$/;
+  var empty = /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
+  var node = /<[a-z][^>]+$/i;
+  var notNode = />[^<>]*$/;
+  var selfClosing = /<([a-z]+[a-z0-9:._-]*)([^>]*?)(\/>)/ig;
+  var trimEnd = /\s+$/;
+
+  var isNode = function isNode(template, i) {
+    while (i--) {
+      var chunk = template[i];
+      if (node.test(chunk)) return true;
+      if (notNode.test(chunk)) return false;
+    }
+
+    return false;
+  };
+
+  var regular = function regular(original, name, extra) {
+    return empty.test(name) ? original : "<".concat(name).concat(extra.replace(trimEnd, ''), "></").concat(name, ">");
+  };
+
+  var instrument = (function (template, prefix) {
+    var text = [];
+
+    var _loop = function _loop(i, length) {
+      var chunk = template[i];
+      if (attr.test(chunk) && isNode(template, i + 1)) text.push(chunk.replace(attr, function (_, $1, $2) {
+        return "".concat(prefix).concat(i, "=").concat($2 ? $2 : '"').concat($1).concat($2 ? '' : '"');
+      }));else if (i + 1 < length) text.push(chunk, "<!--".concat(prefix).concat(i, "-->"));else text.push(chunk);
+    };
+
+    for (var i = 0, length = template.length; i < length; i++) {
+      _loop(i, length);
+    }
+
+    return text.join('').trim().replace(selfClosing, regular);
+  });
+
   /**
    * ISC License
    *
@@ -430,7 +468,6 @@ var uhtml = (function (exports) {
   }
 
   var prefix = 'isµ';
-  var attr = /([^\s\\>"'=]+)\s*=\s*(['"]?)$/;
   var templates = new WeakMap();
 
   var createEntry = function createEntry(type, template) {
@@ -446,38 +483,8 @@ var uhtml = (function (exports) {
     };
   };
 
-  var instrument = function instrument(template) {
-    var text = [];
-
-    var _loop = function _loop(i, length) {
-      var chunk = template[i];
-      if (attr.test(chunk) && isNode(template, i + 1)) text.push(chunk.replace(attr, function (_, $1, $2) {
-        return "".concat(prefix).concat(i, "=").concat($2 ? $2 : '"').concat($1).concat($2 ? '' : '"');
-      }));else if (i + 1 < length) text.push(chunk, "<!--".concat(prefix).concat(i, "-->"));else text.push(chunk);
-    };
-
-    for (var i = 0, length = template.length; i < length; i++) {
-      _loop(i, length);
-    }
-
-    return text.join('').trim().replace(/<([A-Za-z]+[A-Za-z0-9:._-]*)([^>]*?)(\/>)/g, unvoid);
-  }; // TODO: I am not sure this is really necessary
-  //       I might rather set an extra DON'T rule
-  //       Let's play it safe for the time being.
-
-
-  var isNode = function isNode(template, i) {
-    while (i--) {
-      var chunk = template[i];
-      if (/<[A-Za-z][^>]+$/.test(chunk)) return true;
-      if (/>[^<>]*$/.test(chunk)) return false;
-    }
-
-    return false;
-  };
-
   var mapTemplate = function mapTemplate(type, template) {
-    var text = instrument(template);
+    var text = instrument(template, prefix);
     var content = createFragment(text, type);
     var tw = createWalker(content);
     var nodes = [];
@@ -608,10 +615,6 @@ var uhtml = (function (exports) {
         }
       }
     }
-  };
-
-  var unvoid = function unvoid(_, name, extra) {
-    return /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i.test(name) ? _ : "<".concat(name).concat(extra, "></").concat(name, ">");
   };
   /**
    * Holds all necessary details needed to render the content further on. 
