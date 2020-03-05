@@ -1,4 +1,4 @@
-# µhtml
+# <em>µ</em>html
 
 ![snow flake](./uhtml-head.jpg)
 
