@@ -15,9 +15,6 @@ var uhtml = (function (exports) {
     return info;
   };
 
-  var create = Object.create,
-      defineProperties = Object.defineProperties;
-
   
 
   var attr = /([^\s\\>"'=]+)\s*=\s*(['"]?)$/;
@@ -94,32 +91,32 @@ var uhtml = (function (exports) {
     var map = null;
 
     while (aStart < aEnd || bStart < bEnd) {
-      // same node: fast path
-      if (a[aStart] === b[bStart]) {
-        aStart++;
-        bStart++;
-      } // same tail: fast path
-      else if (aEnd && bEnd && a[aEnd - 1] === b[bEnd - 1]) {
-          aEnd--;
-          bEnd--;
-        } // append head, tail, or nodes in between: fast path
-        else if (aEnd === aStart) {
-            // we could be in a situation where the rest of nodes that
-            // need to be added are not at the end, and in such case
-            // the node to `insertBefore`, if the index is more than 0
-            // must be retrieved, otherwise it's gonna be the first item.
-            var node = bEnd < bLength ? bStart ? get(b[bStart - 1], -0).nextSibling : get(b[bEnd - bStart], 0) : before;
+      // append head, tail, or nodes in between: fast path
+      if (aEnd === aStart) {
+        // we could be in a situation where the rest of nodes that
+        // need to be added are not at the end, and in such case
+        // the node to `insertBefore`, if the index is more than 0
+        // must be retrieved, otherwise it's gonna be the first item.
+        var node = bEnd < bLength ? bStart ? get(b[bStart - 1], -0).nextSibling : get(b[bEnd - bStart], 0) : before;
 
-            while (bStart < bEnd) {
-              parentNode.insertBefore(get(b[bStart++], 1), node);
-            }
-          } // remove head or tail: fast path
-          else if (bEnd === bStart) {
-              while (aStart < aEnd) {
-                // remove the node only if it's unknown or not live
-                if (!map || !map.has(a[aStart])) parentNode.removeChild(get(a[aStart], -1));
-                aStart++;
-              }
+        while (bStart < bEnd) {
+          parentNode.insertBefore(get(b[bStart++], 1), node);
+        }
+      } // remove head or tail: fast path
+      else if (bEnd === bStart) {
+          while (aStart < aEnd) {
+            // remove the node only if it's unknown or not live
+            if (!map || !map.has(a[aStart])) parentNode.removeChild(get(a[aStart], -1));
+            aStart++;
+          }
+        } // same node: fast path
+        else if (a[aStart] === b[bStart]) {
+            aStart++;
+            bStart++;
+          } // same tail: fast path
+          else if (a[aEnd - 1] === b[bEnd - 1]) {
+              aEnd--;
+              bEnd--;
             } // single last swap: fast path
             else if (aEnd - aStart === 1 && bEnd - bStart === 1) {
                 // we could be in a situation where the node was either unknown,
@@ -291,40 +288,36 @@ var uhtml = (function (exports) {
 
     return path;
   };
-  var getWire = function getWire(fragment) {
-    var childNodes = fragment.childNodes;
+  var getWire = function getWire(content) {
+    var childNodes = content.childNodes;
     var length = childNodes.length;
     if (length === 1) return childNodes[0];
-    var nodes = slice.call(childNodes, 0);
-    return defineProperties(fragment, {
-      firstChild: {
-        value: nodes[0]
+    var firstChild = childNodes[0];
+    var lastChild = childNodes[length - 1];
+    return {
+      ELEMENT_NODE: 1,
+      nodeType: 11,
+      childNodes: slice.call(childNodes, 0),
+      firstChild: firstChild,
+      lastChild: lastChild,
+      remove: function remove() {
+        var range = document.createRange();
+        range.setStartAfter(firstChild);
+        range.setEndAfter(lastChild);
+        range.deleteContents();
+        return firstChild;
       },
-      lastChild: {
-        value: nodes[length - 1]
-      },
-      remove: {
-        value: function value() {
+      valueOf: function valueOf() {
+        if (childNodes.length !== length) {
           var range = document.createRange();
-          range.setStartBefore(nodes[1]);
-          range.setEndAfter(nodes[length - 1]);
-          range.deleteContents();
-          return nodes[0];
+          range.setStartBefore(firstChild);
+          range.setEndAfter(lastChild);
+          content.appendChild(range.extractContents());
         }
-      },
-      valueOf: {
-        value: function value() {
-          if (childNodes.length !== length) {
-            var range = document.createRange();
-            range.setStartBefore(nodes[0]);
-            range.setEndAfter(nodes[length - 1]);
-            fragment.appendChild(range.extractContents());
-          }
 
-          return fragment;
-        }
+        return content;
       }
-    });
+    };
   };
   var _document = document,
       createTreeWalker = _document.createTreeWalker,
@@ -474,14 +467,15 @@ var uhtml = (function (exports) {
 
   var createEntry = function createEntry(type, template) {
     var _mapUpdates = mapUpdates(type, template),
-        wire = _mapUpdates.wire,
+        content = _mapUpdates.content,
         updates = _mapUpdates.updates;
 
     return {
       type: type,
       template: template,
-      wire: wire,
-      updates: updates
+      content: content,
+      updates: updates,
+      wire: null
     };
   };
 
@@ -542,7 +536,7 @@ var uhtml = (function (exports) {
     var fragment = importNode.call(document, content, true);
     var updates = nodes.map(handlers, fragment);
     return {
-      wire: getWire(fragment),
+      content: fragment,
       updates: updates
     };
   };
@@ -586,14 +580,15 @@ var uhtml = (function (exports) {
     var entry = stack[i];
     if (!unknown && (entry.template !== template || entry.type !== type)) stack[i] = entry = createEntry(type, template);
     var _entry = entry,
-        wire = _entry.wire,
-        updates = _entry.updates;
+        content = _entry.content,
+        updates = _entry.updates,
+        wire = _entry.wire;
 
     for (var _i = 0, length = updates.length; _i < length; _i++) {
       updates[_i](values[_i]);
     }
 
-    return wire;
+    return wire || (entry.wire = getWire(content));
   };
 
   var unrollArray = function unrollArray(info, values, counter) {
@@ -632,6 +627,9 @@ var uhtml = (function (exports) {
     this.template = template;
     this.values = values;
   }
+
+  var create = Object.create,
+      defineProperties = Object.defineProperties;
 
   var util = function util(type) {
     var cache = new WeakMap();

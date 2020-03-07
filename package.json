@@ -19,12 +19,12 @@
   "author": "Andrea Giammarchi",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.8.6",
-    "@babel/preset-env": "^7.8.6",
+    "@babel/core": "^7.8.7",
+    "@babel/preset-env": "^7.8.7",
     "@ungap/degap": "^0.1.7",
     "ascjs": "^3.1.2",
     "drop-babel-typeof": "^1.0.3",
-    "rollup": "^1.32.0",
+    "rollup": "^2.0.1",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-includepaths": "^0.2.3",
     "rollup-plugin-node-resolve": "^5.2.0",
@@ -35,7 +35,7 @@
   "unpkg": "min.js",
   "dependencies": {
     "@ungap/create-content": "^0.1.4",
-    "udomdiff": "^1.0.8",
+    "udomdiff": "^1.0.9",
     "uparser": "^0.1.0"
   },
   "repository": {

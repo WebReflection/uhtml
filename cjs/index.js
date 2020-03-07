@@ -1,7 +1,8 @@
 'use strict';
 const {cache, cacheInfo, setCache} = require('./cache.js');
-const {create, defineProperties} = require('./object.js');
 const {Hole, retrieve} = require('./rabbit.js');
+
+const {create, defineProperties} = Object;
 
 const util = type => {
   const cache = new WeakMap;

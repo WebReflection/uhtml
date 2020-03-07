@@ -11,8 +11,8 @@ const prefix = 'isµ';
 const templates = new WeakMap;
 
 const createEntry = (type, template) => {
-  const {wire, updates} = mapUpdates(type, template);
-  return {type, template, wire, updates};
+  const {content, updates} = mapUpdates(type, template);
+  return {type, template, content, updates, wire: null};
 };
 
 const mapTemplate = (type, template) => {
@@ -60,7 +60,7 @@ const mapUpdates = (type, template) => {
   const {content, nodes} = templates.get(template) || setTemplate(type, template);
   const fragment = importNode.call(document, content, true);
   const updates = nodes.map(handlers, fragment);
-  return {wire: getWire(fragment), updates};
+  return {content: fragment, updates};
 };
 
 const retrieve = (info, hole) => {
@@ -97,10 +97,10 @@ const unroll = (info, hole, counter) => {
   let entry = stack[i];
   if (!unknown && (entry.template !== template || entry.type !== type))
     stack[i] = (entry = createEntry(type, template));
-  const {wire, updates} = entry;
+  const {content, updates, wire} = entry;
   for (let i = 0, {length} = updates; i < length; i++)
     updates[i](values[i]);
-  return wire;
+  return wire || (entry.wire = getWire(content));
 };
 
 const unrollArray = (info, values, counter) => {

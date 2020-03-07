@@ -1,6 +1,5 @@
 import createContent from '@ungap/create-content';
 
-import {defineProperties} from './object.js';
 import {indexOf, slice} from './array.js';
 
 export const getNode = (node, i) => node.childNodes[i];
@@ -16,36 +15,36 @@ export const getPath = node => {
   return path;
 };
 
-export const getWire = fragment => {
-  const {childNodes} = fragment;
+export const getWire = content => {
+  const {childNodes} = content;
   const {length} = childNodes;
   if (length === 1)
     return childNodes[0];
-  const nodes = slice.call(childNodes, 0);
-  return defineProperties(fragment, {
-    firstChild: {value: nodes[0]},
-    lastChild: {value: nodes[length - 1]},
-    remove: {
-      value() {
-        const range = document.createRange();
-        range.setStartBefore(nodes[1]);
-        range.setEndAfter(nodes[length - 1]);
-        range.deleteContents();
-        return nodes[0];
-      }
+  const firstChild = childNodes[0];
+  const lastChild = childNodes[length - 1];
+  return {
+    ELEMENT_NODE: 1,
+    nodeType: 11,
+    childNodes: slice.call(childNodes, 0),
+    firstChild,
+    lastChild,
+    remove() {
+      const range = document.createRange();
+      range.setStartAfter(firstChild);
+      range.setEndAfter(lastChild);
+      range.deleteContents();
+      return firstChild;
     },
-    valueOf: {
-      value() {
-        if (childNodes.length !== length) {
-          const range = document.createRange();
-          range.setStartBefore(nodes[0]);
-          range.setEndAfter(nodes[length - 1]);
-          fragment.appendChild(range.extractContents());
-        }
-        return fragment;
+    valueOf() {
+      if (childNodes.length !== length) {
+        const range = document.createRange();
+        range.setStartBefore(firstChild);
+        range.setEndAfter(lastChild);
+        content.appendChild(range.extractContents());
       }
+      return content;
     }
-  });
+  };
 };
 
 const {createTreeWalker, importNode} = document;
