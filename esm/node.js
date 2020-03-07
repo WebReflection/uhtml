@@ -23,12 +23,12 @@ export const getWire = content => {
   const {length} = childNodes;
   if (length === 1)
     return childNodes[0];
-  const firstChild = childNodes[0];
-  const lastChild = childNodes[length - 1];
+  const nodes = slice.call(childNodes, 0);
+  const firstChild = nodes[0];
+  const lastChild = nodes[length - 1];
   return {
     ELEMENT_NODE: 1,
     nodeType: wireType,
-    childNodes: slice.call(childNodes, 0),
     firstChild,
     lastChild,
     remove() {
@@ -39,11 +39,11 @@ export const getWire = content => {
       return firstChild;
     },
     valueOf() {
+      /* istanbul ignore next */
       if (childNodes.length !== length) {
-        const range = document.createRange();
-        range.setStartBefore(firstChild);
-        range.setEndAfter(lastChild);
-        content.appendChild(range.extractContents());
+        let i = 0;
+        while (i < length)
+          content.appendChild(nodes[i++]);
       }
       return content;
     }
@@ -56,6 +56,7 @@ export {createTreeWalker, importNode};
 const IE = importNode.length != 1;
 
 export const createFragment = IE ?
+  /* istanbul ignore next */
   (text, type) => importNode.call(
     document,
     createContent(text, type),
@@ -66,8 +67,9 @@ export const createFragment = IE ?
 // to support IE10 and IE9 I could pass a callback instead
 // with an `acceptNode` mode that's the callback itself
 // function acceptNode() { return 1; } acceptNode.acceptNode = acceptNode;
-// however, I really don't care about IE10 and IE9, as these would require
-// also a WeakMap polyfill, and have no reason to exist.
+// however, I really don't care anymore about IE10 and IE9, as these would
+// require also a WeakMap polyfill, and have no reason to exist whatsoever.
 export const createWalker = IE ?
+  /* istanbul ignore next */
   fragment => createTreeWalker.call(document, fragment, 1 | 128, null, false) :
   fragment => createTreeWalker.call(document, fragment, 1 | 128);
