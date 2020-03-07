@@ -2,9 +2,9 @@
 const udomdiff = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('udomdiff'));
 
 const {isArray, slice} = require('./array.js');
-const {getNode} = require('./node.js');
+const {getNode, wireType} = require('./node.js');
 
-const get = (item, i) => item.nodeType === 11 ?
+const get = (item, i) => item.nodeType === wireType ?
   ((1 / i) < 0 ?
     (i ? item.remove() : item.lastChild) :
     (i ? item.valueOf() : item.firstChild)) :

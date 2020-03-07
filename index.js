@@ -272,6 +272,7 @@ var uhtml = (function (exports) {
     }
   }(document);
 
+  var wireType = 111;
   var getNode = function getNode(node, i) {
     return node.childNodes[i];
   };
@@ -296,7 +297,7 @@ var uhtml = (function (exports) {
     var lastChild = childNodes[length - 1];
     return {
       ELEMENT_NODE: 1,
-      nodeType: 11,
+      nodeType: wireType,
       childNodes: slice.call(childNodes, 0),
       firstChild: firstChild,
       lastChild: lastChild,
@@ -338,7 +339,7 @@ var uhtml = (function (exports) {
   };
 
   var get = function get(item, i) {
-    return item.nodeType === 11 ? 1 / i < 0 ? i ? item.remove() : item.lastChild : i ? item.valueOf() : item.firstChild : item;
+    return item.nodeType === wireType ? 1 / i < 0 ? i ? item.remove() : item.lastChild : i ? item.valueOf() : item.firstChild : item;
   };
 
   var handleAnything = function handleAnything(node, childNodes) {

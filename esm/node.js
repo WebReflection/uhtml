@@ -2,6 +2,9 @@ import createContent from '@ungap/create-content';
 
 import {indexOf, slice} from './array.js';
 
+// same as hyperhtml-wire
+export const wireType = 111;
+
 export const getNode = (node, i) => node.childNodes[i];
 
 export const getPath = node => {
@@ -24,7 +27,7 @@ export const getWire = content => {
   const lastChild = childNodes[length - 1];
   return {
     ELEMENT_NODE: 1,
-    nodeType: 11,
+    nodeType: wireType,
     childNodes: slice.call(childNodes, 0),
     firstChild,
     lastChild,

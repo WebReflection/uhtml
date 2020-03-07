@@ -3,6 +3,10 @@ const createContent = (m => m.__esModule ? /* istanbul ignore next */ m.default 
 
 const {indexOf, slice} = require('./array.js');
 
+// same as hyperhtml-wire
+const wireType = 111;
+exports.wireType = wireType;
+
 const getNode = (node, i) => node.childNodes[i];
 exports.getNode = getNode;
 
@@ -27,7 +31,7 @@ const getWire = content => {
   const lastChild = childNodes[length - 1];
   return {
     ELEMENT_NODE: 1,
-    nodeType: 11,
+    nodeType: wireType,
     childNodes: slice.call(childNodes, 0),
     firstChild,
     lastChild,
