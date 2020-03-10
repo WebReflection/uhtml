@@ -6,12 +6,14 @@ const {getNode, wireType} = require('./node.js');
 
 const get = (item, i) => item.nodeType === wireType ?
   ((1 / i) < 0 ?
+    /* istanbul ignore next */
     (i ? item.remove() : item.lastChild) :
+    /* istanbul ignore next */
     (i ? item.valueOf() : item.firstChild)) :
   item
 ;
 
-const handleAnything = (node, childNodes) => {
+const handleAnything = (comment, nodes) => {
   let oldValue;
   const text = document.createTextNode('');
   const anyContent = newValue => {
@@ -22,26 +24,26 @@ const handleAnything = (node, childNodes) => {
         if (oldValue !== newValue) {
           oldValue = newValue;
           text.textContent = newValue;
-          childNodes = udomdiff(
-            node.parentNode,
-            childNodes,
+          nodes = udomdiff(
+            comment.parentNode,
+            nodes,
             [text],
             get,
-            node
+            comment
           );
         }
         break;
       case 'object':
       case 'undefined':
         if (newValue == null) {
-          childNodes = udomdiff(node.parentNode, childNodes, [], get, node);
+          nodes = udomdiff(comment.parentNode, nodes, [], get, comment);
           break;
         }
       default:
         oldValue = newValue;
         if (isArray(newValue)) {
           if (newValue.length === 0)
-            childNodes = udomdiff(node.parentNode, childNodes, [], get, node);
+            nodes = udomdiff(comment.parentNode, nodes, [], get, comment);
           else {
             switch (typeof newValue[0]) {
               case 'string':
@@ -50,26 +52,27 @@ const handleAnything = (node, childNodes) => {
                 anyContent(String(newValue));
                 break;
               default:
-                childNodes = udomdiff(
-                  node.parentNode,
-                  childNodes,
+                nodes = udomdiff(
+                  comment.parentNode,
+                  nodes,
                   newValue,
                   get,
-                  node
+                  comment
                 );
                 break;
             }
           }
         }
+        /* istanbul ignore else */
         else if ('ELEMENT_NODE' in newValue) {
-          childNodes = udomdiff(
-            node.parentNode,
-            childNodes,
+          nodes = udomdiff(
+            comment.parentNode,
+            nodes,
             newValue.nodeType === 11 ?
               slice.call(newValue.childNodes) :
               [newValue],
             get,
-            node
+            comment
           );
         }
         break;
@@ -94,8 +97,10 @@ const handleAttribute = (node, name) => {
   // events
   if (name.slice(0, 2) === 'on') {
     let type = name.slice(2);
-    if (name.toLowerCase() in node)
-      type = type.toLowerCase();
+    const lower = name.toLowerCase();
+    /* istanbul ignore next */
+    if (lower in node)
+      type = lower;
     return newValue => {
       const info = isArray(newValue) ? newValue : [newValue, false];
       if (oldValue !== info[0]) {
@@ -109,7 +114,7 @@ const handleAttribute = (node, name) => {
 
   // all other cases
   let noOwner = true;
-  const attribute = node.ownerDocument.createAttribute(name);
+  const attribute = document.createAttribute(name);
   return newValue => {
     if (oldValue !== newValue) {
       oldValue = newValue;
@@ -121,6 +126,7 @@ const handleAttribute = (node, name) => {
       }
       else {
         attribute.value = newValue;
+        /* istanbul ignore else */
         if (noOwner) {
           node.setAttributeNode(attribute);
           noOwner = false;
@@ -130,6 +136,7 @@ const handleAttribute = (node, name) => {
   };
 };
 
+/* istanbul ignore next */
 const handleText = node => {
   let oldValue;
   return newValue => {
@@ -147,6 +154,7 @@ function handlers(options) {
     handleAnything(node, []) :
     (type === 'attr' ?
       handleAttribute(node, options.name) :
+      /* istanbul ignore next */
       handleText(node));
 }
 exports.handlers = handlers;
