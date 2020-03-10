@@ -2,7 +2,16 @@ import {define} from 'https://unpkg.com/wicked-elements?module';
 const {render, html} = uhtml;
 
 define('#app .mondrian', {
-  connected() { this.generateBlocks(); },
+  connected() { this.render(); },
+  render(blocks = this.generateBlocks()) {
+    render(this.element, html`${blocks.map(
+      ({colSpan, rowSpan, colorIndex}) => html`
+      <div class="mondrian__block"
+           data-col-span=${colSpan}
+           data-row-span=${rowSpan}
+           data-color-index=${colorIndex} />`
+    )}`);
+  },
   generateBlocks() {
     const blocks = [];
     for (let i = 0; i < 10; i++) {
@@ -12,17 +21,11 @@ define('#app .mondrian', {
         colorIndex: Math.floor(Math.random() * 6 + 1),
       });
     }
-    render(this.element, html`${blocks.map(
-      ({colSpan, rowSpan, colorIndex}) => html`
-      <div class="mondrian__block"
-           data-col-span=${colSpan}
-           data-row-span=${rowSpan}
-           data-color-index=${colorIndex} />`
-    )}`);
+    return blocks;
   },
   onGenerate() {
-    render(this.element, html``);
-    setTimeout(() => this.generateBlocks())
+    this.render([]);
+    setTimeout(() => this.render());
   }
 });
 

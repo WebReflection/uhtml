@@ -1,5 +1,7 @@
 # <em>µ</em>html
 
+[![Build Status](https://travis-ci.com/WebReflection/uhtml.svg?branch=master)](https://travis-ci.com/WebReflection/uhtml) [![Coverage Status](https://coveralls.io/repos/github/WebReflection/uhtml/badge.svg?branch=master)](https://coveralls.io/github/WebReflection/uhtml?branch=master)
+
 ![snow flake](./uhtml-head.jpg)
 
 <sup>**Social Media Photo by [Andrii Ganzevych](https://unsplash.com/@odya_kun) on [Unsplash](https://unsplash.com/)**</sup>

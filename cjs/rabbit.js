@@ -25,9 +25,11 @@ const mapTemplate = (type, template) => {
   let search = `${prefix}${i}`;
   while (i < length) {
     const node = tw.nextNode();
+    /* istanbul ignore next */
     if (!node)
       throw `bad template: ${text}`;
     if (node.nodeType === 8) {
+      /* istanbul ignore else */
       if (node.textContent === search) {
         nodes.push({type: 'node', path: getPath(node)});
         search = `${prefix}${++i}`;
@@ -44,6 +46,7 @@ const mapTemplate = (type, template) => {
         node.removeAttribute(search);
         search = `${prefix}${++i}`;
       }
+      /* istanbul ignore next */
       if (
         /^(?:style|textarea)$/i.test(node.tagName) &&
         node.textContent.trim() === `<!--${search}-->`
@@ -73,6 +76,13 @@ const retrieve = (info, hole) => {
   const {a, i, aLength, iLength} = counter;
   if (a < aLength)
     sub.splice(a);
+  // TODO: this is actually pointless, as I believe
+  //       such case never exists, being the stack related
+  //       to the template, hence static.
+  //       `i` and `iLength` are only useful for the first pass,
+  //       but from that time on, will never change.
+  //       Verify this and get rid of this extra check.
+  /* istanbul ignore next */
   if (i < iLength)
     stack.splice(i);
   return wire;
@@ -107,6 +117,7 @@ const unrollArray = (info, values, counter) => {
   for (let i = 0, {length} = values; i < length; i++) {
     const hole = values[i];
     if (typeof hole === 'object' && hole) {
+      /* istanbul ignore else */
       if (hole instanceof Hole)
         values[i] = unroll(info, hole, counter);
       else if (isArray(hole)) {

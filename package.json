@@ -4,12 +4,14 @@
   "description": "A micro HTML/SVG render",
   "main": "cjs/index.js",
   "scripts": {
-    "build": "npm run cjs && npm run rollup:new && npm run rollup:babel && drop-babel-typeof ./index.js && npm run min && npm run size",
+    "build": "npm run cjs && npm run rollup:new && npm run rollup:babel && drop-babel-typeof ./index.js && npm run min && npm run test && npm run size",
     "cjs": "rm cjs/* && ascjs esm cjs",
     "rollup:new": "rollup --config rollup/new.config.js",
     "rollup:babel": "rollup --config rollup/babel.config.js",
     "min": "uglifyjs index.js --support-ie8 --comments=/^!/ -c -m -o min.js",
-    "size": "cat min.js | brotli | wc -c && cat new.js | brotli | wc -c"
+    "size": "cat min.js | brotli | wc -c && cat new.js | brotli | wc -c",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls",
+    "test": "nyc node test/coverage.js"
   },
   "keywords": [
     "micro",
@@ -23,12 +25,15 @@
     "@babel/preset-env": "^7.8.7",
     "@ungap/degap": "^0.1.7",
     "ascjs": "^3.1.2",
+    "basichtml": "^2.1.2",
+    "coveralls": "^3.0.9",
     "drop-babel-typeof": "^1.0.3",
-    "rollup": "^2.0.1",
-    "rollup-plugin-babel": "^4.3.3",
+    "nyc": "^15.0.0",
+    "rollup": "^2.0.3",
+    "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-includepaths": "^0.2.3",
     "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-terser": "^5.2.0",
+    "rollup-plugin-terser": "^5.3.0",
     "uglify-js": "^3.8.0"
   },
   "module": "esm/index.js",

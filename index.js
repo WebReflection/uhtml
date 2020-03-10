@@ -293,12 +293,12 @@ var uhtml = (function (exports) {
     var childNodes = content.childNodes;
     var length = childNodes.length;
     if (length === 1) return childNodes[0];
-    var firstChild = childNodes[0];
-    var lastChild = childNodes[length - 1];
+    var nodes = slice.call(childNodes, 0);
+    var firstChild = nodes[0];
+    var lastChild = nodes[length - 1];
     return {
       ELEMENT_NODE: 1,
       nodeType: wireType,
-      childNodes: slice.call(childNodes, 0),
       firstChild: firstChild,
       lastChild: lastChild,
       remove: function remove() {
@@ -309,11 +309,13 @@ var uhtml = (function (exports) {
         return firstChild;
       },
       valueOf: function valueOf() {
+        /* istanbul ignore next */
         if (childNodes.length !== length) {
-          var range = document.createRange();
-          range.setStartBefore(firstChild);
-          range.setEndAfter(lastChild);
-          content.appendChild(range.extractContents());
+          var i = 0;
+
+          while (i < length) {
+            content.appendChild(nodes[i++]);
+          }
         }
 
         return content;
@@ -324,25 +326,33 @@ var uhtml = (function (exports) {
       createTreeWalker = _document.createTreeWalker,
       importNode = _document.importNode;
   var IE = importNode.length != 1;
-  var createFragment = IE ? function (text, type) {
+  var createFragment = IE ?
+  /* istanbul ignore next */
+  function (text, type) {
     return importNode.call(document, createContent(text, type), true);
   } : createContent; // to support IE10 and IE9 I could pass a callback instead
   // with an `acceptNode` mode that's the callback itself
   // function acceptNode() { return 1; } acceptNode.acceptNode = acceptNode;
-  // however, I really don't care about IE10 and IE9, as these would require
-  // also a WeakMap polyfill, and have no reason to exist.
+  // however, I really don't care anymore about IE10 and IE9, as these would
+  // require also a WeakMap polyfill, and have no reason to exist whatsoever.
 
-  var createWalker = IE ? function (fragment) {
+  var createWalker = IE ?
+  /* istanbul ignore next */
+  function (fragment) {
     return createTreeWalker.call(document, fragment, 1 | 128, null, false);
   } : function (fragment) {
     return createTreeWalker.call(document, fragment, 1 | 128);
   };
 
   var get = function get(item, i) {
-    return item.nodeType === wireType ? 1 / i < 0 ? i ? item.remove() : item.lastChild : i ? item.valueOf() : item.firstChild : item;
+    return item.nodeType === wireType ? 1 / i < 0 ?
+    /* istanbul ignore next */
+    i ? item.remove() : item.lastChild :
+    /* istanbul ignore next */
+    i ? item.valueOf() : item.firstChild : item;
   };
 
-  var handleAnything = function handleAnything(node, childNodes) {
+  var handleAnything = function handleAnything(comment, nodes) {
     var oldValue;
     var text = document.createTextNode('');
 
@@ -354,7 +364,7 @@ var uhtml = (function (exports) {
           if (oldValue !== newValue) {
             oldValue = newValue;
             text.textContent = newValue;
-            childNodes = udomdiff(node.parentNode, childNodes, [text], get, node);
+            nodes = udomdiff(comment.parentNode, nodes, [text], get, comment);
           }
 
           break;
@@ -362,7 +372,7 @@ var uhtml = (function (exports) {
         case 'object':
         case 'undefined':
           if (newValue == null) {
-            childNodes = udomdiff(node.parentNode, childNodes, [], get, node);
+            nodes = udomdiff(comment.parentNode, nodes, [], get, comment);
             break;
           }
 
@@ -370,7 +380,7 @@ var uhtml = (function (exports) {
           oldValue = newValue;
 
           if (isArray(newValue)) {
-            if (newValue.length === 0) childNodes = udomdiff(node.parentNode, childNodes, [], get, node);else {
+            if (newValue.length === 0) nodes = udomdiff(comment.parentNode, nodes, [], get, comment);else {
               switch (typeof(newValue[0])) {
                 case 'string':
                 case 'number':
@@ -379,13 +389,15 @@ var uhtml = (function (exports) {
                   break;
 
                 default:
-                  childNodes = udomdiff(node.parentNode, childNodes, newValue, get, node);
+                  nodes = udomdiff(comment.parentNode, nodes, newValue, get, comment);
                   break;
               }
             }
-          } else if ('ELEMENT_NODE' in newValue) {
-            childNodes = udomdiff(node.parentNode, childNodes, newValue.nodeType === 11 ? slice.call(newValue.childNodes) : [newValue], get, node);
           }
+          /* istanbul ignore else */
+          else if ('ELEMENT_NODE' in newValue) {
+              nodes = udomdiff(comment.parentNode, nodes, newValue.nodeType === 11 ? slice.call(newValue.childNodes) : [newValue], get, comment);
+            }
 
           break;
       }
@@ -411,6 +423,8 @@ var uhtml = (function (exports) {
 
     if (name.slice(0, 2) === 'on') {
       var type = name.slice(2);
+      /* istanbul ignore next */
+
       if (name.toLowerCase() in node) type = type.toLowerCase();
       return function (newValue) {
         var info = isArray(newValue) ? newValue : [newValue, false];
@@ -424,7 +438,7 @@ var uhtml = (function (exports) {
 
 
     var noOwner = true;
-    var attribute = node.ownerDocument.createAttribute(name);
+    var attribute = document.createAttribute(name);
     return function (newValue) {
       if (oldValue !== newValue) {
         oldValue = newValue;
@@ -436,6 +450,7 @@ var uhtml = (function (exports) {
           }
         } else {
           attribute.value = newValue;
+          /* istanbul ignore else */
 
           if (noOwner) {
             node.setAttributeNode(attribute);
@@ -445,6 +460,8 @@ var uhtml = (function (exports) {
       }
     };
   };
+  /* istanbul ignore next */
+
 
   var handleText = function handleText(node) {
     var oldValue;
@@ -460,7 +477,9 @@ var uhtml = (function (exports) {
     var type = options.type,
         path = options.path;
     var node = path.reduce(getNode, this);
-    return type === 'node' ? handleAnything(node, []) : type === 'attr' ? handleAttribute(node, options.name) : handleText(node);
+    return type === 'node' ? handleAnything(node, []) : type === 'attr' ? handleAttribute(node, options.name) :
+    /* istanbul ignore next */
+    handleText(node);
   }
 
   var prefix = 'isµ';
@@ -491,9 +510,12 @@ var uhtml = (function (exports) {
 
     while (i < length) {
       var node = tw.nextNode();
+      /* istanbul ignore next */
+
       if (!node) throw "bad template: ".concat(text);
 
       if (node.nodeType === 8) {
+        /* istanbul ignore else */
         if (node.textContent === search) {
           nodes.push({
             type: 'node',
@@ -512,6 +534,8 @@ var uhtml = (function (exports) {
           node.removeAttribute(search);
           search = "".concat(prefix).concat(++i);
         }
+        /* istanbul ignore next */
+
 
         if (/^(?:style|textarea)$/i.test(node.tagName) && node.textContent.trim() === "<!--".concat(search, "-->")) {
           nodes.push({
@@ -556,7 +580,15 @@ var uhtml = (function (exports) {
         i = counter.i,
         aLength = counter.aLength,
         iLength = counter.iLength;
-    if (a < aLength) sub.splice(a);
+    if (a < aLength) sub.splice(a); // TODO: this is actually pointless, as I believe
+    //       such case never exists, being the stack related
+    //       to the template, hence static.
+    //       `i` and `iLength` are only useful for the first pass,
+    //       but from that time on, will never change.
+    //       Verify this and get rid of this extra check.
+
+    /* istanbul ignore next */
+
     if (i < iLength) stack.splice(i);
     return wire;
   };
@@ -597,6 +629,7 @@ var uhtml = (function (exports) {
       var hole = values[i];
 
       if (typeof(hole) === 'object' && hole) {
+        /* istanbul ignore else */
         if (hole instanceof Hole) values[i] = unroll(info, hole, counter);else if (isArray(hole)) {
           for (var _i2 = 0, _length = hole.length; _i2 < _length; _i2++) {
             var inner = hole[_i2];
