@@ -39,6 +39,13 @@ export const getWire = content => {
       return firstChild;
     },
     valueOf() {
+      // In basicHTML fragments can be appended
+      // without their childNodes being automatically removed.
+      // This makes the following check fail each time,
+      // but it's also not really a use case for basicHTML,
+      // as fragments are not moved around or anything.
+      // However, in all browsers, once the fragment is live
+      // and not just created, this is always true.
       /* istanbul ignore next */
       if (childNodes.length !== length) {
         let i = 0;
@@ -53,6 +60,9 @@ export const getWire = content => {
 const {createTreeWalker, importNode} = document;
 export {createTreeWalker, importNode};
 
+// basicHTML would never have a false case,
+// unless forced, but it has no value for this coverage.
+// IE11 and old Edge are passing live tests so we're good.
 const IE = importNode.length != 1;
 
 export const createFragment = IE ?

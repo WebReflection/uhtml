@@ -309,6 +309,14 @@ var uhtml = (function (exports) {
         return firstChild;
       },
       valueOf: function valueOf() {
+        // In basicHTML fragments can be appended
+        // without their childNodes being automatically removed.
+        // This makes the following check fail each time,
+        // but it's also not really a use case for basicHTML,
+        // as fragments are not moved around or anything.
+        // However, in all browsers, once the fragment is live
+        // and not just created, this is always true.
+
         /* istanbul ignore next */
         if (childNodes.length !== length) {
           var i = 0;
@@ -325,6 +333,9 @@ var uhtml = (function (exports) {
   var _document = document,
       createTreeWalker = _document.createTreeWalker,
       importNode = _document.importNode;
+  // unless forced, but it has no value for this coverage.
+  // IE11 and old Edge are passing live tests so we're good.
+
   var IE = importNode.length != 1;
   var createFragment = IE ?
   /* istanbul ignore next */
@@ -343,6 +354,8 @@ var uhtml = (function (exports) {
   } : function (fragment) {
     return createTreeWalker.call(document, fragment, 1 | 128);
   };
+
+  // basicHTML doesn't pass here.
 
   var get = function get(item, i) {
     return item.nodeType === wireType ? 1 / i < 0 ?
@@ -393,7 +406,9 @@ var uhtml = (function (exports) {
                   break;
               }
             }
-          }
+          } // There is no `else` here, meaning if the content
+          // is not expected one, nothing happens, as easy as that.
+
           /* istanbul ignore else */
           else if ('ELEMENT_NODE' in newValue) {
               nodes = udomdiff(comment.parentNode, nodes, newValue.nodeType === 11 ? slice.call(newValue.childNodes) : [newValue], get, comment);
@@ -423,9 +438,7 @@ var uhtml = (function (exports) {
 
     if (name.slice(0, 2) === 'on') {
       var type = name.slice(2);
-      /* istanbul ignore next */
-
-      if (name.toLowerCase() in node) type = type.toLowerCase();
+      if (!(name in node) && name.toLowerCase() in node) type = type.toLowerCase();
       return function (newValue) {
         var info = isArray(newValue) ? newValue : [newValue, false];
 
@@ -449,7 +462,9 @@ var uhtml = (function (exports) {
             noOwner = true;
           }
         } else {
-          attribute.value = newValue;
+          attribute.value = newValue; // There is no else case here.
+          // If the attribute has no owner, it's set back.
+
           /* istanbul ignore else */
 
           if (noOwner) {
@@ -459,7 +474,14 @@ var uhtml = (function (exports) {
         }
       }
     };
-  };
+  }; // basicHTML doesn't care about special <style> or
+  // <textarea> cases, as all nodes can have comments.
+  // This means the text-only case never exists, but it's
+  // validated for real with browsers.
+  // TODO: this might be a basicHTML bug though, as <style>
+  // and <textarea> landing on a page might contain undesired text
+  // 'caused by comments. Verify that's not the case.
+
   /* istanbul ignore next */
 
 
@@ -477,7 +499,9 @@ var uhtml = (function (exports) {
     var type = options.type,
         path = options.path;
     var node = path.reduce(getNode, this);
-    return type === 'node' ? handleAnything(node, []) : type === 'attr' ? handleAttribute(node, options.name) :
+    return type === 'node' ? handleAnything(node, []) : type === 'attr' ? handleAttribute(node, options.name) : // For the same reason handleText is ignored,
+    // basicHTML would never end up here, but browsers will.
+
     /* istanbul ignore next */
     handleText(node);
   }
@@ -510,8 +534,6 @@ var uhtml = (function (exports) {
 
     while (i < length) {
       var node = tw.nextNode();
-      /* istanbul ignore next */
-
       if (!node) throw "bad template: ".concat(text);
 
       if (node.nodeType === 8) {
@@ -533,7 +555,10 @@ var uhtml = (function (exports) {
           });
           node.removeAttribute(search);
           search = "".concat(prefix).concat(++i);
-        }
+        } // basicHTML would never end up here, as both
+        // <style> and <textarea> accepts regular comments.
+        // It is tested live with browsers though, so it's safe to skip.
+
         /* istanbul ignore next */
 
 
@@ -621,6 +646,9 @@ var uhtml = (function (exports) {
       var hole = values[i];
 
       if (typeof(hole) === 'object' && hole) {
+        // The only values to process are Hole and arrays.
+        // Accordingly, there is no `else` case to test.
+
         /* istanbul ignore else */
         if (hole instanceof Hole) values[i] = unroll(info, hole, counter);else if (isArray(hole)) {
           for (var _i2 = 0, _length = hole.length; _i2 < _length; _i2++) {

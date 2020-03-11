@@ -96,7 +96,7 @@ const reference = {};
 render(div, html`<div ref=${reference}>test</div>`);
 console.assert(reference.hasOwnProperty('current'));
 
-const withHandler = handler => html`<div onclick=${handler} />`;
+const withHandler = handler => html`<div onClick=${handler} />`;
 render(div, withHandler(Object));
 render(div, withHandler(Object));
 render(div, withHandler(String));
@@ -126,3 +126,8 @@ render(div, wire([wire2, fragment(), wire1]));
 
 render(div, html`<two /><holes />`);
 render(div, html`<one />`);
+
+try {
+  render(div, html`<p test="is ${'really'} broken" ${"isn't it"}></p>`);
+  console.assert(false, 'broken template is not breaking');
+} catch (OK) {}

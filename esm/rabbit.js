@@ -26,7 +26,6 @@ const mapTemplate = (type, template) => {
   let search = `${prefix}${i}`;
   while (i < length) {
     const node = tw.nextNode();
-    /* istanbul ignore next */
     if (!node)
       throw `bad template: ${text}`;
     if (node.nodeType === 8) {
@@ -47,6 +46,9 @@ const mapTemplate = (type, template) => {
         node.removeAttribute(search);
         search = `${prefix}${++i}`;
       }
+      // basicHTML would never end up here, as both
+      // <style> and <textarea> accepts regular comments.
+      // It is tested live with browsers though, so it's safe to skip.
       /* istanbul ignore next */
       if (
         /^(?:style|textarea)$/i.test(node.tagName) &&
@@ -110,6 +112,8 @@ const unrollArray = (info, values, counter) => {
   for (let i = 0, {length} = values; i < length; i++) {
     const hole = values[i];
     if (typeof hole === 'object' && hole) {
+      // The only values to process are Hole and arrays.
+      // Accordingly, there is no `else` case to test.
       /* istanbul ignore else */
       if (hole instanceof Hole)
         values[i] = unroll(info, hole, counter);

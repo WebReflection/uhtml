@@ -4,6 +4,8 @@ const udomdiff = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* 
 const {isArray, slice} = require('./array.js');
 const {getNode, wireType} = require('./node.js');
 
+// This is tested live with browsers, but somehow
+// basicHTML doesn't pass here.
 const get = (item, i) => item.nodeType === wireType ?
   ((1 / i) < 0 ?
     /* istanbul ignore next */
@@ -63,6 +65,8 @@ const handleAnything = (comment, nodes) => {
             }
           }
         }
+        // There is no `else` here, meaning if the content
+        // is not expected one, nothing happens, as easy as that.
         /* istanbul ignore else */
         else if ('ELEMENT_NODE' in newValue) {
           nodes = udomdiff(
@@ -97,8 +101,7 @@ const handleAttribute = (node, name) => {
   // events
   if (name.slice(0, 2) === 'on') {
     let type = name.slice(2);
-    /* istanbul ignore next */
-    if (name.toLowerCase() in node)
+    if (!(name in node) && name.toLowerCase() in node)
       type = type.toLowerCase();
     return newValue => {
       const info = isArray(newValue) ? newValue : [newValue, false];
@@ -125,6 +128,8 @@ const handleAttribute = (node, name) => {
       }
       else {
         attribute.value = newValue;
+        // There is no else case here.
+        // If the attribute has no owner, it's set back.
         /* istanbul ignore else */
         if (noOwner) {
           node.setAttributeNode(attribute);
@@ -135,6 +140,13 @@ const handleAttribute = (node, name) => {
   };
 };
 
+// basicHTML doesn't care about special <style> or
+// <textarea> cases, as all nodes can have comments.
+// This means the text-only case never exists, but it's
+// validated for real with browsers.
+// TODO: this might be a basicHTML bug though, as <style>
+// and <textarea> landing on a page might contain undesired text
+// 'caused by comments. Verify that's not the case.
 /* istanbul ignore next */
 const handleText = node => {
   let oldValue;
@@ -153,6 +165,8 @@ function handlers(options) {
     handleAnything(node, []) :
     (type === 'attr' ?
       handleAttribute(node, options.name) :
+      // For the same reason handleText is ignored,
+      // basicHTML would never end up here, but browsers will.
       /* istanbul ignore next */
       handleText(node));
 }
