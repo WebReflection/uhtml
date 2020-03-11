@@ -580,15 +580,7 @@ var uhtml = (function (exports) {
         i = counter.i,
         aLength = counter.aLength,
         iLength = counter.iLength;
-    if (a < aLength) sub.splice(a); // TODO: this is actually pointless, as I believe
-    //       such case never exists, being the stack related
-    //       to the template, hence static.
-    //       `i` and `iLength` are only useful for the first pass,
-    //       but from that time on, will never change.
-    //       Verify this and get rid of this extra check.
-
-    /* istanbul ignore next */
-
+    if (a < aLength) sub.splice(a);
     if (i < iLength) stack.splice(i);
     return wire;
   };

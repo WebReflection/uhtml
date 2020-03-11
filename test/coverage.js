@@ -1,3 +1,14 @@
+/**
+ * To whom it might concern: these tests are based on basichtml
+ * and are here only to ensure the whole API works without breaking.
+ * Other live tests ensure the primitives work in all browsers
+ * including IE11 or the non Edgium Edge.
+ * Ideally, I should instrument all code and use puppeteer
+ * or similar to counter validate on a real DOM world all is good
+ * but that requires time, although it's the ultimate goal
+ * for this testing folder and real-world coverage ability.
+ */
+
 require('basichtml').init();
 
 let {render, html, svg} = require('../cjs');
@@ -112,3 +123,6 @@ const wire2 = html`<div /><div />`;
 const wire = what => html`${what}`;
 render(div, wire([wire1, fragment(), wire2]));
 render(div, wire([wire2, fragment(), wire1]));
+
+render(div, html`<two /><holes />`);
+render(div, html`<one />`);
