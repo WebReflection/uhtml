@@ -175,7 +175,7 @@ Taking the essential `Button(text, className)` component example, this is how _�
       * otherwise append the chunk as is, it's the closing part
     * normalize all self-closing, [not void](https://developer.mozilla.org/en-US/docs/Glossary/empty_element), elements, so that the resulting joined layout contains `<span></span>` or `<custom-element></custom-element>` instead of `<span />` or `<custom-element />`, which is another handy _µhtml_ feature 😉
     * let the browser engine parse the final layout through the native [Content Template element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/template) and traverse it in search of all comments and attributes that are only related to _µhtml_
-    * per each crawled node, using and `index` that goes from _zero_ to the length of passed values, as these are those to map and update in the future:
+    * per each crawled node, using an `index` that goes from _zero_ to the length of passed values, as these are those to map and update in the future:
       * if the node is a _comment_, and its text content is exactly `µhtml${index}`, map recursively the position of that node to retrieve it later on, and move the `index` forward
       * if the node is not a comment:
         * while the node has an attribute named `µhtml${index}`, map the attribute value, which is the original name, and map the node to retrieve it later on, then move the `index` forward
@@ -366,7 +366,7 @@ render(document.body, html`
 These are the rules to follow for attributes:
 
   * interpolated attributes don't require the usage of quotes, but these work either ways. `name=${value}` is OK, and so is `name="${value}"` or even `name='${value}'`
-  * you cannot have sparse attribute interpolations: always use one interpolation to define each attribute that needs one, but never write things like `style="top:${x};left${y}"` as the parser will simply breaks with an error _bad template_. Use template literals within interpolations, if you want to obtain exact same result: ``style=${`top:${x};left${y}`}``
+  * you cannot have sparse attribute interpolations: always use one interpolation to define each attribute that needs one, but never write things like `style="top:${x};left${y}"` as the parser will simply break with the error _bad template_. Use template literals within interpolations, if you want to obtain exact same result: ``style=${`top:${x};left${y}`}``
   * if the passed value is `null` or `undefined`, the attribute will be removed. If the value is something else, it will be set as is as value. If the attribute was previously removed, the same attribute will be placed back again. If the value is the same as it was before, nothing happens
   * if the attribute name starts with `on`, as example, `onclick=${...}`, it will be set as listener. If the listener changes, the previous one will be automatically removed. If the listener is an `Array` like `[listener, {once:true}]`, the second entry of the array would be used as listener's options.
   * if the attribute starts with a `.` dot, as in `.setter=${value}`, the value will be passed directly to the element per each update. If such value is a known setter, either native elements or defined via Custom Elements, the setter will be invoked per each update, even if the value is the same
