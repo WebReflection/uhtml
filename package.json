@@ -6,12 +6,13 @@
   "scripts": {
     "build": "npm run cjs && npm run rollup:new && npm run rollup:babel && drop-babel-typeof ./index.js && npm run min && npm run test && npm run size",
     "cjs": "rm cjs/* && ascjs esm cjs",
+    "instrument": "nyc instrument ./index.js ./test/instrumented",
     "rollup:new": "rollup --config rollup/new.config.js",
     "rollup:babel": "rollup --config rollup/babel.config.js",
     "min": "uglifyjs index.js --support-ie8 --comments=/^!/ -c -m -o min.js",
     "size": "cat min.js | brotli | wc -c && cat new.js | brotli | wc -c",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
-    "test": "nyc node test/coverage.js"
+    "test": "npm run instrument && nyc node test/coverage.js"
   },
   "keywords": [
     "micro",
