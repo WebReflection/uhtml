@@ -131,3 +131,7 @@ try {
   render(div, html`<p test="is ${'really'} broken" ${"isn't it"}></p>`);
   console.assert(false, 'broken template is not breaking');
 } catch (OK) {}
+
+render(div, sameWire('test'));
+render(div, sameWire('test'));
+render(div, sameWire(document.createElement('p')));

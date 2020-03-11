@@ -139,14 +139,6 @@ const handleAttribute = (node, name) => {
   };
 };
 
-// basicHTML doesn't care about special <style> or
-// <textarea> cases, as all nodes can have comments.
-// This means the text-only case never exists, but it's
-// validated for real with browsers.
-// TODO: this might be a basicHTML bug though, as <style>
-// and <textarea> landing on a page might contain undesired text
-// 'caused by comments. Verify that's not the case.
-/* istanbul ignore next */
 const handleText = node => {
   let oldValue;
   return newValue => {
@@ -164,8 +156,5 @@ export function handlers(options) {
     handleAnything(node, []) :
     (type === 'attr' ?
       handleAttribute(node, options.name) :
-      // For the same reason handleText is ignored,
-      // basicHTML would never end up here, but browsers will.
-      /* istanbul ignore next */
       handleText(node));
 };

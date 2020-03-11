@@ -28,6 +28,8 @@ const mapTemplate = (type, template) => {
     if (!node)
       throw `bad template: ${text}`;
     if (node.nodeType === 8) {
+      // The only comments to be considered are those
+      // which content is exactly the same as the searched one.
       /* istanbul ignore else */
       if (node.textContent === search) {
         nodes.push({type: 'node', path: getPath(node)});
@@ -45,10 +47,6 @@ const mapTemplate = (type, template) => {
         node.removeAttribute(search);
         search = `${prefix}${++i}`;
       }
-      // basicHTML would never end up here, as both
-      // <style> and <textarea> accepts regular comments.
-      // It is tested live with browsers though, so it's safe to skip.
-      /* istanbul ignore next */
       if (
         /^(?:style|textarea)$/i.test(node.tagName) &&
         node.textContent.trim() === `<!--${search}-->`

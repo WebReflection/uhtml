@@ -474,16 +474,7 @@ var uhtml = (function (exports) {
         }
       }
     };
-  }; // basicHTML doesn't care about special <style> or
-  // <textarea> cases, as all nodes can have comments.
-  // This means the text-only case never exists, but it's
-  // validated for real with browsers.
-  // TODO: this might be a basicHTML bug though, as <style>
-  // and <textarea> landing on a page might contain undesired text
-  // 'caused by comments. Verify that's not the case.
-
-  /* istanbul ignore next */
-
+  };
 
   var handleText = function handleText(node) {
     var oldValue;
@@ -499,11 +490,7 @@ var uhtml = (function (exports) {
     var type = options.type,
         path = options.path;
     var node = path.reduce(getNode, this);
-    return type === 'node' ? handleAnything(node, []) : type === 'attr' ? handleAttribute(node, options.name) : // For the same reason handleText is ignored,
-    // basicHTML would never end up here, but browsers will.
-
-    /* istanbul ignore next */
-    handleText(node);
+    return type === 'node' ? handleAnything(node, []) : type === 'attr' ? handleAttribute(node, options.name) : handleText(node);
   }
 
   var prefix = 'isµ';
@@ -537,6 +524,9 @@ var uhtml = (function (exports) {
       if (!node) throw "bad template: ".concat(text);
 
       if (node.nodeType === 8) {
+        // The only comments to be considered are those
+        // which content is exactly the same as the searched one.
+
         /* istanbul ignore else */
         if (node.textContent === search) {
           nodes.push({
@@ -555,12 +545,7 @@ var uhtml = (function (exports) {
           });
           node.removeAttribute(search);
           search = "".concat(prefix).concat(++i);
-        } // basicHTML would never end up here, as both
-        // <style> and <textarea> accepts regular comments.
-        // It is tested live with browsers though, so it's safe to skip.
-
-        /* istanbul ignore next */
-
+        }
 
         if (/^(?:style|textarea)$/i.test(node.tagName) && node.textContent.trim() === "<!--".concat(search, "-->")) {
           nodes.push({
