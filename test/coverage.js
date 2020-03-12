@@ -1,58 +1,38 @@
-/**
- * To whom it might concern: these tests are based on basichtml
- * and are here only to ensure the whole API works without breaking.
- * Other live tests ensure the primitives work in all browsers
- * including IE11 or the non Edgium Edge.
- * Ideally, I should instrument all code and use puppeteer
- * or similar to counter validate on a real DOM world all is good
- * but that requires time, although it's the ultimate goal
- * for this testing folder and real-world coverage ability.
- */
+import {render, html, svg} from './instrumented/index.js';
 
-require('basichtml').init();
+const {body} = document;
 
-let {render, html, svg} = require('../cjs');
+const fragment = () => html`<p>1</p><p>2</p>`;
+const variousContent = content => html`${content}`;
 
-render(document.createElement('div'), html`this is a test`);
-render(document.createElement('div'), html`this is a ${
+render(body, html`this is a test`);
+render(body, html`this is a ${
   [1, 2].map(n => html`${n}`)
 } test`);
-render(document.createElement('div'), html`this is a ${
+render(body, html`this is a ${
   [1, 2].map(n => svg`${n}`)
 } test`);
 
-delete require.cache[require.resolve('../cjs')];
-const {importNode} = document;
-
-document.importNode = function () {
-  return importNode.apply(this, arguments);
-};
-
-const uhtml = require('../cjs');
-render = uhtml.render;
-html = uhtml.html;
-svg = uhtml.svg;
-
 (function twice(i) {
-  render(document.createElement('div'), html`this is a ${
+  render(body, html`this is a ${
     (i ? [1, 2, 3] : [1, 2]).map(n => svg`${n}`)
   } test`);
   if (i--) twice(i);
 }(1));
 
-render(document.createElement('div'), html`this is a ${'test'}`);
-render(document.createElement('div'), html`this is a ${true}`);
-render(document.createElement('div'), html`this is a ${1}`);
+render(body, html`this is a ${'test'}`);
+render(body, html`this is a ${true}`);
+render(body, html`this is a ${1}`);
 
 let div = document.createElement('div');
 render(div, html.node`this is a test`);
-render(div, html.for(global)`this is a test`);
-render(div, html.for(global, 1)`this is a test`);
-render(div, () => html.for(global)`this is a test`);
-render(div, () => html.for(global, 1)`this is a test`);
+render(div, html.for(body)`this is a test`);
+render(div, html.for(body, 1)`this is a test`);
+render(div, () => html.for(body)`this is a test`);
+render(div, () => html.for(body, 1)`this is a test`);
 (function twice(i) {
-  render(div, () => html.for(global)`this is a test`);
-  render(div, () => html.for(global, 1)`this is a test`);
+  render(div, () => html.for(body)`this is a test`);
+  render(div, () => html.for(body, 1)`this is a test`);
   if (i--) twice(i);
 }(1));
 
@@ -61,8 +41,6 @@ render(div, html`<div test="${123}" onclick=${() => {}} .disabled=${true} .conte
 render(document.createElement('div'), html`<textarea>${'test'}</textarea>`);
 render(document.createElement('div'), html`<style>${'test'}</style>`);
 
-const fragment = () => html`<p>1</p><p>2</p>`;
-
 const sameWire = content => html`<div>${content}</div>`;
 render(div, sameWire([fragment()]));
 render(div, sameWire([]));
@@ -70,7 +48,6 @@ render(div, sameWire([fragment()]));
 
 render(div, html`<style>${'text only'}</style>`);
 
-const variousContent = content => html`${content}`;
 render(div, variousContent([
   html`<p />`,
   html`<p />`
@@ -135,3 +112,102 @@ try {
 render(div, sameWire('test'));
 render(div, sameWire('test'));
 render(div, sameWire(document.createElement('p')));
+
+render(body, html`<h1>test</h1>`);
+render(body, html`<h2>test</h2><h3>test</h3>`);
+render(body, html`${fragment()}`);
+render(body, html`${fragment()}`);
+render(body, html`${[fragment()]}`);
+render(body, html`<h1 data-test="${123}">${'content'}</h1>`);
+render(body, html`<div test="${123}" onclick=${() => {}} .disabled=${true} .contentEditable=${false} null=${null} />`);
+render(body, variousContent([
+  html`<p />`,
+  html`<p />`
+]));
+render(body, variousContent([
+  html`<p />`,
+  html`<p />`,
+  html`<p />`
+]));
+render(body, variousContent([
+  html`<p />`
+]));
+
+// udomdiff tests for get(node, how)
+// https://github.com/WebReflection/udomdiff/blob/master/test/test.js
+const createList = (...args) => html`<div>${args}</div>`;
+const testDiff = (a, b, c, d, e, f, g, h, i, j, k) => {
+  render(body, createList());
+  render(body, createList(b, c, d));
+  render(body, createList(a, b, c, d));
+  render(body, createList(d, c, b, a));
+  render(body, createList(a, b, c, d));
+  render(body, createList(a, b, c, d, e, f));
+  render(body, createList(a, b, c, g, h, i, d, e, f));
+  render(body, createList(a, b, c, g, h, i, d, e));
+  render(body, createList(c, g, h, i, d, e));
+  render(body, createList(c, g, d, e));
+  render(body, createList());
+  render(body, createList(a, b, c, d, e, f));
+  render(body, createList(a, b, g, i, d, e, f));
+  render(body, createList(a, b, c, d, e, f));
+  render(body, createList(j, g, a, b, c, d, e, f, h, i));
+  render(body, createList(a, b, c, d, e, f));
+  render(body, createList(a, g, c, d, h, i));
+  render(body, createList(i, g, a, d, h, c));
+  render(body, createList(c, h, d, a, g, i));
+  render(body, createList(d, f, g));
+  render(body, createList(a, b, c, d, f, g));
+  render(body, createList(a, b, c, d, e, f, g));
+  render(body, createList(g, f, e, d, c, b, a));
+  render(body, createList(f, d, b, a, e, g));
+  render(body, createList(a, b, c, d, e, f));
+  render(body, createList(a, b, c, d, e, f, h, i, j));
+  render(body, createList(a, b, c, d, e, h, f, i, j));
+  render(body, createList(a, b, i, d, e, h, f, c, j));
+  render(body, createList(a, b, c, d, e, f, h, i, j));
+  render(body, createList(a, b, c, d, e, f, g, h, i, j, k));
+  render(body, createList(g, h, i));
+  render(body, createList(a, b, c, d));
+  render(body, createList(b, c, a, d));
+  render(body, createList(a, b, c, d, e));
+  render(body, createList(d, a, b, c, f));
+  render(body, createList(a, d, e));
+  render(body, createList(d, f));
+  render(body, createList(b, d, c, k));
+  render(body, createList(c, k, b, d));
+  render(body, createList());
+  render(body, createList(a, b, c, d));
+  render(body, createList(a, b, d, e, c));
+  render(body, createList(a, b, c));
+  render(body, createList(c, a, b));
+  render(body, createList());
+};
+
+testDiff(
+  html`<p>a</p>`,
+  html`<p>b</p>`,
+  html`<p>c</p>`,
+  html`<p>d</p>`,
+  html`<p>e</p>`,
+  html`<p>f</p>`,
+  html`<p>g</p>`,
+  html`<p>h</p>`,
+  html`<p>i</p>`,
+  html`<p>j</p>`,
+  html`<p>k</p>`
+);
+
+testDiff(
+  html`<p>a</p><p>a</p>`,
+  html`<p>b</p><p>b</p>`,
+  html`<p>c</p><p>c</p>`,
+  html`<p>d</p><p>d</p>`,
+  html`<p>e</p><p>e</p>`,
+  html`<p>f</p><p>f</p>`,
+  html`<p>g</p><p>g</p>`,
+  html`<p>h</p><p>h</p>`,
+  html`<p>i</p><p>i</p>`,
+  html`<p>j</p><p>j</p>`,
+  html`<p>k</p><p>k</p>`
+);
