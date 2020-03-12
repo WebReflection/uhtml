@@ -2,11 +2,11 @@
 const cache = new WeakMap;
 exports.cache = cache;
 
-const cacheInfo = () => ({sub: [], stack: [], wire: null});
-exports.cacheInfo = cacheInfo;
+const createCache = () => ({stack: [], entry: null, wire: null});
+exports.createCache = createCache;
 
 const setCache = where => {
-  const info = cacheInfo();
+  const info = createCache();
   cache.set(where, info);
   return info;
 };
