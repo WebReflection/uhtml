@@ -1,4 +1,6 @@
-import {render, html, svg} from './instrumented/index.js';
+const {document} = require('basichtml').init();
+
+const {render, html, svg} = require('../cjs');
 
 const {body} = document;
 
