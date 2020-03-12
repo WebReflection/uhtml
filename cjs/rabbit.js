@@ -107,29 +107,30 @@ const unroll = (info, hole, counter) => {
 };
 
 const unrollArray = (info, values, counter) => {
-  for (let i = 0, {length} = values; i < length; i++) {
+  let {a, aLength} = counter;
+  for (let i = 0, {length} = values, {sub} = info; i < length; i++) {
     const hole = values[i];
-    if (typeof hole === 'object' && hole) {
-      // The only values to process are Hole and arrays.
-      // Accordingly, there is no `else` case to test.
-      /* istanbul ignore else */
-      if (hole instanceof Hole)
-        values[i] = unroll(info, hole, counter);
-      else if (isArray(hole)) {
-        for (let i = 0, {length} = hole; i < length; i++) {
-          const inner = hole[i];
-          if (typeof inner === 'object' && inner && inner instanceof Hole) {
-            const {sub} = info;
-            const {a, aLength} = counter;
-            if (a === aLength)
-              counter.aLength = sub.push(cacheInfo());
-            counter.a++;
-            hole[i] = retrieve(sub[a], inner);
-          }
-        }
+    // The only values to process are Hole and arrays.
+    // Accordingly, there is no `else` case to test.
+    /* istanbul ignore else */
+    if (hole instanceof Hole)
+      values[i] = unroll(info, hole, counter);
+    else if (isArray(hole)) {
+      const {length} = hole;
+      const next = a + length;
+      while (aLength < next)
+        aLength = sub.push(null);
+      for (let i = 0; i < length; i++) {
+        const inner = hole[i];
+        if (inner instanceof Hole)
+          hole[i] = retrieve(sub[a] || (sub[a] = cacheInfo()), inner);
+        a++;
       }
     }
+    a++;
   }
+  counter.a = a;
+  counter.aLength = aLength;
 };
 
 /**

@@ -15,8 +15,6 @@ var uhtml = (function (exports) {
     return info;
   };
 
-  
-
   var attr = /([^\s\\>"'=]+)\s*=\s*(['"]?)$/;
   var empty = /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
   var node = /<[a-z][^>]+$/i;
@@ -103,6 +101,8 @@ var uhtml = (function (exports) {
       }
     };
   };
+
+  
 
   /**
    * ISC License
@@ -619,30 +619,34 @@ var uhtml = (function (exports) {
   };
 
   var unrollArray = function unrollArray(info, values, counter) {
-    for (var i = 0, length = values.length; i < length; i++) {
-      var hole = values[i];
+    var a = counter.a,
+        aLength = counter.aLength;
 
-      if (typeof(hole) === 'object' && hole) {
-        // The only values to process are Hole and arrays.
-        // Accordingly, there is no `else` case to test.
+    for (var i = 0, length = values.length, sub = info.sub; i < length; i++) {
+      var hole = values[i]; // The only values to process are Hole and arrays.
+      // Accordingly, there is no `else` case to test.
 
-        /* istanbul ignore else */
-        if (hole instanceof Hole) values[i] = unroll(info, hole, counter);else if (isArray(hole)) {
-          for (var _i2 = 0, _length = hole.length; _i2 < _length; _i2++) {
-            var inner = hole[_i2];
+      /* istanbul ignore else */
 
-            if (typeof(inner) === 'object' && inner && inner instanceof Hole) {
-              var sub = info.sub;
-              var a = counter.a,
-                  aLength = counter.aLength;
-              if (a === aLength) counter.aLength = sub.push(cacheInfo());
-              counter.a++;
-              hole[_i2] = retrieve(sub[a], inner);
-            }
-          }
+      if (hole instanceof Hole) values[i] = unroll(info, hole, counter);else if (isArray(hole)) {
+        var _length = hole.length;
+        var next = a + _length;
+
+        while (aLength < next) {
+          aLength = sub.push(null);
+        }
+
+        for (var _i2 = 0; _i2 < _length; _i2++) {
+          var inner = hole[_i2];
+          if (inner instanceof Hole) hole[_i2] = retrieve(sub[a] || (sub[a] = cacheInfo()), inner);
+          a++;
         }
       }
+      a++;
     }
+
+    counter.a = a;
+    counter.aLength = aLength;
   };
   /**
    * Holds all necessary details needed to render the content further on. 
