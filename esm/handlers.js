@@ -3,13 +3,9 @@ import udomdiff from 'udomdiff';
 import {isArray, slice} from './array.js';
 import {getNode, wireType} from './node.js';
 
-// This is tested live with browsers, but somehow
-// basicHTML doesn't pass here.
 const get = (item, i) => item.nodeType === wireType ?
   ((1 / i) < 0 ?
-    /* istanbul ignore next */
     (i ? item.remove() : item.lastChild) :
-    /* istanbul ignore next */
     (i ? item.valueOf() : item.firstChild)) :
   item
 ;
