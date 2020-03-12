@@ -5,12 +5,14 @@
   "main": "cjs/index.js",
   "scripts": {
     "build": "npm run cjs && npm run rollup:new && npm run rollup:babel && drop-babel-typeof ./index.js && npm run min && npm run test && npm run size",
-    "cjs": "rm cjs/* && ascjs esm cjs",
+    "cjs": "rm cjs/*.js && ascjs esm cjs",
     "instrument": "nyc instrument --es-modules --includes='*.js' ./esm ./test/instrumented && npm run fix",
-    "fix": "npm run fix:rabbit && npm run fix:node && npm run fix:handlers",
-    "fix:rabbit": "sed -i \"s/from'uparser'/from'..\\/..\\/node_modules\\/uparser\\/esm\\/index.js'/\" test/instrumented/rabbit.js",
-    "fix:node": "sed -i \"s/from'@ungap\\/create-content'/from'..\\/..\\/node_modules\\/@ungap\\/create-content\\/esm\\/index.js'/\" test/instrumented/node.js",
-    "fix:handlers": "sed -i \"s/from'udomdiff'/from'..\\/..\\/node_modules\\/udomdiff\\/esm\\/index.js'/\" test/instrumented/handlers.js",
+    "fix": "npm run fix:handlers && npm run fix:node && npm run fix:rabbit && npm run fix:uwire && npm run fix:uarray",
+    "fix:handlers": "sed -i \"s/from[ ]*'udomdiff'/from '..\\/..\\/node_modules\\/udomdiff\\/esm\\/index.js'/\" test/instrumented/handlers.js",
+    "fix:node": "sed -i \"s/from[ ]*'@ungap\\/create-content'/from '..\\/..\\/node_modules\\/@ungap\\/create-content\\/esm\\/index.js'/\" test/instrumented/node.js",
+    "fix:rabbit": "sed -i \"s/from[ ]*'uparser'/from '..\\/..\\/node_modules\\/uparser\\/esm\\/index.js'/\" test/instrumented/rabbit.js",
+    "fix:uwire": "cp node_modules/uwire/esm/index.js test/instrumented/uwire.js && sed -i \"s/from[ ]*'uwire'/from '.\\/uwire.js'/\" test/instrumented/{handlers,rabbit}.js",
+    "fix:uarray": "sed -i \"s/from[ ]*'uarray'/from '..\\/..\\/node_modules\\/uarray\\/esm\\/index.js'/\" test/instrumented/{handlers,node,rabbit,uwire}.js",
     "rollup:new": "rollup --config rollup/new.config.js",
     "rollup:babel": "rollup --config rollup/babel.config.js",
     "min": "uglifyjs index.js --support-ie8 --comments=/^!/ -c -m -o min.js",
@@ -47,8 +49,10 @@
   "unpkg": "min.js",
   "dependencies": {
     "@ungap/create-content": "^0.1.4",
+    "uarray": "^1.0.0",
     "udomdiff": "^1.0.9",
-    "uparser": "^0.1.0"
+    "uparser": "^0.1.0",
+    "uwire": "^1.0.0"
   },
   "repository": {
     "type": "git",

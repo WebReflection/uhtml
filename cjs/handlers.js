@@ -1,19 +1,9 @@
 'use strict';
+const {isArray, slice} = require('uarray');
 const udomdiff = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('udomdiff'));
+const {diffable} = require('uwire');
 
-const {isArray, slice} = require('./array.js');
-const {getNode, wireType} = require('./node.js');
-
-// This is tested live with browsers, but somehow
-// basicHTML doesn't pass here.
-const get = (item, i) => item.nodeType === wireType ?
-  ((1 / i) < 0 ?
-    /* istanbul ignore next */
-    (i ? item.remove() : item.lastChild) :
-    /* istanbul ignore next */
-    (i ? item.valueOf() : item.firstChild)) :
-  item
-;
+const {reducePath} = require('./node.js');
 
 const handleAnything = (comment, nodes) => {
   let oldValue;
@@ -30,7 +20,7 @@ const handleAnything = (comment, nodes) => {
             comment.parentNode,
             nodes,
             [text],
-            get,
+            diffable,
             comment
           );
         }
@@ -38,14 +28,14 @@ const handleAnything = (comment, nodes) => {
       case 'object':
       case 'undefined':
         if (newValue == null) {
-          nodes = udomdiff(comment.parentNode, nodes, [], get, comment);
+          nodes = udomdiff(comment.parentNode, nodes, [], diffable, comment);
           break;
         }
       default:
         oldValue = newValue;
         if (isArray(newValue)) {
           if (newValue.length === 0)
-            nodes = udomdiff(comment.parentNode, nodes, [], get, comment);
+            nodes = udomdiff(comment.parentNode, nodes, [], diffable, comment);
           else {
             switch (typeof newValue[0]) {
               case 'string':
@@ -58,7 +48,7 @@ const handleAnything = (comment, nodes) => {
                   comment.parentNode,
                   nodes,
                   newValue,
-                  get,
+                  diffable,
                   comment
                 );
                 break;
@@ -75,7 +65,7 @@ const handleAnything = (comment, nodes) => {
             newValue.nodeType === 11 ?
               slice.call(newValue.childNodes) :
               [newValue],
-            get,
+            diffable,
             comment
           );
         }
@@ -152,7 +142,7 @@ const handleText = node => {
 
 function handlers(options) {
   const {type, path} = options;
-  const node = path.reduce(getNode, this);
+  const node = path.reduce(reducePath, this);
   return type === 'node' ?
     handleAnything(node, []) :
     (type === 'attr' ?

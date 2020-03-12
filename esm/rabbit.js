@@ -1,12 +1,10 @@
 import instrument from 'uparser';
+import {isArray} from 'uarray';
+import {persistent} from 'uwire';
+
 import {cacheInfo} from './cache.js';
 import {handlers} from './handlers.js';
-import {isArray} from './array.js';
-import {
-  createFragment, createWalker,
-  getPath, getWire,
-  importNode
-} from './node.js';
+import {createFragment, createPath, createWalker, importNode} from './node.js';
 
 const prefix = 'isµ';
 const templates = new WeakMap;
@@ -33,7 +31,7 @@ const mapTemplate = (type, template) => {
       // which content is exactly the same as the searched one.
       /* istanbul ignore else */
       if (node.textContent === search) {
-        nodes.push({type: 'node', path: getPath(node)});
+        nodes.push({type: 'node', path: createPath(node)});
         search = `${prefix}${++i}`;
       }
     }
@@ -41,7 +39,7 @@ const mapTemplate = (type, template) => {
       while (node.hasAttribute(search)) {
         nodes.push({
           type: 'attr',
-          path: getPath(node),
+          path: createPath(node),
           name: node.getAttribute(search),
           // svg: type === 'svg'
         });
@@ -52,7 +50,7 @@ const mapTemplate = (type, template) => {
         /^(?:style|textarea)$/i.test(node.tagName) &&
         node.textContent.trim() === `<!--${search}-->`
       ){
-        nodes.push({type: 'text', path: getPath(node)});
+        nodes.push({type: 'text', path: createPath(node)});
         search = `${prefix}${++i}`;
       }
     }
@@ -103,7 +101,7 @@ const unroll = (info, hole, counter) => {
   const {content, updates, wire} = entry;
   for (let i = 0, {length} = updates; i < length; i++)
     updates[i](values[i]);
-  return wire || (entry.wire = getWire(content));
+  return wire || (entry.wire = persistent(content));
 };
 
 const unrollArray = (info, values, counter) => {

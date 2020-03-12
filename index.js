@@ -55,6 +55,53 @@ var uhtml = (function (exports) {
     return text.join('').trim().replace(selfClosing, regular);
   });
 
+  var isArray = Array.isArray;
+  var _ref = [],
+      indexOf = _ref.indexOf,
+      slice = _ref.slice;
+
+  var ELEMENT_NODE = 1;
+  var nodeType = 111;
+
+  var remove = function remove(_ref) {
+    var firstChild = _ref.firstChild,
+        lastChild = _ref.lastChild;
+    var range = document.createRange();
+    range.setStartAfter(firstChild);
+    range.setEndAfter(lastChild);
+    range.deleteContents();
+    return firstChild;
+  };
+
+  var diffable = function diffable(node, operation) {
+    return node.nodeType === nodeType ? 1 / operation < 0 ? operation ? remove(node) : node.lastChild : operation ? node.valueOf() : node.firstChild : node;
+  };
+  var persistent = function persistent(fragment) {
+    var childNodes = fragment.childNodes;
+    var length = childNodes.length;
+    if (length === 1) return childNodes[0];
+    var nodes = slice.call(childNodes, 0);
+    var firstChild = nodes[0];
+    var lastChild = nodes[length - 1];
+    return {
+      ELEMENT_NODE: ELEMENT_NODE,
+      nodeType: nodeType,
+      firstChild: firstChild,
+      lastChild: lastChild,
+      valueOf: function valueOf() {
+        if (childNodes.length !== length) {
+          var i = 0;
+
+          while (i < length) {
+            fragment.appendChild(nodes[i++]);
+          }
+        }
+
+        return fragment;
+      }
+    };
+  };
+
   /**
    * ISC License
    *
@@ -212,11 +259,6 @@ var uhtml = (function (exports) {
     return b;
   });
 
-  var isArray = Array.isArray;
-  var _ref = [],
-      indexOf = _ref.indexOf,
-      slice = _ref.slice;
-
   /*! (c) Andrea Giammarchi - ISC */
   var createContent = function (document) {
 
@@ -272,11 +314,10 @@ var uhtml = (function (exports) {
     }
   }(document);
 
-  var wireType = 111;
-  var getNode = function getNode(node, i) {
+  var reducePath = function reducePath(node, i) {
     return node.childNodes[i];
   };
-  var getPath = function getPath(node) {
+  var createPath = function createPath(node) {
     var path = [];
     var _node = node,
         parentNode = _node.parentNode;
@@ -288,47 +329,6 @@ var uhtml = (function (exports) {
     }
 
     return path;
-  };
-  var getWire = function getWire(content) {
-    var childNodes = content.childNodes;
-    var length = childNodes.length;
-    if (length === 1) return childNodes[0];
-    var nodes = slice.call(childNodes, 0);
-    var firstChild = nodes[0];
-    var lastChild = nodes[length - 1];
-    return {
-      ELEMENT_NODE: 1,
-      nodeType: wireType,
-      firstChild: firstChild,
-      lastChild: lastChild,
-      remove: function remove() {
-        var range = document.createRange();
-        range.setStartAfter(firstChild);
-        range.setEndAfter(lastChild);
-        range.deleteContents();
-        return firstChild;
-      },
-      valueOf: function valueOf() {
-        // In basicHTML fragments can be appended
-        // without their childNodes being automatically removed.
-        // This makes the following check fail each time,
-        // but it's also not really a use case for basicHTML,
-        // as fragments are not moved around or anything.
-        // However, in all browsers, once the fragment is live
-        // and not just created, this is always true.
-
-        /* istanbul ignore next */
-        if (childNodes.length !== length) {
-          var i = 0;
-
-          while (i < length) {
-            content.appendChild(nodes[i++]);
-          }
-        }
-
-        return content;
-      }
-    };
   };
   var _document = document,
       createTreeWalker = _document.createTreeWalker,
@@ -355,16 +355,6 @@ var uhtml = (function (exports) {
     return createTreeWalker.call(document, fragment, 1 | 128);
   };
 
-  // basicHTML doesn't pass here.
-
-  var get = function get(item, i) {
-    return item.nodeType === wireType ? 1 / i < 0 ?
-    /* istanbul ignore next */
-    i ? item.remove() : item.lastChild :
-    /* istanbul ignore next */
-    i ? item.valueOf() : item.firstChild : item;
-  };
-
   var handleAnything = function handleAnything(comment, nodes) {
     var oldValue;
     var text = document.createTextNode('');
@@ -377,7 +367,7 @@ var uhtml = (function (exports) {
           if (oldValue !== newValue) {
             oldValue = newValue;
             text.textContent = newValue;
-            nodes = udomdiff(comment.parentNode, nodes, [text], get, comment);
+            nodes = udomdiff(comment.parentNode, nodes, [text], diffable, comment);
           }
 
           break;
@@ -385,7 +375,7 @@ var uhtml = (function (exports) {
         case 'object':
         case 'undefined':
           if (newValue == null) {
-            nodes = udomdiff(comment.parentNode, nodes, [], get, comment);
+            nodes = udomdiff(comment.parentNode, nodes, [], diffable, comment);
             break;
           }
 
@@ -393,7 +383,7 @@ var uhtml = (function (exports) {
           oldValue = newValue;
 
           if (isArray(newValue)) {
-            if (newValue.length === 0) nodes = udomdiff(comment.parentNode, nodes, [], get, comment);else {
+            if (newValue.length === 0) nodes = udomdiff(comment.parentNode, nodes, [], diffable, comment);else {
               switch (typeof(newValue[0])) {
                 case 'string':
                 case 'number':
@@ -402,7 +392,7 @@ var uhtml = (function (exports) {
                   break;
 
                 default:
-                  nodes = udomdiff(comment.parentNode, nodes, newValue, get, comment);
+                  nodes = udomdiff(comment.parentNode, nodes, newValue, diffable, comment);
                   break;
               }
             }
@@ -411,7 +401,7 @@ var uhtml = (function (exports) {
 
           /* istanbul ignore else */
           else if ('ELEMENT_NODE' in newValue) {
-              nodes = udomdiff(comment.parentNode, nodes, newValue.nodeType === 11 ? slice.call(newValue.childNodes) : [newValue], get, comment);
+              nodes = udomdiff(comment.parentNode, nodes, newValue.nodeType === 11 ? slice.call(newValue.childNodes) : [newValue], diffable, comment);
             }
 
           break;
@@ -489,7 +479,7 @@ var uhtml = (function (exports) {
   function handlers(options) {
     var type = options.type,
         path = options.path;
-    var node = path.reduce(getNode, this);
+    var node = path.reduce(reducePath, this);
     return type === 'node' ? handleAnything(node, []) : type === 'attr' ? handleAttribute(node, options.name) : handleText(node);
   }
 
@@ -531,7 +521,7 @@ var uhtml = (function (exports) {
         if (node.textContent === search) {
           nodes.push({
             type: 'node',
-            path: getPath(node)
+            path: createPath(node)
           });
           search = "".concat(prefix).concat(++i);
         }
@@ -539,7 +529,7 @@ var uhtml = (function (exports) {
         while (node.hasAttribute(search)) {
           nodes.push({
             type: 'attr',
-            path: getPath(node),
+            path: createPath(node),
             name: node.getAttribute(search) // svg: type === 'svg'
 
           });
@@ -550,7 +540,7 @@ var uhtml = (function (exports) {
         if (/^(?:style|textarea)$/i.test(node.tagName) && node.textContent.trim() === "<!--".concat(search, "-->")) {
           nodes.push({
             type: 'text',
-            path: getPath(node)
+            path: createPath(node)
           });
           search = "".concat(prefix).concat(++i);
         }
@@ -623,7 +613,7 @@ var uhtml = (function (exports) {
       updates[_i](values[_i]);
     }
 
-    return wire || (entry.wire = getWire(content));
+    return wire || (entry.wire = persistent(content));
   };
 
   var unrollArray = function unrollArray(info, values, counter) {
