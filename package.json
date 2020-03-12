@@ -38,7 +38,7 @@
     "http-server": "^0.12.1",
     "nyc": "^15.0.0",
     "puppeteer": "^2.1.1",
-    "rollup": "^2.0.3",
+    "rollup": "^2.0.5",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-includepaths": "^0.2.3",
     "rollup-plugin-node-resolve": "^5.2.0",
@@ -52,7 +52,7 @@
     "uarray": "^1.0.0",
     "udomdiff": "^1.0.9",
     "uparser": "^0.1.0",
-    "uwire": "^1.0.0"
+    "uwire": "^1.0.1"
   },
   "repository": {
     "type": "git",
