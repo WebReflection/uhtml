@@ -1,13 +1,13 @@
 'use strict';
-const cache = new WeakMap;
-exports.cache = cache;
+const createCache = () => ({
+  stack: [],
+  entry: null,
+  wire: null
+});
+exports.createCache = createCache;
 
-const cacheInfo = () => ({sub: [], stack: [], wire: null});
-exports.cacheInfo = cacheInfo;
-
-const setCache = where => {
-  const info = cacheInfo();
-  cache.set(where, info);
-  return info;
+const setCache = (cache, key, value) => {
+  cache.set(key, value);
+  return value;
 };
 exports.setCache = setCache;

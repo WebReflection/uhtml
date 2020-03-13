@@ -24,6 +24,7 @@ render(body, html`this is a ${
 
 render(body, html`this is a ${'test'}`);
 render(body, html`this is a ${true}`);
+render(body, html`this is a ${1} ${2} ${3}`);
 render(body, html`this is a ${1}`);
 
 let div = document.createElement('div');

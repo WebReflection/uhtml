@@ -2,12 +2,12 @@ import instrument from 'uparser';
 import {isArray} from 'uarray';
 import {persistent} from 'uwire';
 
-import {cacheInfo} from './cache.js';
+import {createCache, setCache} from './cache.js';
 import {handlers} from './handlers.js';
 import {createFragment, createPath, createWalker, importNode} from './node.js';
 
 const prefix = 'isµ';
-const templates = new WeakMap;
+const cache = new WeakMap;
 
 const createEntry = (type, template) => {
   const {content, updates} = mapUpdates(type, template);
@@ -59,76 +59,42 @@ const mapTemplate = (type, template) => {
 };
 
 const mapUpdates = (type, template) => {
-  const {content, nodes} = templates.get(template) || setTemplate(type, template);
+  const {content, nodes} = (
+    cache.get(template) ||
+    setCache(cache, template, mapTemplate(type, template))
+  );
   const fragment = importNode.call(document, content, true);
   const updates = nodes.map(handlers, fragment);
   return {content: fragment, updates};
 };
 
-export const retrieve = (info, hole) => {
-  const {sub, stack} = info;
-  const counter = {
-    a: 0, aLength: sub.length,
-    i: 0, iLength: stack.length
-  };
-  const wire = unroll(info, hole, counter);
-  const {a, i, aLength, iLength} = counter;
-  if (a < aLength)
-    sub.splice(a);
-  if (i < iLength)
-    stack.splice(i);
-  return wire;
-};
-
-const setTemplate = (type, template) => {
-  const result = mapTemplate(type, template);
-  templates.set(template, result);
-  return result;
-};
-
-const unroll = (info, hole, counter) => {
-  const {stack} = info;
-  const {i, iLength} = counter;
-  const {type, template, values} = hole;
-  const unknown = i === iLength;
-  if (unknown)
-    counter.iLength = stack.push(createEntry(type, template));
-  counter.i++;
-  unrollArray(info, values, counter);
-  let entry = stack[i];
-  if (!unknown && (entry.template !== template || entry.type !== type))
-    stack[i] = (entry = createEntry(type, template));
+export const unroll = (info, {type, template, values}) => {
+  unrollValues(info, values);
+  let {entry} = info;
+  if (!entry || (entry.template !== template || entry.type !== type))
+    info.entry = (entry = createEntry(type, template));
   const {content, updates, wire} = entry;
   for (let i = 0, {length} = updates; i < length; i++)
     updates[i](values[i]);
   return wire || (entry.wire = persistent(content));
 };
 
-const unrollArray = (info, values, counter) => {
-  let {a, aLength} = counter;
-  for (let i = 0, {length} = values, {sub} = info; i < length; i++) {
+const unrollValues = (info, values) => {
+  for (let i = 0, {length} = values, {stack} = info; i < length; i++) {
     const hole = values[i];
-    // The only values to process are Hole and arrays.
-    // Accordingly, there is no `else` case to test.
-    /* istanbul ignore else */
     if (hole instanceof Hole)
-      values[i] = unroll(info, hole, counter);
-    else if (isArray(hole)) {
-      const {length} = hole;
-      const next = a + length;
-      while (aLength < next)
-        aLength = sub.push(null);
-      for (let i = 0; i < length; i++) {
-        const inner = hole[i];
-        if (inner instanceof Hole)
-          hole[i] = retrieve(sub[a] || (sub[a] = cacheInfo()), inner);
-        a++;
-      }
-    }
-    a++;
+      values[i] = unroll(
+        stack[i] || (stack[i] = createCache()),
+        hole
+      );
+    else if (isArray(hole))
+      unrollValues(
+        stack[i] || (stack[i] = createCache()),
+        hole
+      );
+    else
+      stack[i] = null;
   }
-  counter.a = a;
-  counter.aLength = aLength;
 };
 
 /**

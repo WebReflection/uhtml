@@ -1,18 +1,16 @@
 var uhtml = (function (exports) {
   'use strict';
 
-  var cache = new WeakMap();
-  var cacheInfo = function cacheInfo() {
+  var createCache = function createCache() {
     return {
-      sub: [],
       stack: [],
+      entry: null,
       wire: null
     };
   };
-  var setCache = function setCache(where) {
-    var info = cacheInfo();
-    cache.set(where, info);
-    return info;
+  var setCache = function setCache(cache, key, value) {
+    cache.set(key, value);
+    return value;
   };
 
   var attr = /([^\s\\>"'=]+)\s*=\s*(['"]?)$/;
@@ -486,7 +484,7 @@ var uhtml = (function (exports) {
   }
 
   var prefix = 'isµ';
-  var templates = new WeakMap();
+  var cache = new WeakMap();
 
   var createEntry = function createEntry(type, template) {
     var _mapUpdates = mapUpdates(type, template),
@@ -556,7 +554,7 @@ var uhtml = (function (exports) {
   };
 
   var mapUpdates = function mapUpdates(type, template) {
-    var _ref = templates.get(template) || setTemplate(type, template),
+    var _ref = cache.get(template) || setCache(cache, template, mapTemplate(type, template)),
         content = _ref.content,
         nodes = _ref.nodes;
 
@@ -568,85 +566,30 @@ var uhtml = (function (exports) {
     };
   };
 
-  var retrieve = function retrieve(info, hole) {
-    var sub = info.sub,
-        stack = info.stack;
-    var counter = {
-      a: 0,
-      aLength: sub.length,
-      i: 0,
-      iLength: stack.length
-    };
-    var wire = unroll(info, hole, counter);
-    var a = counter.a,
-        i = counter.i,
-        aLength = counter.aLength,
-        iLength = counter.iLength;
-    if (a < aLength) sub.splice(a);
-    if (i < iLength) stack.splice(i);
-    return wire;
-  };
-
-  var setTemplate = function setTemplate(type, template) {
-    var result = mapTemplate(type, template);
-    templates.set(template, result);
-    return result;
-  };
-
-  var unroll = function unroll(info, hole, counter) {
-    var stack = info.stack;
-    var i = counter.i,
-        iLength = counter.iLength;
-    var type = hole.type,
-        template = hole.template,
-        values = hole.values;
-    var unknown = i === iLength;
-    if (unknown) counter.iLength = stack.push(createEntry(type, template));
-    counter.i++;
-    unrollArray(info, values, counter);
-    var entry = stack[i];
-    if (!unknown && (entry.template !== template || entry.type !== type)) stack[i] = entry = createEntry(type, template);
+  var unroll = function unroll(info, _ref2) {
+    var type = _ref2.type,
+        template = _ref2.template,
+        values = _ref2.values;
+    unrollValues(info, values);
+    var entry = info.entry;
+    if (!entry || entry.template !== template || entry.type !== type) info.entry = entry = createEntry(type, template);
     var _entry = entry,
         content = _entry.content,
         updates = _entry.updates,
         wire = _entry.wire;
 
-    for (var _i = 0, length = updates.length; _i < length; _i++) {
-      updates[_i](values[_i]);
+    for (var i = 0, length = updates.length; i < length; i++) {
+      updates[i](values[i]);
     }
 
     return wire || (entry.wire = persistent(content));
   };
 
-  var unrollArray = function unrollArray(info, values, counter) {
-    var a = counter.a,
-        aLength = counter.aLength;
-
-    for (var i = 0, length = values.length, sub = info.sub; i < length; i++) {
-      var hole = values[i]; // The only values to process are Hole and arrays.
-      // Accordingly, there is no `else` case to test.
-
-      /* istanbul ignore else */
-
-      if (hole instanceof Hole) values[i] = unroll(info, hole, counter);else if (isArray(hole)) {
-        var _length = hole.length;
-        var next = a + _length;
-
-        while (aLength < next) {
-          aLength = sub.push(null);
-        }
-
-        for (var _i2 = 0; _i2 < _length; _i2++) {
-          var inner = hole[_i2];
-          if (inner instanceof Hole) hole[_i2] = retrieve(sub[a] || (sub[a] = cacheInfo()), inner);
-          a++;
-        }
-      }
-      a++;
+  var unrollValues = function unrollValues(info, values) {
+    for (var i = 0, length = values.length, stack = info.stack; i < length; i++) {
+      var hole = values[i];
+      if (hole instanceof Hole) values[i] = unroll(stack[i] || (stack[i] = createCache()), hole);else if (isArray(hole)) unrollValues(stack[i] || (stack[i] = createCache()), hole);else stack[i] = null;
     }
-
-    counter.a = a;
-    counter.aLength = aLength;
   };
   /**
    * Holds all necessary details needed to render the content further on. 
@@ -665,40 +608,49 @@ var uhtml = (function (exports) {
 
   var create = Object.create,
       defineProperties = Object.defineProperties;
+  var cache$1 = new WeakMap();
 
   var util = function util(type) {
-    var cache = new WeakMap();
+    var keyed = new WeakMap();
 
-    var fixed = function fixed(info) {
-      return function (template) {
-        for (var _len = arguments.length, values = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-          values[_key - 1] = arguments[_key];
+    var fixed = function fixed(i) {
+      return function (t) {
+        for (var _len = arguments.length, v = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+          v[_key - 1] = arguments[_key];
         }
 
-        return retrieve(info, new Hole(type, template, values));
+        return unroll(i, {
+          type: type,
+          template: t,
+          values: v
+        });
       };
     };
 
-    return defineProperties(function (template) {
-      for (var _len2 = arguments.length, values = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-        values[_key2 - 1] = arguments[_key2];
+    return defineProperties(function (t) {
+      for (var _len2 = arguments.length, v = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        v[_key2 - 1] = arguments[_key2];
       }
 
-      return new Hole(type, template, values);
+      return new Hole(type, t, v);
     }, {
       "for": {
         value: function value(ref, id) {
-          var memo = cache.get(ref) || cache.set(ref, create(null)).get(ref);
-          return memo[id] || (memo[id] = fixed(cacheInfo()));
+          var memo = keyed.get(ref) || setCache(keyed, ref, create(null));
+          return memo[id] || (memo[id] = fixed(createCache()));
         }
       },
       node: {
-        value: function value(template) {
-          for (var _len3 = arguments.length, values = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-            values[_key3 - 1] = arguments[_key3];
+        value: function value(t) {
+          for (var _len3 = arguments.length, v = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+            v[_key3 - 1] = arguments[_key3];
           }
 
-          return retrieve(cacheInfo(), new Hole(type, template, values));
+          return unroll(createCache(), {
+            type: type,
+            template: t,
+            values: v
+          });
         }
       }
     });
@@ -708,8 +660,8 @@ var uhtml = (function (exports) {
   var svg = util('svg');
   var render = function render(where, what) {
     var hole = typeof what === 'function' ? what() : what;
-    var info = cache.get(where) || setCache(where);
-    var wire = hole instanceof Hole ? retrieve(info, hole) : hole;
+    var info = cache$1.get(where) || setCache(cache$1, where, createCache());
+    var wire = hole instanceof Hole ? unroll(info, hole) : hole;
 
     if (wire !== info.wire) {
       info.wire = wire;
