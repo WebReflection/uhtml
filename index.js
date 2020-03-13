@@ -570,7 +570,8 @@ var uhtml = (function (exports) {
     var type = _ref2.type,
         template = _ref2.template,
         values = _ref2.values;
-    unrollValues(info, values);
+    var length = values.length;
+    unrollValues(info, values, length);
     var entry = info.entry;
     if (!entry || entry.template !== template || entry.type !== type) info.entry = entry = createEntry(type, template);
     var _entry = entry,
@@ -578,18 +579,22 @@ var uhtml = (function (exports) {
         updates = _entry.updates,
         wire = _entry.wire;
 
-    for (var i = 0, length = updates.length; i < length; i++) {
+    for (var i = 0; i < length; i++) {
       updates[i](values[i]);
     }
 
     return wire || (entry.wire = persistent(content));
   };
 
-  var unrollValues = function unrollValues(info, values) {
-    for (var i = 0, length = values.length, stack = info.stack; i < length; i++) {
+  var unrollValues = function unrollValues(_ref3, values, length) {
+    var stack = _ref3.stack;
+
+    for (var i = 0; i < length; i++) {
       var hole = values[i];
-      if (hole instanceof Hole) values[i] = unroll(stack[i] || (stack[i] = createCache()), hole);else if (isArray(hole)) unrollValues(stack[i] || (stack[i] = createCache()), hole);else stack[i] = null;
+      if (hole instanceof Hole) values[i] = unroll(stack[i] || (stack[i] = createCache()), hole);else if (isArray(hole)) unrollValues(stack[i] || (stack[i] = createCache()), hole, hole.length);else stack[i] = null;
     }
+
+    if (length < stack.length) stack.splice(length);
   };
   /**
    * Holds all necessary details needed to render the content further on. 

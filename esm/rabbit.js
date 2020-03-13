@@ -69,18 +69,19 @@ const mapUpdates = (type, template) => {
 };
 
 export const unroll = (info, {type, template, values}) => {
-  unrollValues(info, values);
+  const {length} = values;
+  unrollValues(info, values, length);
   let {entry} = info;
   if (!entry || (entry.template !== template || entry.type !== type))
     info.entry = (entry = createEntry(type, template));
   const {content, updates, wire} = entry;
-  for (let i = 0, {length} = updates; i < length; i++)
+  for (let i = 0; i < length; i++)
     updates[i](values[i]);
   return wire || (entry.wire = persistent(content));
 };
 
-const unrollValues = (info, values) => {
-  for (let i = 0, {length} = values, {stack} = info; i < length; i++) {
+const unrollValues = ({stack}, values, length) => {
+  for (let i = 0; i < length; i++) {
     const hole = values[i];
     if (hole instanceof Hole)
       values[i] = unroll(
@@ -90,11 +91,14 @@ const unrollValues = (info, values) => {
     else if (isArray(hole))
       unrollValues(
         stack[i] || (stack[i] = createCache()),
-        hole
+        hole,
+        hole.length
       );
     else
       stack[i] = null;
   }
+  if (length < stack.length)
+    stack.splice(length);
 };
 
 /**
