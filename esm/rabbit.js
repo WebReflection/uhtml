@@ -2,12 +2,12 @@ import instrument from 'uparser';
 import {isArray} from 'uarray';
 import {persistent} from 'uwire';
 
-import {createCache} from './cache.js';
+import {createCache, setCache} from './cache.js';
 import {handlers} from './handlers.js';
 import {createFragment, createPath, createWalker, importNode} from './node.js';
 
 const prefix = 'isµ';
-const templates = new WeakMap;
+const cache = new WeakMap;
 
 const createEntry = (type, template) => {
   const {content, updates} = mapUpdates(type, template);
@@ -59,20 +59,16 @@ const mapTemplate = (type, template) => {
 };
 
 const mapUpdates = (type, template) => {
-  const {content, nodes} = templates.get(template) || setTemplate(type, template);
+  const {content, nodes} = (
+    cache.get(template) ||
+    setCache(cache, template, mapTemplate(type, template))
+  );
   const fragment = importNode.call(document, content, true);
   const updates = nodes.map(handlers, fragment);
   return {content: fragment, updates};
 };
 
-const setTemplate = (type, template) => {
-  const result = mapTemplate(type, template);
-  templates.set(template, result);
-  return result;
-};
-
-export const unroll = (info, hole) => {
-  const {type, template, values} = hole;
+export const unroll = (info, {type, template, values}) => {
   unrollValues(info, values);
   let {entry} = info;
   if (!entry || (entry.template !== template || entry.type !== type))

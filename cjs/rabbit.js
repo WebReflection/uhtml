@@ -3,12 +3,12 @@ const instrument = (m => m.__esModule ? /* istanbul ignore next */ m.default : /
 const {isArray} = require('uarray');
 const {persistent} = require('uwire');
 
-const {createCache} = require('./cache.js');
+const {createCache, setCache} = require('./cache.js');
 const {handlers} = require('./handlers.js');
 const {createFragment, createPath, createWalker, importNode} = require('./node.js');
 
 const prefix = 'isµ';
-const templates = new WeakMap;
+const cache = new WeakMap;
 
 const createEntry = (type, template) => {
   const {content, updates} = mapUpdates(type, template);
@@ -60,20 +60,16 @@ const mapTemplate = (type, template) => {
 };
 
 const mapUpdates = (type, template) => {
-  const {content, nodes} = templates.get(template) || setTemplate(type, template);
+  const {content, nodes} = (
+    cache.get(template) ||
+    setCache(cache, template, mapTemplate(type, template))
+  );
   const fragment = importNode.call(document, content, true);
   const updates = nodes.map(handlers, fragment);
   return {content: fragment, updates};
 };
 
-const setTemplate = (type, template) => {
-  const result = mapTemplate(type, template);
-  templates.set(template, result);
-  return result;
-};
-
-const unroll = (info, hole) => {
-  const {type, template, values} = hole;
+const unroll = (info, {type, template, values}) => {
   unrollValues(info, values);
   let {entry} = info;
   if (!entry || (entry.template !== template || entry.type !== type))
