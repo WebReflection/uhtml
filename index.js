@@ -530,8 +530,7 @@ var uhtml = (function (exports) {
           nodes.push({
             type: 'attr',
             path: createPath(node),
-            name: node.getAttribute(search) // svg: type === 'svg'
-
+            name: node.getAttribute(search)
           });
           node.removeAttribute(search);
           search = "".concat(prefix).concat(++i);
@@ -615,29 +614,29 @@ var uhtml = (function (exports) {
       defineProperties = Object.defineProperties;
   var cache$1 = new WeakMap();
 
-  var util = function util(type) {
+  var tag = function tag(type) {
     var keyed = new WeakMap();
 
-    var fixed = function fixed(i) {
-      return function (t) {
-        for (var _len = arguments.length, v = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-          v[_key - 1] = arguments[_key];
+    var fixed = function fixed(cache) {
+      return function (template) {
+        for (var _len = arguments.length, values = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+          values[_key - 1] = arguments[_key];
         }
 
-        return unroll(i, {
+        return unroll(cache, {
           type: type,
-          template: t,
-          values: v
+          template: template,
+          values: values
         });
       };
     };
 
-    return defineProperties(function (t) {
-      for (var _len2 = arguments.length, v = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
-        v[_key2 - 1] = arguments[_key2];
+    return defineProperties(function (template) {
+      for (var _len2 = arguments.length, values = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
+        values[_key2 - 1] = arguments[_key2];
       }
 
-      return new Hole(type, t, v);
+      return new Hole(type, template, values);
     }, {
       "for": {
         value: function value(ref, id) {
@@ -646,23 +645,23 @@ var uhtml = (function (exports) {
         }
       },
       node: {
-        value: function value(t) {
-          for (var _len3 = arguments.length, v = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-            v[_key3 - 1] = arguments[_key3];
+        value: function value(template) {
+          for (var _len3 = arguments.length, values = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+            values[_key3 - 1] = arguments[_key3];
           }
 
           return unroll(createCache(), {
             type: type,
-            template: t,
-            values: v
-          });
+            template: template,
+            values: values
+          }).valueOf();
         }
       }
     });
   };
 
-  var html = util('html');
-  var svg = util('svg');
+  var html = tag('html');
+  var svg = tag('svg');
   var render = function render(where, what) {
     var hole = typeof what === 'function' ? what() : what;
     var info = cache$1.get(where) || setCache(cache$1, where, createCache());

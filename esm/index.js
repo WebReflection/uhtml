@@ -4,23 +4,34 @@ import {Hole, unroll} from './rabbit.js';
 const {create, defineProperties} = Object;
 const cache = new WeakMap;
 
-const util = type => {
+const tag = type => {
   const keyed = new WeakMap;
-  const fixed = i => (t, ...v) => unroll(i, {type, template: t, values: v});
-  return defineProperties((t, ...v) => new Hole(type, t, v), {
-    for: {value(ref, id) {
-      const memo = keyed.get(ref) || setCache(keyed, ref, create(null));
-      return memo[id] || (memo[id] = fixed(createCache()));
-    }},
-    node: {value:
-      (t, ...v) => unroll(createCache(), {type, template: t, values: v})
+  const fixed = cache => (template, ...values) => unroll(
+    cache,
+    {type, template, values}
+  );
+  return defineProperties(
+    (template, ...values) => new Hole(type, template, values),
+    {
+      for: {
+        value(ref, id) {
+          const memo = keyed.get(ref) || setCache(keyed, ref, create(null));
+          return memo[id] || (memo[id] = fixed(createCache()));
+        }
+      },
+      node: {
+        value: (template, ...values) => unroll(
+          createCache(),
+          {type, template, values}
+        ).valueOf()
+      }
     }
-  });
+  );
 };
 
-export const html = util('html');
+export const html = tag('html');
 
-export const svg = util('svg');
+export const svg = tag('svg');
 
 export const render = (where, what) => {
   const hole = typeof what === 'function' ? what() : what;

@@ -41,7 +41,6 @@ const mapTemplate = (type, template) => {
           type: 'attr',
           path: createPath(node),
           name: node.getAttribute(search),
-          // svg: type === 'svg'
         });
         node.removeAttribute(search);
         search = `${prefix}${++i}`;

@@ -11,16 +11,22 @@
 
 const {render, html} = uhtml;
 
-const span = (x, i) => html`<span class="a">${x}</span>`;
+function span(x, i) {
+  return html`<span class="a">${x}</span>`;
+  // return html.for(this, x)`<span class="a">${x}</span>`;
+}
+
+const div1 = {};
+const div2 = {};
 
 let first = 0;
 const renderDivs = (firstRow, secondRow) => html`
   <div>
-    ${firstRow.map(span)}
+    ${firstRow.map(span, div1)}
   </div>
   <hr>
   <div>
-    ${secondRow.map(span)}
+    ${secondRow.map(span, div2)}
   </div>
 `;
 
