@@ -1,9 +1,9 @@
 'use strict';
+const umap = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('umap'));
 const instrument = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('uparser'));
 const {isArray} = require('uarray');
 const {persistent} = require('uwire');
 
-const {createCache, setCache} = require('./cache.js');
 const {handlers} = require('./handlers.js');
 const {createFragment, createPath, createWalker, importNode} = require('./node.js');
 
@@ -20,7 +20,25 @@ const prefix = 'isµ';
 // should be parsed once, and once only, as it will always represent the same
 // content, within the exact same amount of updates each time.
 // This cache relates each template to its unique content and updates.
-const cache = new WeakMap;
+const cache = umap(new WeakMap);
+
+const createCache = () => ({
+  stack: [],    // each template gets a stack for each interpolation "hole"
+
+  entry: null,  // each entry contains details, such as:
+                //  * the template that is representing
+                //  * the type of node it represents (html or svg)
+                //  * the content fragment with all nodes
+                //  * the list of updates per each node (template holes)
+                //  * the "wired" node or fragment that will get updates
+                // if the template or type are different from the previous one
+                // the entry gets re-created each time
+
+  wire: null    // each rendered node represent some wired content and
+                // this reference to the latest one. If different, the node
+                // will be cleaned up and the new "wire" will be appended
+});
+exports.createCache = createCache;
 
 // the entry stored in the rendered node cache, and per each "hole"
 const createEntry = (type, template) => {
@@ -97,7 +115,7 @@ const mapTemplate = (type, template) => {
 const mapUpdates = (type, template) => {
   const {content, nodes} = (
     cache.get(template) ||
-    setCache(cache, template, mapTemplate(type, template))
+    cache.set(template, mapTemplate(type, template))
   );
   // clone deeply the fragment
   const fragment = importNode.call(document, content, true);

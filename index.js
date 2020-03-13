@@ -1,31 +1,16 @@
 var uhtml = (function (exports) {
   'use strict';
 
-  var createCache = function createCache() {
+  var umap = (function (_) {
     return {
-      stack: [],
-      // each template gets a stack for each interpolation "hole"
-      entry: null,
-      // each entry contains details, such as:
-      //  * the template that is representing
-      //  * the type of node it represents (html or svg)
-      //  * the content fragment with all nodes
-      //  * the list of updates per each node (template holes)
-      //  * the "wired" node or fragment that will get updates
-      // if the template or type are different from the previous one
-      // the entry gets re-created each time
-      wire: null // each rendered node represent some wired content and
-      // this reference to the latest one. If different, the node
-      // will be cleaned up and the new "wire" will be appended
+      get: _.get.bind(_),
+      set: function set(key, value) {
+        _.set(key, value);
 
+        return value;
+      }
     };
-  }; // this helper simplifies wm.get(key) || wm.set(key, value).get(key) operation
-  // enabling wm.get(key) || setCache(wm, key, value); to boost performance too
-
-  var setCache = function setCache(cache, key, value) {
-    cache.set(key, value);
-    return value;
-  };
+  });
 
   var attr = /([^\s\\>"'=]+)\s*=\s*(['"]?)$/;
   var empty = /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
@@ -550,7 +535,26 @@ var uhtml = (function (exports) {
   // content, within the exact same amount of updates each time.
   // This cache relates each template to its unique content and updates.
 
-  var cache = new WeakMap(); // the entry stored in the rendered node cache, and per each "hole"
+  var cache = umap(new WeakMap());
+  var createCache = function createCache() {
+    return {
+      stack: [],
+      // each template gets a stack for each interpolation "hole"
+      entry: null,
+      // each entry contains details, such as:
+      //  * the template that is representing
+      //  * the type of node it represents (html or svg)
+      //  * the content fragment with all nodes
+      //  * the list of updates per each node (template holes)
+      //  * the "wired" node or fragment that will get updates
+      // if the template or type are different from the previous one
+      // the entry gets re-created each time
+      wire: null // each rendered node represent some wired content and
+      // this reference to the latest one. If different, the node
+      // will be cleaned up and the new "wire" will be appended
+
+    };
+  }; // the entry stored in the rendered node cache, and per each "hole"
 
   var createEntry = function createEntry(type, template) {
     var _mapUpdates = mapUpdates(type, template),
@@ -641,7 +645,7 @@ var uhtml = (function (exports) {
 
 
   var mapUpdates = function mapUpdates(type, template) {
-    var _ref = cache.get(template) || setCache(cache, template, mapTemplate(type, template)),
+    var _ref = cache.get(template) || cache.set(template, mapTemplate(type, template)),
         content = _ref.content,
         nodes = _ref.nodes; // clone deeply the fragment
 
@@ -729,12 +733,12 @@ var uhtml = (function (exports) {
   var create = Object.create,
       defineProperties = Object.defineProperties; // each rendered node gets its own cache
 
-  var cache$1 = new WeakMap(); // both `html` and `svg` template literal tags are polluted
+  var cache$1 = umap(new WeakMap()); // both `html` and `svg` template literal tags are polluted
   // with a `for(ref[, id])` and a `node` tag too
 
   var tag = function tag(type) {
     // both `html` and `svg` tags have their own cache
-    var keyed = new WeakMap(); // keyed operations always re-use the same cache and unroll
+    var keyed = umap(new WeakMap()); // keyed operations always re-use the same cache and unroll
     // the template and its interpolations right away
 
     var fixed = function fixed(cache) {
@@ -766,7 +770,7 @@ var uhtml = (function (exports) {
         // related node, handy with JSON results and mutable list of objects
         // that usually carry a unique identifier
         value: function value(ref, id) {
-          var memo = keyed.get(ref) || setCache(keyed, ref, create(null));
+          var memo = keyed.get(ref) || keyed.set(ref, create(null));
           return memo[id] || (memo[id] = fixed(createCache()));
         }
       },
@@ -798,7 +802,7 @@ var uhtml = (function (exports) {
 
   var render = function render(where, what) {
     var hole = typeof what === 'function' ? what() : what;
-    var info = cache$1.get(where) || setCache(cache$1, where, createCache());
+    var info = cache$1.get(where) || cache$1.set(where, createCache());
     var wire = hole instanceof Hole ? unroll(info, hole) : hole;
 
     if (wire !== info.wire) {

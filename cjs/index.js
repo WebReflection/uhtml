@@ -1,17 +1,17 @@
 'use strict';
-const {createCache, setCache} = require('./cache.js');
-const {Hole, unroll} = require('./rabbit.js');
+const umap = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('umap'));
+const {Hole, createCache, unroll} = require('./rabbit.js');
 
 const {create, defineProperties} = Object;
 
 // each rendered node gets its own cache
-const cache = new WeakMap;
+const cache = umap(new WeakMap);
 
 // both `html` and `svg` template literal tags are polluted
 // with a `for(ref[, id])` and a `node` tag too
 const tag = type => {
   // both `html` and `svg` tags have their own cache
-  const keyed = new WeakMap;
+  const keyed = umap(new WeakMap);
   // keyed operations always re-use the same cache and unroll
   // the template and its interpolations right away
   const fixed = cache => (template, ...values) => unroll(
@@ -29,7 +29,7 @@ const tag = type => {
         // related node, handy with JSON results and mutable list of objects
         // that usually carry a unique identifier
         value(ref, id) {
-          const memo = keyed.get(ref) || setCache(keyed, ref, create(null));
+          const memo = keyed.get(ref) || keyed.set(ref, create(null));
           return memo[id] || (memo[id] = fixed(createCache()));
         }
       },
@@ -59,7 +59,7 @@ exports.svg = svg;
 // then it's "unrolled" to resolve all its inner nodes.
 const render = (where, what) => {
   const hole = typeof what === 'function' ? what() : what;
-  const info = cache.get(where) || setCache(cache, where, createCache());
+  const info = cache.get(where) || cache.set(where, createCache());
   const wire = hole instanceof Hole ? unroll(info, hole) : hole;
   if (wire !== info.wire) {
     info.wire = wire;
