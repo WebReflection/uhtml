@@ -12,8 +12,8 @@
 const {render, html} = uhtml;
 
 function span(x, i) {
-  return html`<span class="a">${x}</span>`;
-  // return html.for(this, x)`<span class="a">${x}</span>`;
+  // return html`<span class="a">${x}</span>`;
+  return html.for(this, x)`<span class="a">${x}</span>`;
 }
 
 const div1 = {};

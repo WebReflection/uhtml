@@ -4,6 +4,29 @@ import {diffable} from 'uwire';
 
 import {reducePath} from './node.js';
 
+const diff = (comment, oldNodes, newNodes) => udomdiff(
+  comment.parentNode,
+  // TODO: there is a possible edge case where a node has been
+  //       removed manually, or it was a keyed one, attached
+  //       to a shared reference between renders.
+  //       In this case udomdiff might fail at removing such node
+  //       as its parent won't be the expected one.
+  //       The best way to avoid this issue is to filter oldNodes
+  //       in search of those not live, or not in the current parent
+  //       anymore, but this would require both a change to uwire,
+  //       exposing a parentNode from the firstChild, as example,
+  //       but also a filter per each diff that should exclude nodes
+  //       that are not in there, penalizing performance quite a lot.
+  //       As this has been also a potential issue with domdiff,
+  //       and both lighterhtml and hyperHTML might fail with this
+  //       very specific edge case, I might as well document this possible
+  //       "diffing shenanigan" and call it a day.
+  oldNodes,
+  newNodes,
+  diffable,
+  comment
+);
+
 const handleAnything = (comment, nodes) => {
   let oldValue;
   const text = document.createTextNode('');
@@ -15,57 +38,39 @@ const handleAnything = (comment, nodes) => {
         if (oldValue !== newValue) {
           oldValue = newValue;
           text.textContent = newValue;
-          nodes = udomdiff(
-            comment.parentNode,
-            nodes,
-            [text],
-            diffable,
-            comment
-          );
+          nodes = diff(comment, nodes, [text]);
         }
         break;
       case 'object':
       case 'undefined':
         if (newValue == null) {
-          nodes = udomdiff(comment.parentNode, nodes, [], diffable, comment);
+          if (oldValue) {
+            oldValue = newValue;
+            nodes = diff(comment, nodes, []);
+          }
           break;
         }
       default:
-        oldValue = newValue;
         if (isArray(newValue)) {
+          oldValue = newValue;
           if (newValue.length === 0)
-            nodes = udomdiff(comment.parentNode, nodes, [], diffable, comment);
-          else {
-            switch (typeof newValue[0]) {
-              case 'string':
-              case 'number':
-              case 'boolean':
-                anyContent(String(newValue));
-                break;
-              default:
-                nodes = udomdiff(
-                  comment.parentNode,
-                  nodes,
-                  newValue,
-                  diffable,
-                  comment
-                );
-                break;
-            }
-          }
+            nodes = diff(comment, nodes, []);
+          else if (typeof newValue[0] === 'object')
+            nodes = diff(comment, nodes, newValue);
+          else
+            anyContent(String(newValue));
         }
         // There is no `else` here, meaning if the content
         // is not expected one, nothing happens, as easy as that.
         /* istanbul ignore else */
-        else if ('ELEMENT_NODE' in newValue) {
-          nodes = udomdiff(
-            comment.parentNode,
+        else if ('ELEMENT_NODE' in newValue && newValue !== oldValue) {
+          oldValue = newValue;
+          nodes = diff(
+            comment,
             nodes,
             newValue.nodeType === 11 ?
               slice.call(newValue.childNodes) :
-              [newValue],
-            diffable,
-            comment
+              [newValue]
           );
         }
         break;
