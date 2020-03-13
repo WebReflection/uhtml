@@ -4,10 +4,24 @@ var uhtml = (function (exports) {
   var createCache = function createCache() {
     return {
       stack: [],
+      // each template gets a stack for each interpolation "hole"
       entry: null,
-      wire: null
+      // each entry contains details, such as:
+      //  * the template that is representing
+      //  * the type of node it represents (html or svg)
+      //  * the content fragment with all nodes
+      //  * the list of updates per each node (template holes)
+      //  * the "wired" node or fragment that will get updates
+      // if the template or type are different from the previous one
+      // the entry gets re-created each time
+      wire: null // each rendered node represent some wired content and
+      // this reference to the latest one. If different, the node
+      // will be cleaned up and the new "wire" will be appended
+
     };
-  };
+  }; // this helper simplifies wm.get(key) || wm.set(key, value).get(key) operation
+  // enabling wm.get(key) || setCache(wm, key, value); to boost performance too
+
   var setCache = function setCache(cache, key, value) {
     cache.set(key, value);
     return value;
@@ -316,7 +330,10 @@ var uhtml = (function (exports) {
 
   var reducePath = function reducePath(node, i) {
     return node.childNodes[i];
-  };
+  }; // from a fragment container, create an array of indexes
+  // related to its child nodes, so that it's possible
+  // to retrieve later on exact node via reducePath
+
   var createPath = function createPath(node) {
     var path = [];
     var _node = node,
@@ -333,19 +350,18 @@ var uhtml = (function (exports) {
   var _document = document,
       createTreeWalker = _document.createTreeWalker,
       importNode = _document.importNode;
+
+  var IE = importNode.length != 1;
+  var createFragment = IE ? // basicHTML would never have a false case,
   // unless forced, but it has no value for this coverage.
   // IE11 and old Edge are passing live tests so we're good.
 
-  var IE = importNode.length != 1;
-  var createFragment = IE ?
   /* istanbul ignore next */
   function (text, type) {
     return importNode.call(document, createContent(text, type), true);
-  } : createContent; // to support IE10 and IE9 I could pass a callback instead
-  // with an `acceptNode` mode that's the callback itself
-  // function acceptNode() { return 1; } acceptNode.acceptNode = acceptNode;
-  // however, I really don't care anymore about IE10 and IE9, as these would
-  // require also a WeakMap polyfill, and have no reason to exist whatsoever.
+  } : createContent; // IE11 and old Edge have a different createTreeWalker signature that
+  // has been deprecated in other browsers. This export is needed only
+  // to guarantee the TreeWalker doesn't show warnings and, ultimately, works
 
   var createWalker = IE ?
   /* istanbul ignore next */
@@ -372,24 +388,30 @@ var uhtml = (function (exports) {
     //       very specific edge case, I might as well document this possible
     //       "diffing shenanigan" and call it a day.
     oldNodes, newNodes, diffable, comment);
-  };
+  }; // if an interpolation represents a comment, the whole
+  // diffing will be related to such comment.
+  // This helper is in charge of understanding how the new
+  // content for such interpolation/hole should be updated
+
 
   var handleAnything = function handleAnything(comment, nodes) {
-    var oldValue;
-    var text = document.createTextNode('');
+    var oldValue, text;
 
     var anyContent = function anyContent(newValue) {
       switch (typeof(newValue)) {
+        // primitives are handled as text content
         case 'string':
         case 'number':
         case 'boolean':
           if (oldValue !== newValue) {
             oldValue = newValue;
+            if (!text) text = document.createTextNode('');
             text.textContent = newValue;
             nodes = diff(comment, nodes, [text]);
           }
 
           break;
+        // null, and undefined are used to cleanup previous content
 
         case 'object':
         case 'undefined':
@@ -402,11 +424,19 @@ var uhtml = (function (exports) {
             break;
           }
 
+        // arrays and nodes have a special treatment
+
         default:
           if (isArray(newValue)) {
-            oldValue = newValue;
-            if (newValue.length === 0) nodes = diff(comment, nodes, []);else if (typeof(newValue[0]) === 'object') nodes = diff(comment, nodes, newValue);else anyContent(String(newValue));
-          } // There is no `else` here, meaning if the content
+            oldValue = newValue; // arrays can be used to cleanup, if empty
+
+            if (newValue.length === 0) nodes = diff(comment, nodes, []); // or diffed, if these contains nodes or "wires"
+            else if (typeof(newValue[0]) === 'object') nodes = diff(comment, nodes, newValue); // in all other cases the content is stringified as is
+              else anyContent(String(newValue));
+          } // if the new value is a DOM node, or a wire, and it's
+          // different from the one already live, then it's diffed.
+          // if the node is a fragment, it's appended once via its childNodes
+          // There is no `else` here, meaning if the content
           // is not expected one, nothing happens, as easy as that.
 
           /* istanbul ignore else */
@@ -420,7 +450,13 @@ var uhtml = (function (exports) {
     };
 
     return anyContent;
-  };
+  }; // attributes can be:
+  //  * ref=${...}      for hooks and other purposes
+  //  * .setter=${...}  for Custom Elements setters or nodes with setters
+  //                    such as buttons, details, options, select, etc
+  //  * onevent=${...}  to automatically handle event listeners
+  //  * generic=${...}  to handle an attribute just like an attribute
+
 
   var handleAttribute = function handleAttribute(node, name) {
     // hooks and ref
@@ -475,7 +511,11 @@ var uhtml = (function (exports) {
         }
       }
     };
-  };
+  }; // style and textarea nodes can change only their text
+  // without any possibility to accept child nodes.
+  // in these two cases the content is simply updated, or cleaned,
+  // accordingly with the passed value.
+
 
   var handleText = function handleText(node) {
     var oldValue;
@@ -485,7 +525,11 @@ var uhtml = (function (exports) {
         node.textContent = newValue == null ? '' : newValue;
       }
     };
-  };
+  }; // each mapped update carries the update type and its path
+  // the type is either node, attribute, or text, while
+  // the path is how to retrieve the related node to update.
+  // In the attribute case, the attribute name is also carried along.
+
 
   function handlers(options) {
     var type = options.type,
@@ -494,8 +538,19 @@ var uhtml = (function (exports) {
     return type === 'node' ? handleAnything(node, []) : type === 'attr' ? handleAttribute(node, options.name) : handleText(node);
   }
 
-  var prefix = 'isµ';
-  var cache = new WeakMap();
+  // that contain the related unique id. In the attribute cases
+  // isµX="attribute-name" will be used to map current X update to that
+  // attribute name, while comments will be like <!--isµX-->, to map
+  // the update to that specific comment node, hence its parent.
+  // style and textarea will have <!--isµX--> text content, and are handled
+  // directly through text-only updates.
+
+  var prefix = 'isµ'; // Template Literals are unique per scope and static, meaning a template
+  // should be parsed once, and once only, as it will always represent the same
+  // content, within the exact same amount of updates each time.
+  // This cache relates each template to its unique content and updates.
+
+  var cache = new WeakMap(); // the entry stored in the rendered node cache, and per each "hole"
 
   var createEntry = function createEntry(type, template) {
     var _mapUpdates = mapUpdates(type, template),
@@ -509,20 +564,30 @@ var uhtml = (function (exports) {
       updates: updates,
       wire: null
     };
-  };
+  }; // a template is instrumented to be able to retrieve where updates are needed.
+  // Each unique template becomes a fragment, cloned once per each other
+  // operation based on the same template, i.e. data => html`<p>${data}</p>`
+
 
   var mapTemplate = function mapTemplate(type, template) {
     var text = instrument(template, prefix);
-    var content = createFragment(text, type);
+    var content = createFragment(text, type); // once instrumented and reproduced as fragment, it's crawled
+    // to find out where each update is in the fragment tree
+
     var tw = createWalker(content);
     var nodes = [];
     var length = template.length - 1;
-    var i = 0;
+    var i = 0; // updates are searched via unique names, linearly increased across the tree
+    // <div isµ0="attr" isµ1="other"><!--isµ2--><style><!--isµ3--</style></div>
+
     var search = "".concat(prefix).concat(i);
 
     while (i < length) {
-      var node = tw.nextNode();
-      if (!node) throw "bad template: ".concat(text);
+      var node = tw.nextNode(); // if not all updates are bound but there's nothing else to crawl
+      // it means that there is something wrong with the template.
+
+      if (!node) throw "bad template: ".concat(text); // if the current node is a comment, and it contains isµX
+      // it means the update should take care of any content
 
       if (node.nodeType === 8) {
         // The only comments to be considered are those
@@ -537,6 +602,10 @@ var uhtml = (function (exports) {
           search = "".concat(prefix).concat(++i);
         }
       } else {
+        // if the node is not a comment, loop through all its attributes
+        // named isµX and relate attribute updates to this node and the
+        // attribute name, retrieved through node.getAttribute("isµX")
+        // the isµX attribute will be removed as irrelevant for the layout
         while (node.hasAttribute(search)) {
           nodes.push({
             type: 'attr',
@@ -545,7 +614,9 @@ var uhtml = (function (exports) {
           });
           node.removeAttribute(search);
           search = "".concat(prefix).concat(++i);
-        }
+        } // if the node was a style or a textarea one, check its content
+        // and if it is <!--isµX--> then update tex-only this node
+
 
         if (/^(?:style|textarea)$/i.test(node.tagName) && node.textContent.trim() === "<!--".concat(search, "-->")) {
           nodes.push({
@@ -555,59 +626,93 @@ var uhtml = (function (exports) {
           search = "".concat(prefix).concat(++i);
         }
       }
-    }
+    } // once all nodes to update, or their attributes, are known, the content
+    // will be cloned in the future to represent the template, and all updates
+    // related to such content retrieved right away without needing to re-crawl
+    // the exact same template, and its content, more than once.
+
 
     return {
       content: content,
       nodes: nodes
     };
-  };
+  }; // if a template is unknown, perform the previous mapping, otherwise grab
+  // its details such as the fragment with all nodes, and updates info.
+
 
   var mapUpdates = function mapUpdates(type, template) {
     var _ref = cache.get(template) || setCache(cache, template, mapTemplate(type, template)),
         content = _ref.content,
-        nodes = _ref.nodes;
+        nodes = _ref.nodes; // clone deeply the fragment
 
-    var fragment = importNode.call(document, content, true);
-    var updates = nodes.map(handlers, fragment);
+
+    var fragment = importNode.call(document, content, true); // and relate an update handler per each node that needs one
+
+    var updates = nodes.map(handlers, fragment); // return the fragment and all updates to use within its nodes
+
     return {
       content: fragment,
       updates: updates
     };
-  };
+  }; // as html and svg can be nested calls, but no parent node is known
+  // until rendered somewhere, the unroll operation is needed to
+  // discover what to do with each interpolation, which will result
+  // into an update operation.
+
 
   var unroll = function unroll(info, _ref2) {
     var type = _ref2.type,
         template = _ref2.template,
         values = _ref2.values;
-    var length = values.length;
+    var length = values.length; // interpolations can contain holes and arrays, so these need
+    // to be recursively discovered
+
     unrollValues(info, values, length);
-    var entry = info.entry;
+    var entry = info.entry; // if the cache entry is either null or different from the template
+    // and the type this unroll should resolve, create a new entry
+    // assigning a new content fragment and the list of updates.
+
     if (!entry || entry.template !== template || entry.type !== type) info.entry = entry = createEntry(type, template);
     var _entry = entry,
         content = _entry.content,
         updates = _entry.updates,
-        wire = _entry.wire;
+        wire = _entry.wire; // even if the fragment and its nodes is not live yet,
+    // it is already possible to update via interpolations values.
 
     for (var i = 0; i < length; i++) {
       updates[i](values[i]);
-    }
+    } // if the entry was new, or representing a different template or type,
+    // create a new persistent entity to use during diffing.
+    // This is simply a DOM node, when the template has a single container,
+    // as in `<p></p>`, or a "wire" in `<p></p><p></p>` and similar cases.
+
 
     return wire || (entry.wire = persistent(content));
-  };
+  }; // the stack retains, per each interpolation value, the cache
+  // related to each interpolation value, or null, if the render
+  // was conditional and the value is not special (Array or Hole)
 
   var unrollValues = function unrollValues(_ref3, values, length) {
     var stack = _ref3.stack;
 
     for (var i = 0; i < length; i++) {
-      var hole = values[i];
-      if (hole instanceof Hole) values[i] = unroll(stack[i] || (stack[i] = createCache()), hole);else if (isArray(hole)) unrollValues(stack[i] || (stack[i] = createCache()), hole, hole.length);else stack[i] = null;
+      var hole = values[i]; // each Hole gets unrolled and re-assigned as value
+      // so that domdiff will deal with a node/wire, not with a hole
+
+      if (hole instanceof Hole) values[i] = unroll(stack[i] || (stack[i] = createCache()), hole); // arrays are recursively resolved so that each entry will contain
+      // also a DOM node or a wire, hence it can be diffed if/when needed
+      else if (isArray(hole)) unrollValues(stack[i] || (stack[i] = createCache()), hole, hole.length); // if the value is nothing special, the stack doesn't need to retain data
+        // this is useful also to cleanup previously retained data, if the value
+        // was a Hole, or an Array, but not anymore, i.e.:
+        // const update = content => html`<div>${content}</div>`;
+        // update(listOfItems); update(null); update(html`hole`)
+        else stack[i] = null;
     }
 
     if (length < stack.length) stack.splice(length);
   };
   /**
-   * Holds all necessary details needed to render the content further on. 
+   * Holds all details wrappers needed to render the content further on.
    * @constructor
    * @param {string} type The hole type, either `html` or `svg`.
    * @param {string[]} template The template literals used to the define the content.
@@ -622,11 +727,15 @@ var uhtml = (function (exports) {
   }
 
   var create = Object.create,
-      defineProperties = Object.defineProperties;
-  var cache$1 = new WeakMap();
+      defineProperties = Object.defineProperties; // each rendered node gets its own cache
+
+  var cache$1 = new WeakMap(); // both `html` and `svg` template literal tags are polluted
+  // with a `for(ref[, id])` and a `node` tag too
 
   var tag = function tag(type) {
-    var keyed = new WeakMap();
+    // both `html` and `svg` tags have their own cache
+    var keyed = new WeakMap(); // keyed operations always re-use the same cache and unroll
+    // the template and its interpolations right away
 
     var fixed = function fixed(cache) {
       return function (template) {
@@ -642,7 +751,9 @@ var uhtml = (function (exports) {
       };
     };
 
-    return defineProperties(function (template) {
+    return defineProperties( // non keyed operations are recognized as instance of Hole
+    // during the "unroll", recursively resolved and updated
+    function (template) {
       for (var _len2 = arguments.length, values = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
         values[_key2 - 1] = arguments[_key2];
       }
@@ -650,12 +761,19 @@ var uhtml = (function (exports) {
       return new Hole(type, template, values);
     }, {
       "for": {
+        // keyed operations need a reference object, usually the parent node
+        // which is showing keyed results, and optionally a unique id per each
+        // related node, handy with JSON results and mutable list of objects
+        // that usually carry a unique identifier
         value: function value(ref, id) {
           var memo = keyed.get(ref) || setCache(keyed, ref, create(null));
           return memo[id] || (memo[id] = fixed(createCache()));
         }
       },
       node: {
+        // it is possible to create one-off content out of the box via node tag
+        // this might return the single created node, or a fragment with all
+        // nodes present at the root level and, of course, their child nodes
         value: function value(template) {
           for (var _len3 = arguments.length, values = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
             values[_key3 - 1] = arguments[_key3];
@@ -672,7 +790,12 @@ var uhtml = (function (exports) {
   };
 
   var html = tag('html');
-  var svg = tag('svg');
+  var svg = tag('svg'); // rendering means understanding what `html` or `svg` tags returned
+  // and it relates a specific node to its own unique cache.
+  // Each time the content to render changes, the node is cleaned up
+  // and the new new content is appended, and if such content is a Hole
+  // then it's "unrolled" to resolve all its inner nodes.
+
   var render = function render(where, what) {
     var hole = typeof what === 'function' ? what() : what;
     var info = cache$1.get(where) || setCache(cache$1, where, createCache());
@@ -680,7 +803,11 @@ var uhtml = (function (exports) {
 
     if (wire !== info.wire) {
       info.wire = wire;
-      where.textContent = '';
+      where.textContent = ''; // valueOf() simply returns the node itself, but in case it was a "wire"
+      // it will eventually re-append all nodes to its fragment so that such
+      // fragment can be re-appended many times in a meaningful way
+      // (wires are basically persistent fragments facades with special behavior)
+
       where.appendChild(wire.valueOf());
     }
 

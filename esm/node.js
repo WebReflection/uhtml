@@ -1,8 +1,12 @@
 import createContent from '@ungap/create-content';
 import {indexOf} from 'uarray';
 
+// from a generic path, retrieves the exact targeted node
 export const reducePath = (node, i) => node.childNodes[i];
 
+// from a fragment container, create an array of indexes
+// related to its child nodes, so that it's possible
+// to retrieve later on exact node via reducePath
 export const createPath = node => {
   const path = [];
   let {parentNode} = node;
@@ -17,12 +21,13 @@ export const createPath = node => {
 const {createTreeWalker, importNode} = document;
 export {createTreeWalker, importNode};
 
-// basicHTML would never have a false case,
-// unless forced, but it has no value for this coverage.
-// IE11 and old Edge are passing live tests so we're good.
+// this "hack" tells the library if the browser is IE11 or old Edge
 const IE = importNode.length != 1;
 
 export const createFragment = IE ?
+  // basicHTML would never have a false case,
+  // unless forced, but it has no value for this coverage.
+  // IE11 and old Edge are passing live tests so we're good.
   /* istanbul ignore next */
   (text, type) => importNode.call(
     document,
@@ -31,11 +36,9 @@ export const createFragment = IE ?
   ) :
   createContent;
 
-// to support IE10 and IE9 I could pass a callback instead
-// with an `acceptNode` mode that's the callback itself
-// function acceptNode() { return 1; } acceptNode.acceptNode = acceptNode;
-// however, I really don't care anymore about IE10 and IE9, as these would
-// require also a WeakMap polyfill, and have no reason to exist whatsoever.
+// IE11 and old Edge have a different createTreeWalker signature that
+// has been deprecated in other browsers. This export is needed only
+// to guarantee the TreeWalker doesn't show warnings and, ultimately, works
 export const createWalker = IE ?
   /* istanbul ignore next */
   fragment => createTreeWalker.call(document, fragment, 1 | 128, null, false) :
