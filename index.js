@@ -412,11 +412,9 @@ var uhtml = (function (exports) {
             }
 
             break;
-          }
+          } // arrays and nodes have a special treatment
 
-        // arrays and nodes have a special treatment
 
-        default:
           if (isArray(newValue)) {
             oldValue = newValue; // arrays can be used to cleanup, if empty
 
@@ -435,7 +433,6 @@ var uhtml = (function (exports) {
               nodes = diff(comment, nodes, newValue.nodeType === 11 ? slice.call(newValue.childNodes) : [newValue]);
             }
 
-          break;
       }
     };
 

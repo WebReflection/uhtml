@@ -58,8 +58,7 @@ const handleAnything = (comment, nodes) => {
           }
           break;
         }
-      // arrays and nodes have a special treatment
-      default:
+        // arrays and nodes have a special treatment
         if (isArray(newValue)) {
           oldValue = newValue;
           // arrays can be used to cleanup, if empty
@@ -88,7 +87,6 @@ const handleAnything = (comment, nodes) => {
               [newValue]
           );
         }
-        break;
     }
   };
   return anyContent;
