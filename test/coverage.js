@@ -116,6 +116,15 @@ render(div, sameWire('test'));
 render(div, sameWire('test'));
 render(div, sameWire(document.createElement('p')));
 
+const sameAttribute = value => html`<div test=${value} />`;
+render(body, sameAttribute(1));
+render(body, sameAttribute(null));
+render(body, sameAttribute(null));
+render(body, sameAttribute(2));
+render(body, sameAttribute(3));
+
+render(body, html`<p><!--nope--></p><p>${'hole'}</p>`);
+render(body, html`<h1>${{no: "op"}}</h1>`);
 render(body, html`<h1>test</h1>`);
 render(body, html`<h2>test</h2><h3>test</h3>`);
 render(body, html`${fragment()}`);
@@ -135,3 +144,16 @@ render(body, variousContent([
 render(body, variousContent([
   html`<p />`
 ]));
+
+
+// cover importNode
+delete require.cache[require.resolve('../cjs/handlers.js')];
+delete require.cache[require.resolve('../cjs/node.js')];
+delete require.cache[require.resolve('../cjs/rabbit.js')];
+delete require.cache[require.resolve('../cjs')];
+const importNode = document.importNode;
+document.importNode = function () {
+  return importNode.apply(this, arguments);
+};
+const uhtml = require('../cjs');
+uhtml.render(body, uhtml.html`<last test=${123}>${456}</last>`);

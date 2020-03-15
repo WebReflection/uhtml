@@ -341,21 +341,19 @@ var uhtml = (function (exports) {
       createTreeWalker = _document.createTreeWalker,
       importNode = _document.importNode;
 
-  var IE = importNode.length != 1;
-  var createFragment = IE ? // basicHTML would never have a false case,
-  // unless forced, but it has no value for this coverage.
-  // IE11 and old Edge are passing live tests so we're good.
+  var IE = importNode.length != 1; // IE11 and old Edge discard empty nodes when cloning, potentially
+  // resulting in broken paths to find updates. The workaround here
+  // is to import once, upfront, the fragment that will be cloned
+  // later on, so that paths are retrieved from one already parsed,
+  // hence without missing child nodes once re-cloned.
 
-  /* istanbul ignore next */
-  function (text, type) {
+  var createFragment = IE ? function (text, type) {
     return importNode.call(document, createContent(text, type), true);
   } : createContent; // IE11 and old Edge have a different createTreeWalker signature that
   // has been deprecated in other browsers. This export is needed only
   // to guarantee the TreeWalker doesn't show warnings and, ultimately, works
 
-  var createWalker = IE ?
-  /* istanbul ignore next */
-  function (fragment) {
+  var createWalker = IE ? function (fragment) {
     return createTreeWalker.call(document, fragment, 1 | 128, null, false);
   } : function (fragment) {
     return createTreeWalker.call(document, fragment, 1 | 128);
@@ -426,8 +424,6 @@ var uhtml = (function (exports) {
           // if the node is a fragment, it's appended once via its childNodes
           // There is no `else` here, meaning if the content
           // is not expected one, nothing happens, as easy as that.
-
-          /* istanbul ignore else */
           else if ('ELEMENT_NODE' in newValue && newValue !== oldValue) {
               oldValue = newValue;
               nodes = diff(comment, nodes, newValue.nodeType === 11 ? slice.call(newValue.childNodes) : [newValue]);
@@ -488,8 +484,6 @@ var uhtml = (function (exports) {
         } else {
           attribute.value = newValue; // There is no else case here.
           // If the attribute has no owner, it's set back.
-
-          /* istanbul ignore else */
 
           if (noOwner) {
             node.setAttributeNode(attribute);
@@ -598,8 +592,6 @@ var uhtml = (function (exports) {
       if (node.nodeType === 8) {
         // The only comments to be considered are those
         // which content is exactly the same as the searched one.
-
-        /* istanbul ignore else */
         if (node.textContent === search) {
           nodes.push({
             type: 'node',

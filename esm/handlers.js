@@ -76,7 +76,6 @@ const handleAnything = (comment, nodes) => {
         // if the node is a fragment, it's appended once via its childNodes
         // There is no `else` here, meaning if the content
         // is not expected one, nothing happens, as easy as that.
-        /* istanbul ignore else */
         else if ('ELEMENT_NODE' in newValue && newValue !== oldValue) {
           oldValue = newValue;
           nodes = diff(
@@ -143,7 +142,6 @@ const handleAttribute = (node, name) => {
         attribute.value = newValue;
         // There is no else case here.
         // If the attribute has no owner, it's set back.
-        /* istanbul ignore else */
         if (noOwner) {
           node.setAttributeNode(attribute);
           noOwner = false;
