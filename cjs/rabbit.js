@@ -50,7 +50,7 @@ const createEntry = (type, template) => {
 // Each unique template becomes a fragment, cloned once per each other
 // operation based on the same template, i.e. data => html`<p>${data}</p>`
 const mapTemplate = (type, template) => {
-  const text = instrument(template, prefix);
+  const text = instrument(template, prefix, type === 'svg');
   const content = createFragment(text, type);
   // once instrumented and reproduced as fragment, it's crawled
   // to find out where each update is in the fragment tree

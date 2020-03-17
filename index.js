@@ -38,7 +38,7 @@ var uhtml = (function (exports) {
     return empty.test(name) ? original : "<".concat(name).concat(extra.replace(trimEnd, ''), "></").concat(name, ">");
   };
 
-  var instrument = (function (template, prefix) {
+  var instrument = (function (template, prefix, svg) {
     var text = [];
 
     var _loop = function _loop(i, length) {
@@ -52,7 +52,8 @@ var uhtml = (function (exports) {
       _loop(i, length);
     }
 
-    return text.join('').trim().replace(selfClosing, regular);
+    var output = text.join('').trim();
+    return svg ? output : output.replace(selfClosing, regular);
   });
 
   var isArray = Array.isArray;
@@ -570,7 +571,7 @@ var uhtml = (function (exports) {
 
 
   var mapTemplate = function mapTemplate(type, template) {
-    var text = instrument(template, prefix);
+    var text = instrument(template, prefix, type === 'svg');
     var content = createFragment(text, type); // once instrumented and reproduced as fragment, it's crawled
     // to find out where each update is in the fragment tree
 

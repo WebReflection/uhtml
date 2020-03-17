@@ -43,7 +43,7 @@
     "uarray": "^1.0.0",
     "udomdiff": "^1.0.9",
     "umap": "^1.0.2",
-    "uparser": "^0.1.0",
+    "uparser": "^0.2.0",
     "uwire": "^1.0.1"
   },
   "repository": {
