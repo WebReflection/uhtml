@@ -1,0 +1,23 @@
+<!doctype html>
+<!-- https://github.com/Polymer/lit-html/issues/1007 -->
+<script src="../index.js"></script>
+<script>
+const {render, html} = uhtml;
+
+const someArray = ['a', 'b', 'c'];
+
+setInterval(
+  () => {
+    render(document.body, html`
+      <div>
+      ${
+        Math.random() < 0.5 ?
+          someArray.map(c => html`<p>${c}</p>`) :
+          []
+      }
+      </div>
+    `);
+  },
+  1000
+);
+</script>

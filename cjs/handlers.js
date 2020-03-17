@@ -101,7 +101,12 @@ const handleAnything = (comment, nodes) => {
 const handleAttribute = (node, name) => {
   // hooks and ref
   if (name === 'ref')
-    return ref => { ref.current = node; };
+    return ref => {
+      if (typeof ref === 'function')
+        ref(node);
+      else
+        ref.current = node;
+    };
 
   // direct setters
   if (name.slice(0, 1) === '.') {

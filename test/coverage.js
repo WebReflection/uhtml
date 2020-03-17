@@ -76,6 +76,10 @@ const reference = {};
 render(div, html`<div ref=${reference}>test</div>`);
 console.assert(reference.hasOwnProperty('current'));
 
+const fnReference = node => { fnReference.node = node; };
+render(div, html`<div ref=${fnReference}>test</div>`);
+console.assert(fnReference.node === div.firstElementChild);
+
 const withHandler = handler => html`<div onClick=${handler} />`;
 render(div, withHandler(Object));
 render(div, withHandler(Object));

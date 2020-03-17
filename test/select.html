@@ -1,0 +1,19 @@
+<!doctype html>
+<!-- https://github.com/Polymer/lit-html/issues/1052 -->
+<script src="../index.js"></script>
+<script>
+const {render, html} = uhtml;
+
+const someArray = ['a', 'b', 'c'];
+const selected = (Math.random() * someArray.length) | 0;
+
+this.onload = () => {
+  render(document.body, html`
+    <select>
+      ${someArray.map((value, i) => html`
+        <option .selected=${i === selected}>${value}</option>
+      `)}
+    </select>
+  `);
+};
+</script>
