@@ -2,7 +2,7 @@ import createContent from '@ungap/create-content';
 import {indexOf} from 'uarray';
 
 // from a generic path, retrieves the exact targeted node
-export const reducePath = (node, i) => node.childNodes[i];
+export const reducePath = ({childNodes}, i) => childNodes[i];
 
 // from a fragment container, create an array of indexes
 // related to its child nodes, so that it's possible
@@ -11,7 +11,7 @@ export const createPath = node => {
   const path = [];
   let {parentNode} = node;
   while (parentNode) {
-    path.unshift(indexOf.call(parentNode.childNodes, node));
+    path.push(indexOf.call(parentNode.childNodes, node));
     node = parentNode;
     parentNode = node.parentNode;
   }

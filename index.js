@@ -260,12 +260,84 @@ var uhtml = (function (exports) {
     return b;
   });
 
+  var aria = function aria(node) {
+    return function (value) {
+      for (var key in value) {
+        node.setAttribute(key === 'role' ? key : "aria-".concat(key), value[key]);
+      }
+    };
+  };
+  var attribute = function attribute(node, name) {
+    var oldValue,
+        orphan = true;
+    var attributeNode = document.createAttribute(name);
+    return function (newValue) {
+      if (oldValue !== newValue) {
+        oldValue = newValue;
+
+        if (oldValue == null) {
+          if (!orphan) {
+            node.removeAttributeNode(attributeNode);
+            orphan = true;
+          }
+        } else {
+          attributeNode.value = newValue;
+
+          if (orphan) {
+            node.setAttributeNode(attributeNode);
+            orphan = false;
+          }
+        }
+      }
+    };
+  };
+  var data = function data(_ref) {
+    var dataset = _ref.dataset;
+    return function (value) {
+      for (var key in value) {
+        dataset[key] = value[key];
+      }
+    };
+  };
+  var event = function event(node, name) {
+    var oldValue,
+        type = name.slice(2);
+    if (!(name in node) && name.toLowerCase() in node) type = type.toLowerCase();
+    return function (newValue) {
+      var info = isArray(newValue) ? newValue : [newValue, false];
+
+      if (oldValue !== info[0]) {
+        if (oldValue) node.removeEventListener(type, oldValue, info[1]);
+        if (oldValue = info[0]) node.addEventListener(type, oldValue, info[1]);
+      }
+    };
+  };
+  var ref = function ref(node) {
+    return function (value) {
+      if (typeof value === 'function') value(node);else value.current = node;
+    };
+  };
+  var setter = function setter(node, key) {
+    return function (value) {
+      node[key] = value;
+    };
+  };
+  var text = function text(node) {
+    var oldValue;
+    return function (newValue) {
+      if (oldValue != newValue) {
+        oldValue = newValue;
+        node.textContent = newValue == null ? '' : newValue;
+      }
+    };
+  };
+
   /*! (c) Andrea Giammarchi - ISC */
   var createContent = function (document) {
 
     var FRAGMENT = 'fragment';
     var TEMPLATE = 'template';
-    var HAS_CONTENT = 'content' in create(TEMPLATE);
+    var HAS_CONTENT = ('content' in create(TEMPLATE));
     var createHTML = HAS_CONTENT ? function (html) {
       var template = create(TEMPLATE);
       template.innerHTML = html;
@@ -315,8 +387,9 @@ var uhtml = (function (exports) {
     }
   }(document);
 
-  var reducePath = function reducePath(node, i) {
-    return node.childNodes[i];
+  var reducePath = function reducePath(_ref, i) {
+    var childNodes = _ref.childNodes;
+    return childNodes[i];
   }; // from a fragment container, create an array of indexes
   // related to its child nodes, so that it's possible
   // to retrieve later on exact node via reducePath
@@ -327,7 +400,7 @@ var uhtml = (function (exports) {
         parentNode = _node.parentNode;
 
     while (parentNode) {
-      path.unshift(indexOf.call(parentNode.childNodes, node));
+      path.push(indexOf.call(parentNode.childNodes, node));
       node = parentNode;
       parentNode = node.parentNode;
     }
@@ -379,8 +452,10 @@ var uhtml = (function (exports) {
   // content for such interpolation/hole should be updated
 
 
-  var handleAnything = function handleAnything(comment, nodes) {
-    var oldValue, text;
+  var handleAnything = function handleAnything(comment) {
+    var oldValue,
+        text,
+        nodes = [];
 
     var anyContent = function anyContent(newValue) {
       switch (typeof(newValue)) {
@@ -390,8 +465,7 @@ var uhtml = (function (exports) {
         case 'boolean':
           if (oldValue !== newValue) {
             oldValue = newValue;
-            if (!text) text = document.createTextNode('');
-            text.textContent = newValue;
+            if (text) text.textContent = newValue;else text = document.createTextNode(newValue);
             nodes = diff(comment, nodes, [text]);
           }
 
@@ -401,7 +475,7 @@ var uhtml = (function (exports) {
         case 'object':
         case 'undefined':
           if (newValue == null) {
-            if (oldValue) {
+            if (oldValue != newValue) {
               oldValue = newValue;
               nodes = diff(comment, nodes, []);
             }
@@ -416,15 +490,18 @@ var uhtml = (function (exports) {
             if (newValue.length === 0) nodes = diff(comment, nodes, []); // or diffed, if these contains nodes or "wires"
             else if (typeof(newValue[0]) === 'object') nodes = diff(comment, nodes, newValue); // in all other cases the content is stringified as is
               else anyContent(String(newValue));
+            break;
           } // if the new value is a DOM node, or a wire, and it's
           // different from the one already live, then it's diffed.
           // if the node is a fragment, it's appended once via its childNodes
           // There is no `else` here, meaning if the content
           // is not expected one, nothing happens, as easy as that.
-          else if ('ELEMENT_NODE' in newValue && newValue !== oldValue) {
-              oldValue = newValue;
-              nodes = diff(comment, nodes, newValue.nodeType === 11 ? slice.call(newValue.childNodes) : [newValue]);
-            }
+
+
+          if ('ELEMENT_NODE' in newValue && oldValue !== newValue) {
+            oldValue = newValue;
+            nodes = diff(comment, nodes, newValue.nodeType === 11 ? slice.call(newValue.childNodes) : [newValue]);
+          }
 
       }
     };
@@ -432,6 +509,8 @@ var uhtml = (function (exports) {
     return anyContent;
   }; // attributes can be:
   //  * ref=${...}      for hooks and other purposes
+  //  * aria=${...}     for aria attributes
+  //  * data=${...}     for dataset related attributes
   //  * .setter=${...}  for Custom Elements setters or nodes with setters
   //                    such as buttons, details, options, select, etc
   //  * onevent=${...}  to automatically handle event listeners
@@ -439,70 +518,12 @@ var uhtml = (function (exports) {
 
 
   var handleAttribute = function handleAttribute(node, name) {
-    // hooks and ref
-    if (name === 'ref') return function (ref) {
-      if (typeof ref === 'function') ref(node);else ref.current = node;
-    }; // direct setters
-
-    if (name.slice(0, 1) === '.') {
-      var setter = name.slice(1);
-      return function (value) {
-        node[setter] = value;
-      };
-    }
-
-    var oldValue; // events
-
-    if (name.slice(0, 2) === 'on') {
-      var type = name.slice(2);
-      if (!(name in node) && name.toLowerCase() in node) type = type.toLowerCase();
-      return function (newValue) {
-        var info = isArray(newValue) ? newValue : [newValue, false];
-
-        if (oldValue !== info[0]) {
-          if (oldValue) node.removeEventListener(type, oldValue, info[1]);
-          if (oldValue = info[0]) node.addEventListener(type, oldValue, info[1]);
-        }
-      };
-    } // all other cases
-
-
-    var noOwner = true;
-    var attribute = document.createAttribute(name);
-    return function (newValue) {
-      if (oldValue !== newValue) {
-        oldValue = newValue;
-
-        if (oldValue == null) {
-          if (!noOwner) {
-            node.removeAttributeNode(attribute);
-            noOwner = true;
-          }
-        } else {
-          attribute.value = newValue; // There is no else case here.
-          // If the attribute has no owner, it's set back.
-
-          if (noOwner) {
-            node.setAttributeNode(attribute);
-            noOwner = false;
-          }
-        }
-      }
-    };
-  }; // style and textarea nodes can change only their text
-  // without any possibility to accept child nodes.
-  // in these two cases the content is simply updated, or cleaned,
-  // accordingly with the passed value.
-
-
-  var handleText = function handleText(node) {
-    var oldValue;
-    return function (newValue) {
-      if (oldValue !== newValue) {
-        oldValue = newValue;
-        node.textContent = newValue == null ? '' : newValue;
-      }
-    };
+    if (name === 'ref') return ref(node);
+    if (name === 'aria') return aria(node);
+    if (name === 'data') return data(node);
+    if (name.slice(0, 1) === '.') return setter(node, name.slice(1));
+    if (name.slice(0, 2) === 'on') return event(node, name);
+    return attribute(node, name);
   }; // each mapped update carries the update type and its path
   // the type is either node, attribute, or text, while
   // the path is how to retrieve the related node to update.
@@ -512,8 +533,8 @@ var uhtml = (function (exports) {
   function handlers(options) {
     var type = options.type,
         path = options.path;
-    var node = path.reduce(reducePath, this);
-    return type === 'node' ? handleAnything(node, []) : type === 'attr' ? handleAttribute(node, options.name) : handleText(node);
+    var node = path.reduceRight(reducePath, this);
+    return type === 'node' ? handleAnything(node) : type === 'attr' ? handleAttribute(node, options.name) : text(node);
   }
 
   // that contain the related unique id. In the attribute cases

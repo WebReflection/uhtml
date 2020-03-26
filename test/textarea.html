@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<script src="../index.js"></script>
+<script>
+this.onload = () => {
+  const {render, html} = uhtml;
+
+  let text = '';
+
+  const clear = () => {
+    text = '';
+    update();
+  };
+
+  const updateText = e => {
+    text = e.currentTarget.value;
+    update();
+  };
+
+  const update = () => render(document.body, html`
+    <textarea oninput=${updateText} .value=${text}/>
+    <br>
+    <button onclick=${clear}>clear</button>
+    <div>Text: ${text}</div>
+  `);
+
+  update();
+};
+</script>

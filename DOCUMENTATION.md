@@ -371,7 +371,21 @@ These are the rules to follow for attributes:
   * if the attribute name starts with `on`, as example, `onclick=${...}`, it will be set as listener. If the listener changes, the previous one will be automatically removed. If the listener is an `Array` like `[listener, {once:true}]`, the second entry of the array would be used as listener's options.
   * if the attribute starts with a `.` dot, as in `.setter=${value}`, the value will be passed directly to the element per each update. If such value is a known setter, either native elements or defined via Custom Elements, the setter will be invoked per each update, even if the value is the same
   * if the attribute name is `ref`, as in `ref=${object}`, the `object.current` property will be assigned to the node, once this is rendered, and per each update
+  * if the attribute name is `aria`, as in `aria=${object}`, aria attributes are applied to the node, including the `role` one.
+  * if the attribute name is `data`, as in `data=${object}`, the `node.dataset` gets populated with all values.
 
+
+Following an example of both `aria` and `data` cases:
+
+```js
+// the aria special case
+html`<div aria=${{labelledBy: 'id', role: 'button'}} />`;
+//=> <div aria-labelledby="id" role="button"></div>
+
+// the data special case
+html`<div data=${{key: 'value', otherKey: 'otherValue'}} />`;
+//=> <div data-key="value" data-other-key="otherValue"></div>
+```
 
 ## API: HTML/SVG Content
 
