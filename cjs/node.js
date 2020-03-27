@@ -3,7 +3,7 @@ const createContent = (m => m.__esModule ? /* istanbul ignore next */ m.default 
 const {indexOf} = require('uarray');
 
 // from a generic path, retrieves the exact targeted node
-const reducePath = (node, i) => node.childNodes[i];
+const reducePath = ({childNodes}, i) => childNodes[i];
 exports.reducePath = reducePath;
 
 // from a fragment container, create an array of indexes
@@ -13,7 +13,7 @@ const createPath = node => {
   const path = [];
   let {parentNode} = node;
   while (parentNode) {
-    path.unshift(indexOf.call(parentNode.childNodes, node));
+    path.push(indexOf.call(parentNode.childNodes, node));
     node = parentNode;
     parentNode = node.parentNode;
   }

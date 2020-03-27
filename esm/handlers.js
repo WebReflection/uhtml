@@ -1,5 +1,6 @@
 import {isArray, slice} from 'uarray';
 import udomdiff from 'udomdiff';
+import {aria, attribute, data, event, ref, setter, text} from 'uhandlers';
 import {diffable} from 'uwire';
 
 import {reducePath} from './node.js';
@@ -32,8 +33,8 @@ const diff = (comment, oldNodes, newNodes) => udomdiff(
 // diffing will be related to such comment.
 // This helper is in charge of understanding how the new
 // content for such interpolation/hole should be updated
-const handleAnything = (comment, nodes) => {
-  let oldValue, text;
+const handleAnything = comment => {
+  let oldValue, text, nodes = [];
   const anyContent = newValue => {
     switch (typeof newValue) {
       // primitives are handled as text content
@@ -42,9 +43,10 @@ const handleAnything = (comment, nodes) => {
       case 'boolean':
         if (oldValue !== newValue) {
           oldValue = newValue;
-          if (!text)
-            text = document.createTextNode('');
-          text.textContent = newValue;
+          if (text)
+            text.textContent = newValue;
+          else
+            text = document.createTextNode(newValue);
           nodes = diff(comment, nodes, [text]);
         }
         break;
@@ -52,7 +54,7 @@ const handleAnything = (comment, nodes) => {
       case 'object':
       case 'undefined':
         if (newValue == null) {
-          if (oldValue) {
+          if (oldValue != newValue) {
             oldValue = newValue;
             nodes = diff(comment, nodes, []);
           }
@@ -70,13 +72,14 @@ const handleAnything = (comment, nodes) => {
           // in all other cases the content is stringified as is
           else
             anyContent(String(newValue));
+          break;
         }
         // if the new value is a DOM node, or a wire, and it's
         // different from the one already live, then it's diffed.
         // if the node is a fragment, it's appended once via its childNodes
         // There is no `else` here, meaning if the content
         // is not expected one, nothing happens, as easy as that.
-        else if ('ELEMENT_NODE' in newValue && newValue !== oldValue) {
+        if ('ELEMENT_NODE' in newValue && oldValue !== newValue) {
           oldValue = newValue;
           nodes = diff(
             comment,
@@ -93,81 +96,29 @@ const handleAnything = (comment, nodes) => {
 
 // attributes can be:
 //  * ref=${...}      for hooks and other purposes
+//  * aria=${...}     for aria attributes
+//  * data=${...}     for dataset related attributes
 //  * .setter=${...}  for Custom Elements setters or nodes with setters
 //                    such as buttons, details, options, select, etc
 //  * onevent=${...}  to automatically handle event listeners
 //  * generic=${...}  to handle an attribute just like an attribute
 const handleAttribute = (node, name) => {
-  // hooks and ref
   if (name === 'ref')
-    return ref => {
-      if (typeof ref === 'function')
-        ref(node);
-      else
-        ref.current = node;
-    };
+    return ref(node);
 
-  // direct setters
-  if (name.slice(0, 1) === '.') {
-    const setter = name.slice(1);
-    return value => { node[setter] = value; }
-  }
+  if (name === 'aria')
+    return aria(node);
 
-  let oldValue;
+  if (name === 'data')
+    return data(node);
 
-  // events
-  if (name.slice(0, 2) === 'on') {
-    let type = name.slice(2);
-    if (!(name in node) && name.toLowerCase() in node)
-      type = type.toLowerCase();
-    return newValue => {
-      const info = isArray(newValue) ? newValue : [newValue, false];
-      if (oldValue !== info[0]) {
-        if (oldValue)
-          node.removeEventListener(type, oldValue, info[1]);
-        if (oldValue = info[0])
-          node.addEventListener(type, oldValue, info[1]);
-      }
-    };
-  }
+  if (name.slice(0, 1) === '.')
+    return setter(node, name.slice(1));
 
-  // all other cases
-  let noOwner = true;
-  const attribute = document.createAttribute(name);
-  return newValue => {
-    if (oldValue !== newValue) {
-      oldValue = newValue;
-      if (oldValue == null) {
-        if (!noOwner) {
-          node.removeAttributeNode(attribute);
-          noOwner = true;
-        }
-      }
-      else {
-        attribute.value = newValue;
-        // There is no else case here.
-        // If the attribute has no owner, it's set back.
-        if (noOwner) {
-          node.setAttributeNode(attribute);
-          noOwner = false;
-        }
-      }
-    }
-  };
-};
+  if (name.slice(0, 2) === 'on')
+    return event(node, name);
 
-// style and textarea nodes can change only their text
-// without any possibility to accept child nodes.
-// in these two cases the content is simply updated, or cleaned,
-// accordingly with the passed value.
-const handleText = node => {
-  let oldValue;
-  return newValue => {
-    if (oldValue !== newValue) {
-      oldValue = newValue;
-      node.textContent = newValue == null ? '' : newValue;
-    }
-  };
+  return attribute(node, name);
 };
 
 // each mapped update carries the update type and its path
@@ -176,10 +127,10 @@ const handleText = node => {
 // In the attribute case, the attribute name is also carried along.
 export function handlers(options) {
   const {type, path} = options;
-  const node = path.reduce(reducePath, this);
+  const node = path.reduceRight(reducePath, this);
   return type === 'node' ?
-    handleAnything(node, []) :
+    handleAnything(node) :
     (type === 'attr' ?
       handleAttribute(node, options.name) :
-      handleText(node));
+      text(node));
 };
