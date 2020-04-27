@@ -80,11 +80,16 @@ const mapTemplate = (type, template) => {
       // named isµX and relate attribute updates to this node and the
       // attribute name, retrieved through node.getAttribute("isµX")
       // the isµX attribute will be removed as irrelevant for the layout
+      let isSVG = -1;
       while (node.hasAttribute(search)) {
         nodes.push({
           type: 'attr',
           path: createPath(node),
           name: node.getAttribute(search),
+          svg: isSVG < 0 ?
+                (isSVG = ('ownerSVGElement' in node ?
+                  /* istanbul ignore next */ 1 : 0)) :
+                isSVG
         });
         node.removeAttribute(search);
         search = `${prefix}${++i}`;

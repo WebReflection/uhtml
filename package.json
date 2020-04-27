@@ -42,7 +42,7 @@
     "@ungap/create-content": "^0.1.4",
     "uarray": "^1.0.0",
     "udomdiff": "^1.1.0",
-    "uhandlers": "^0.3.1",
+    "uhandlers": "^0.3.2",
     "umap": "^1.0.2",
     "uparser": "^0.2.1",
     "uwire": "^1.0.1"

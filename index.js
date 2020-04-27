@@ -256,12 +256,12 @@ var uhtml = (function (exports) {
       }
     };
   };
-  var attribute = function attribute(node, name) {
+  var attribute = function attribute(node, name, svg) {
     var oldValue,
         orphan = true;
     /* istanbul ignore next */
 
-    var attributeNode = document.createAttributeNS('ownerSVGElement' in node ? 'http://www.w3.org/2000/svg' : null, name);
+    var attributeNode = document.createAttributeNS(svg ? 'http://www.w3.org/2000/svg' : null, name);
     return function (newValue) {
       if (oldValue !== newValue) {
         oldValue = newValue;
@@ -525,7 +525,7 @@ var uhtml = (function (exports) {
     var type = options.type,
         path = options.path;
     var node = path.reduceRight(reducePath, this);
-    return type === 'node' ? handleAnything(node) : type === 'attr' ? handleAttribute(node, options.name) : text(node);
+    return type === 'node' ? handleAnything(node) : type === 'attr' ? handleAttribute(node, options.name, !!options.svg) : text(node);
   }
 
   // that contain the related unique id. In the attribute cases
@@ -613,11 +613,16 @@ var uhtml = (function (exports) {
         // named isµX and relate attribute updates to this node and the
         // attribute name, retrieved through node.getAttribute("isµX")
         // the isµX attribute will be removed as irrelevant for the layout
+        var isSVG = -1;
+
         while (node.hasAttribute(search)) {
           nodes.push({
             type: 'attr',
             path: createPath(node),
-            name: node.getAttribute(search)
+            name: node.getAttribute(search),
+            svg: isSVG < 0 ? isSVG = 'ownerSVGElement' in node ?
+            /* istanbul ignore next */
+            1 : 0 : isSVG
           });
           node.removeAttribute(search);
           search = "".concat(prefix).concat(++i);

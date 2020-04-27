@@ -132,7 +132,7 @@ function handlers(options) {
   return type === 'node' ?
     handleAnything(node) :
     (type === 'attr' ?
-      handleAttribute(node, options.name) :
+      handleAttribute(node, options.name, !!options.svg) :
       text(node));
 }
 exports.handlers = handlers;
