@@ -523,7 +523,9 @@ var uhtml = (function (exports) {
     var type = options.type,
         path = options.path;
     var node = path.reduceRight(reducePath, this);
-    return type === 'node' ? handleAnything(node) : type === 'attr' ? handleAttribute(node, options.name, options.svg) : text(node);
+    return type === 'node' ? handleAnything(node) : type === 'attr' ? handleAttribute(node, options.name
+    /*, options.svg*/
+    ) : text(node);
   }
 
   // that contain the related unique id. In the attribute cases
@@ -611,16 +613,13 @@ var uhtml = (function (exports) {
         // named isµX and relate attribute updates to this node and the
         // attribute name, retrieved through node.getAttribute("isµX")
         // the isµX attribute will be removed as irrelevant for the layout
-        var isSVG = -1;
-
+        // let svg = -1;
         while (node.hasAttribute(search)) {
           nodes.push({
             type: 'attr',
             path: createPath(node),
-            name: node.getAttribute(search),
-            svg: isSVG < 0 ? isSVG = 'ownerSVGElement' in node ?
-            /* istanbul ignore next */
-            1 : 0 : isSVG
+            name: node.getAttribute(search) //svg: svg < 0 ? (svg = ('ownerSVGElement' in node ? 1 : 0)) : svg
+
           });
           node.removeAttribute(search);
           search = "".concat(prefix).concat(++i);
