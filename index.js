@@ -508,13 +508,13 @@ var uhtml = (function (exports) {
   //  * generic=${...}  to handle an attribute just like an attribute
 
 
-  var handleAttribute = function handleAttribute(node, name) {
+  var handleAttribute = function handleAttribute(node, name, svg) {
     if (name === 'ref') return ref(node);
     if (name === 'aria') return aria(node);
     if (name === 'data') return data(node);
     if (name.slice(0, 1) === '.') return setter(node, name.slice(1));
     if (name.slice(0, 2) === 'on') return event(node, name);
-    return attribute(node, name);
+    return attribute(node, name, svg);
   }; // each mapped update carries the update type and its path
   // the type is either node, attribute, or text, while
   // the path is how to retrieve the related node to update.
@@ -525,7 +525,7 @@ var uhtml = (function (exports) {
     var type = options.type,
         path = options.path;
     var node = path.reduceRight(reducePath, this);
-    return type === 'node' ? handleAnything(node) : type === 'attr' ? handleAttribute(node, options.name, !!options.svg) : text(node);
+    return type === 'node' ? handleAnything(node) : type === 'attr' ? handleAttribute(node, options.name, options.svg) : text(node);
   }
 
   // that contain the related unique id. In the attribute cases
