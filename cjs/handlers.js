@@ -103,7 +103,7 @@ const handleAnything = comment => {
 //                    such as buttons, details, options, select, etc
 //  * onevent=${...}  to automatically handle event listeners
 //  * generic=${...}  to handle an attribute just like an attribute
-const handleAttribute = (node, name, svg) => {
+const handleAttribute = (node, name/*, svg*/) => {
   if (name === 'ref')
     return ref(node);
 
@@ -119,7 +119,7 @@ const handleAttribute = (node, name, svg) => {
   if (name.slice(0, 2) === 'on')
     return event(node, name);
 
-  return attribute(node, name, svg);
+  return attribute(node, name/*, svg*/);
 };
 
 // each mapped update carries the update type and its path
