@@ -8,7 +8,11 @@
   const {html, svg, render} = uhtml;
   this.onload = function () {
     const viewBoxText = '0 0 100 100';
-    render(document.body, html`<svg viewBox=${viewBoxText} />`);
+    render(document.body, html`
+      <svg viewBox=${viewBoxText} style=${`width: ${1000}px; height: ${1000}px;`}>
+        <rect x="0" y="0" width="${50}" height="${50}" fill="#f00" />
+      </svg>
+    `);
   };
   </script>
 </head>

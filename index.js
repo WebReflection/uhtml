@@ -256,26 +256,24 @@ var uhtml = (function (exports) {
       }
     };
   };
-  var attribute = function attribute(node, name, svg) {
+  var attribute = function attribute(node, name) {
     var oldValue,
         orphan = true;
-    /* istanbul ignore next */
-
-    var attributeNode = document.createAttributeNS(svg ? 'http://www.w3.org/2000/svg' : null, name);
+    var attributeNode = document.createAttributeNS(null, name);
     return function (newValue) {
       if (oldValue !== newValue) {
         oldValue = newValue;
 
         if (oldValue == null) {
           if (!orphan) {
-            node.removeAttributeNode(attributeNode);
+            node.removeAttributeNodeNS(attributeNode);
             orphan = true;
           }
         } else {
           attributeNode.value = newValue;
 
           if (orphan) {
-            node.setAttributeNode(attributeNode);
+            node.setAttributeNodeNS(attributeNode);
             orphan = false;
           }
         }
@@ -514,7 +512,7 @@ var uhtml = (function (exports) {
     if (name === 'data') return data(node);
     if (name.slice(0, 1) === '.') return setter(node, name.slice(1));
     if (name.slice(0, 2) === 'on') return event(node, name);
-    return attribute(node, name, svg);
+    return attribute(node, name);
   }; // each mapped update carries the update type and its path
   // the type is either node, attribute, or text, while
   // the path is how to retrieve the related node to update.
