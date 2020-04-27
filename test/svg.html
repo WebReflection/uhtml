@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../index.js"></script>
+  <script>
+  const {html, svg, render} = uhtml;
+  this.onload = function () {
+    const viewBoxText = '0 0 100 100';
+    render(document.body, html`<svg viewBox=${viewBoxText} />`);
+  };
+  </script>
+</head>
+</html>

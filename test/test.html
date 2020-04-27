@@ -12,7 +12,7 @@
   var render = uhtml.render;
   var html = uhtml.html;
   var content =
-    '<button class="large btn" .test=${} onclick="${}">-</button>\
+    '<button attr=${} class="large btn" .test=${} onclick="${}">-</button>\
     <span class="large value">${}</span>\
     <button class="large btn" onclick="${}">+</button>\
     <textarea>${}</textarea>'.split('${}');
@@ -22,6 +22,7 @@
     var update = state[1];
     render(element, html(
       content,
+      Math.random(),
       123,
       update.bind(null, count - 1),
       count,
