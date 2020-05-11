@@ -266,7 +266,7 @@ var uhtml = (function (exports) {
 
         if (oldValue == null) {
           if (!orphan) {
-            node.removeAttributeNodeNS(attributeNode);
+            node.removeAttributeNode(attributeNode);
             orphan = true;
           }
         } else {
