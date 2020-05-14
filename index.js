@@ -1,4 +1,4 @@
-var uhtml = (function (exports) {
+window.uhtml = (function (exports) {
   'use strict';
 
   var umap = (function (_) {

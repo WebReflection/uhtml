@@ -1,4 +1,4 @@
-var ENV = function () {'use strict';
+window.ENV = function () {'use strict';
   var counter = 0;
   var data;
   var _base;
