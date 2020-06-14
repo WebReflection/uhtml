@@ -80,7 +80,8 @@ These are the rules to follow for attributes:
   * if the attribute starts with a `.` dot, as in `.setter=${value}`, the value will be passed directly to the element per each update. If such value is a known setter, either native elements or defined via Custom Elements, the setter will be invoked per each update, even if the value is the same
   * if the attribute name is `ref`, as in `ref=${object}`, the `object.current` property will be assigned to the node, once this is rendered, and per each update. If a callback is passed instead, the callback will receive the node right away, same way [React ref](https://reactjs.org/docs/refs-and-the-dom.html) does.
   * if the attribute name is `aria`, as in `aria=${object}`, aria attributes are applied to the node, including the `role` one.
-  * if the attribute name is `data`, as in `data=${object}`, the `node.dataset` gets populated with all values.
+  * if the attribute name is `.dataset`, as in `.dataset=${object}`, the `node.dataset` gets populated with all values.
+  * _deprecated_: if the attribute name is `data`, as in `data=${object}`, the `node.dataset` gets populated with all values.
 
 
 Following an example of both `aria` and `data` cases:
@@ -91,7 +92,7 @@ html`<div aria=${{labelledBy: 'id', role: 'button'}} />`;
 //=> <div aria-labelledby="id" role="button"></div>
 
 // the data special case
-html`<div data=${{key: 'value', otherKey: 'otherValue'}} />`;
+html`<div .dataset=${{key: 'value', otherKey: 'otherValue'}} />`;
 //=> <div data-key="value" data-other-key="otherValue"></div>
 ```
 
@@ -264,7 +265,8 @@ Following a list of other points to consider when choosing _µhtml_ instead of _
   * _uhtml_ should *not* suffer any of the IE11/Edge issues, or invalid SVG attributes warnings, as the parsing is done differently 🎉
   * nested `html` and `svg` are allowed like in _lighterhtml_. The version `0` of this library didn't allow that, hence it was more "_surprise prone_". _uhtml_ in that sense is more like a drop-in replacement for _lighterhtml_, and vice-versa
   * keyed results via `htmlfor(...)` or `svg.for(...)`, as well as one-off node creation, via `html.node` or `svg.node` are the same found in _lighterhtml_
-  * both `aria=${object}`, `data=${object}`, and  `ref=${...}` special attributes work same as _lighterhtml_
+  * both `aria=${object}`, and  `ref=${...}` special attributes work same as _lighterhtml_
+  * the `data=${object}` (_soon to be deprecated_) and `.dataset=${object}` helper work the same as _lighterhtml_
   * the `.property=${...}` *direct setter* is still available
   * self closing nodes are also supported, go wild with `<custom-elements />` or even `<span />`
   * the wire parsing logic has been simplified even more, resulting in slightly [better bootstrap and update performance](https://github.com/krausest/js-framework-benchmark/pull/698)
