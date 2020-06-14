@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+  this.onload = () => {
+    document.body.innerHTML = `<object height="100px" type="image/svg+xml"></object>`;
+    const object = document.body.firstElementChild;
+    const m= {
+      id: '_svg_',
+      path: 'https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/ruby.svg'
+    };
+    const update = () => {
+      object.onload = () => {
+        document.dispatchEvent(new CustomEvent(m.id, {detail: null}));
+      };
+      object.data = m.path;
+    };
+    document.addEventListener(m.id, () => {
+      setTimeout(()=> {
+        console.log("loaded");
+        // do some work here like changing the svgs height/scale
+        update();
+      },1000);
+    });
+    update();
+  };
+  </script>
+</head>
+</html>

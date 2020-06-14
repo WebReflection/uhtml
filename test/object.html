@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script type="module">
+  // npx ucdn --debug
+  import {render, html, svg} from '../esm/index.js';
+
+  const dispatch = (id, detail) => () => {
+    document.dispatchEvent(new CustomEvent(id, {detail}));
+  };
+
+  const svg_test = (id, path) => html`
+    <object
+        height="100px"
+        type="image/svg+xml"
+        data=${path}
+        onload=${dispatch(id)}
+    />
+  `;
+
+  const m = {
+    id: '_svg_',
+    path: 'https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/ruby.svg'
+  };
+
+  const update = () => {
+    render(document.body, svg_test(m.id, m.path));
+  };
+
+  document.addEventListener(m.id, () => {
+    setTimeout(()=> {
+      console.log("loaded");
+      // do some work here like changing the svgs height/scale
+      update();
+    },1000);
+  });
+
+  update();
+  </script>
+</head>
+</html>
