@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+  // https://github.com/WebReflection/lighterhtml/issues/92
+  // ucdn --debug
+  import {render, html} from '../esm/index.js';
+
+  render(document.body, html`<div .dataset=${{a: 1, b: 2}} />`);
+  </script>
+</head>
+</html>
