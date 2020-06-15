@@ -110,9 +110,7 @@ const handleAttribute = (node, name/*, svg*/) => {
   if (name === 'aria')
     return aria(node);
 
-  // some SVG node has the data attribute and if it's used as setter it flicks
-  // see https://github.com/WebReflection/uhtml/issues/14
-  if (name === '.dataset' || (name === 'data' && !(name in node)))
+  if (name === '.dataset')
     return data(node);
 
   if (name.slice(0, 1) === '.')
