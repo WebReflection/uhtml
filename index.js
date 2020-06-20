@@ -740,9 +740,7 @@ window.uhtml = (function (exports) {
   }
 
   var create = Object.create,
-      defineProperties = Object.defineProperties; // each rendered node gets its own cache
-
-  var cache$1 = umap(new WeakMap()); // both `html` and `svg` template literal tags are polluted
+      defineProperties = Object.defineProperties; // both `html` and `svg` template literal tags are polluted
   // with a `for(ref[, id])` and a `node` tag too
 
   var tag = function tag(type) {
@@ -800,10 +798,10 @@ window.uhtml = (function (exports) {
         }
       }
     });
-  };
+  }; // each rendered node gets its own cache
 
-  var html = tag('html');
-  var svg = tag('svg'); // rendering means understanding what `html` or `svg` tags returned
+
+  var cache$1 = umap(new WeakMap()); // rendering means understanding what `html` or `svg` tags returned
   // and it relates a specific node to its own unique cache.
   // Each time the content to render changes, the node is cleaned up
   // and the new new content is appended, and if such content is a Hole
@@ -827,6 +825,10 @@ window.uhtml = (function (exports) {
     return where;
   };
 
+  var html = tag('html');
+  var svg = tag('svg');
+
+  exports.Hole = Hole;
   exports.html = html;
   exports.render = render;
   exports.svg = svg;

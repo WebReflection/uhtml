@@ -3,9 +3,6 @@ import {Hole, createCache, unroll} from './rabbit.js';
 
 const {create, defineProperties} = Object;
 
-// each rendered node gets its own cache
-const cache = umap(new WeakMap);
-
 // both `html` and `svg` template literal tags are polluted
 // with a `for(ref[, id])` and a `node` tag too
 const tag = type => {
@@ -45,16 +42,15 @@ const tag = type => {
   );
 };
 
-export const html = tag('html');
-
-export const svg = tag('svg');
+// each rendered node gets its own cache
+const cache = umap(new WeakMap);
 
 // rendering means understanding what `html` or `svg` tags returned
 // and it relates a specific node to its own unique cache.
 // Each time the content to render changes, the node is cleaned up
 // and the new new content is appended, and if such content is a Hole
 // then it's "unrolled" to resolve all its inner nodes.
-export const render = (where, what) => {
+const render = (where, what) => {
   const hole = typeof what === 'function' ? what() : what;
   const info = cache.get(where) || cache.set(where, createCache());
   const wire = hole instanceof Hole ? unroll(info, hole) : hole;
@@ -69,3 +65,8 @@ export const render = (where, what) => {
   }
   return where;
 };
+
+const html = tag('html');
+const svg = tag('svg');
+
+export {Hole, render, html, svg};

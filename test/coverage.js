@@ -153,8 +153,8 @@ render(body, html`<div aria=${{role: 'button', labelledBy: 'id'}} />`);
 console.assert(body.firstElementChild.getAttribute('role') === 'button', 'aria=${role}');
 console.assert(body.firstElementChild.getAttribute('aria-labelledBy') === 'id', 'aria=${labelledBy}');
 
-render(body, html`<div data=${{labelledBy: 'id'}} />`);
-console.assert(body.firstElementChild.dataset.labelledBy === 'id', 'data=${...}');
+render(body, html`<div .dataset=${{labelledBy: 'id'}} />`);
+console.assert(body.firstElementChild.dataset.labelledBy === 'id', '.dataset=${...}');
 
 // cover importNode
 delete require.cache[require.resolve('../cjs/handlers.js')];

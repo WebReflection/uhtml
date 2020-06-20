@@ -4,9 +4,6 @@ const {Hole, createCache, unroll} = require('./rabbit.js');
 
 const {create, defineProperties} = Object;
 
-// each rendered node gets its own cache
-const cache = umap(new WeakMap);
-
 // both `html` and `svg` template literal tags are polluted
 // with a `for(ref[, id])` and a `node` tag too
 const tag = type => {
@@ -46,11 +43,8 @@ const tag = type => {
   );
 };
 
-const html = tag('html');
-exports.html = html;
-
-const svg = tag('svg');
-exports.svg = svg;
+// each rendered node gets its own cache
+const cache = umap(new WeakMap);
 
 // rendering means understanding what `html` or `svg` tags returned
 // and it relates a specific node to its own unique cache.
@@ -72,4 +66,11 @@ const render = (where, what) => {
   }
   return where;
 };
+
+const html = tag('html');
+const svg = tag('svg');
+
+exports.Hole = Hole;
 exports.render = render;
+exports.html = html;
+exports.svg = svg;
