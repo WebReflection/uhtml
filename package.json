@@ -8,7 +8,7 @@
     "cjs": "rm cjs/*.js && ascjs esm cjs",
     "rollup:new": "rollup --config rollup/new.config.js",
     "rollup:babel": "rollup --config rollup/babel.config.js && sed -i.bck 's/^var /window./' index.js && rm -rf index.js.bck",
-    "min": "uglifyjs index.js --support-ie8 --comments=/^!/ -c -m -o min.js",
+    "min": "terser index.js -c -m -o min.js",
     "size": "cat min.js | brotli | wc -c && cat new.js | brotli | wc -c",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
     "test": "nyc node test/coverage.js"
@@ -21,20 +21,20 @@
   "author": "Andrea Giammarchi",
   "license": "ISC",
   "devDependencies": {
-    "@babel/core": "^7.10.3",
-    "@babel/preset-env": "^7.10.3",
+    "@babel/core": "^7.10.5",
+    "@babel/preset-env": "^7.10.4",
     "@ungap/degap": "^0.2.0",
     "ascjs": "^4.0.1",
     "basichtml": "^2.3.0",
     "coveralls": "^3.1.0",
     "drop-babel-typeof": "^1.0.3",
     "nyc": "^15.1.0",
-    "rollup": "^2.17.1",
+    "rollup": "^2.21.0",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-includepaths": "^0.2.3",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-terser": "^6.1.0",
-    "uglify-js": "^3.9.4"
+    "terser": "^4.8.0"
   },
   "module": "esm/index.js",
   "unpkg": "min.js",

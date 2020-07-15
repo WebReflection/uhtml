@@ -499,7 +499,7 @@ window.uhtml = (function (exports) {
   }; // attributes can be:
   //  * ref=${...}      for hooks and other purposes
   //  * aria=${...}     for aria attributes
-  //  * data=${...}     for dataset related attributes
+  //  * .dataset=${...} for dataset related attributes
   //  * .setter=${...}  for Custom Elements setters or nodes with setters
   //                    such as buttons, details, options, select, etc
   //  * onevent=${...}  to automatically handle event listeners
