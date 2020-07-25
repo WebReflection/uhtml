@@ -1,5 +1,5 @@
-import resolve from 'rollup-plugin-node-resolve';
-import babel from 'rollup-plugin-babel';
+import {nodeResolve} from '@rollup/plugin-node-resolve';
+import babel from '@rollup/plugin-babel';
 import includePaths from 'rollup-plugin-includepaths';
 export default {
   input: './esm/index.js',
@@ -7,8 +7,11 @@ export default {
     includePaths({
       include: {},
     }),
-    resolve({module: true}),
-    babel({presets: ['@babel/preset-env']})
+    nodeResolve(),
+    babel({
+      presets: ['@babel/preset-env'],
+      babelHelpers: 'bundled'
+    })
   ],
   context: 'null',
   moduleContext: 'null',
