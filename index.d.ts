@@ -24,6 +24,6 @@ export declare function render<T extends Node>(
 export class Hole {
   constructor(type: string, template: TemplateStringsArray, values: any[]);
   readonly type: string;
-  readonly template: readonly TemplateStringsArray;
+  readonly template: TemplateStringsArray;
   readonly values: readonly any[];
 }
