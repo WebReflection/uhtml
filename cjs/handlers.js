@@ -4,8 +4,6 @@ const udomdiff = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* 
 const {aria, attribute, data, event, ref, setter, text} = require('uhandlers');
 const {diffable} = require('uwire');
 
-const {reducePath} = require('./node.js');
-
 // this helper avoid code bloat around handleAnything() callback
 const diff = (comment, oldNodes, newNodes) => udomdiff(
   comment.parentNode,
@@ -121,6 +119,8 @@ const handleAttribute = (node, name/*, svg*/) => {
 
   return attribute(node, name/*, svg*/);
 };
+
+const reducePath = ({childNodes}, i) => childNodes[i];
 
 // each mapped update carries the update type and its path
 // the type is either node, attribute, or text, while

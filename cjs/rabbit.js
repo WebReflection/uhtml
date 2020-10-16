@@ -1,26 +1,8 @@
 'use strict';
-const umap = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('umap'));
-const instrument = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('uparser'));
 const {isArray} = require('uarray');
 const {persistent} = require('uwire');
 
-const {handlers} = require('./handlers.js');
-const {createFragment, createPath, createWalker, importNode} = require('./node.js');
-
-// the prefix is used to identify either comments, attributes, or nodes
-// that contain the related unique id. In the attribute cases
-// isµX="attribute-name" will be used to map current X update to that
-// attribute name, while comments will be like <!--isµX-->, to map
-// the update to that specific comment node, hence its parent.
-// style and textarea will have <!--isµX--> text content, and are handled
-// directly through text-only updates.
-const prefix = 'isµ';
-
-// Template Literals are unique per scope and static, meaning a template
-// should be parsed once, and once only, as it will always represent the same
-// content, within the exact same amount of updates each time.
-// This cache relates each template to its unique content and updates.
-const cache = umap(new WeakMap);
+const mapUpdates = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('./updates.js'));
 
 const createCache = () => ({
   stack: [],    // each template gets a stack for each interpolation "hole"
@@ -44,86 +26,6 @@ exports.createCache = createCache;
 const createEntry = (type, template) => {
   const {content, updates} = mapUpdates(type, template);
   return {type, template, content, updates, wire: null};
-};
-
-// a template is instrumented to be able to retrieve where updates are needed.
-// Each unique template becomes a fragment, cloned once per each other
-// operation based on the same template, i.e. data => html`<p>${data}</p>`
-const mapTemplate = (type, template) => {
-  const text = instrument(template, prefix, type === 'svg');
-  const content = createFragment(text, type);
-  // once instrumented and reproduced as fragment, it's crawled
-  // to find out where each update is in the fragment tree
-  const tw = createWalker(content);
-  const nodes = [];
-  const length = template.length - 1;
-  let i = 0;
-  // updates are searched via unique names, linearly increased across the tree
-  // <div isµ0="attr" isµ1="other"><!--isµ2--><style><!--isµ3--</style></div>
-  let search = `${prefix}${i}`;
-  while (i < length) {
-    const node = tw.nextNode();
-    // if not all updates are bound but there's nothing else to crawl
-    // it means that there is something wrong with the template.
-    if (!node)
-      throw `bad template: ${text}`;
-    // if the current node is a comment, and it contains isµX
-    // it means the update should take care of any content
-    if (node.nodeType === 8) {
-      // The only comments to be considered are those
-      // which content is exactly the same as the searched one.
-      if (node.textContent === search) {
-        nodes.push({type: 'node', path: createPath(node)});
-        search = `${prefix}${++i}`;
-      }
-    }
-    else {
-      // if the node is not a comment, loop through all its attributes
-      // named isµX and relate attribute updates to this node and the
-      // attribute name, retrieved through node.getAttribute("isµX")
-      // the isµX attribute will be removed as irrelevant for the layout
-      // let svg = -1;
-      while (node.hasAttribute(search)) {
-        nodes.push({
-          type: 'attr',
-          path: createPath(node),
-          name: node.getAttribute(search),
-          //svg: svg < 0 ? (svg = ('ownerSVGElement' in node ? 1 : 0)) : svg
-        });
-        node.removeAttribute(search);
-        search = `${prefix}${++i}`;
-      }
-      // if the node was a style or a textarea one, check its content
-      // and if it is <!--isµX--> then update tex-only this node
-      if (
-        /^(?:style|textarea)$/i.test(node.tagName) &&
-        node.textContent.trim() === `<!--${search}-->`
-      ){
-        nodes.push({type: 'text', path: createPath(node)});
-        search = `${prefix}${++i}`;
-      }
-    }
-  }
-  // once all nodes to update, or their attributes, are known, the content
-  // will be cloned in the future to represent the template, and all updates
-  // related to such content retrieved right away without needing to re-crawl
-  // the exact same template, and its content, more than once.
-  return {content, nodes};
-};
-
-// if a template is unknown, perform the previous mapping, otherwise grab
-// its details such as the fragment with all nodes, and updates info.
-const mapUpdates = (type, template) => {
-  const {content, nodes} = (
-    cache.get(template) ||
-    cache.set(template, mapTemplate(type, template))
-  );
-  // clone deeply the fragment
-  const fragment = importNode.call(document, content, true);
-  // and relate an update handler per each node that needs one
-  const updates = nodes.map(handlers, fragment);
-  // return the fragment and all updates to use within its nodes
-  return {content: fragment, updates};
 };
 
 // as html and svg can be nested calls, but no parent node is known

@@ -1,10 +1,10 @@
 {
-  "name": "uhtml",
-  "version": "2.1.2",
+  "name": "uhtml-x",
+  "version": "0.0.0",
   "description": "A micro HTML/SVG render",
   "main": "cjs/index.js",
   "scripts": {
-    "build": "npm run cjs && npm run rollup:new && npm run rollup:babel && drop-babel-typeof ./index.js && npm run min && npm run test && npm run size",
+    "build": "npm run cjs && npm run rollup:new && npm run rollup:babel && drop-babel-typeof ./index.js && npm run min && npm run size",
     "cjs": "rm cjs/*.js && ascjs esm cjs",
     "rollup:new": "rollup --config rollup/new.config.js",
     "rollup:babel": "rollup --config rollup/babel.config.js && sed -i.bck 's/^var /window./' index.js && rm -rf index.js.bck",

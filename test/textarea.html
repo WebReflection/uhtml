@@ -17,7 +17,9 @@ this.onload = () => {
   };
 
   const update = () => render(document.body, html`
-    <textarea oninput=${updateText} .value=${text}/>
+    <textarea oninput=${updateText}>
+      ${text}
+    </textarea>
     <br>
     <button onclick=${clear}>clear</button>
     <div>Text: ${text}</div>

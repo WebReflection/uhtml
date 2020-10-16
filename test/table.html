@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../index.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {"use strict";
+
+      const {render, html} = uhtml;
+
+      const target = document.querySelector('#app');
+
+      render(target, html`
+        <table class="table table-striped latest-data">
+          <tbody>${
+            html`<tr><td>test</td><td>test</td></tr>`
+          }</tbody>
+        </table>`);
+
+    }, {once: true});
+    </script>
+</head>
+<body>
+  <div id="app"></div>
+</body>
+</html>

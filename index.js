@@ -17,41 +17,6 @@ window.uhtml = (function (exports) {
     };
   });
 
-  var attr = /([^\s\\>"'=]+)\s*=\s*(['"]?)$/;
-  var empty = /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
-  var node = /<[a-z][^>]+$/i;
-  var notNode = />[^<>]*$/;
-  var selfClosing = /<([a-z]+[a-z0-9:._-]*)([^>]*?)(\/>)/ig;
-  var trimEnd = /\s+$/;
-
-  var isNode = function isNode(template, i) {
-    return 0 < i-- && (node.test(template[i]) || !notNode.test(template[i]) && isNode(template, i));
-  };
-
-  var regular = function regular(original, name, extra) {
-    return empty.test(name) ? original : "<".concat(name).concat(extra.replace(trimEnd, ''), "></").concat(name, ">");
-  };
-
-  var instrument = (function (template, prefix, svg) {
-    var text = [];
-    var length = template.length;
-
-    var _loop = function _loop(i) {
-      var chunk = template[i - 1];
-      text.push(attr.test(chunk) && isNode(template, i) ? chunk.replace(attr, function (_, $1, $2) {
-        return "".concat(prefix).concat(i - 1, "=").concat($2 || '"').concat($1).concat($2 ? '' : '"');
-      }) : "".concat(chunk, "<!--").concat(prefix).concat(i - 1, "-->"));
-    };
-
-    for (var i = 1; i < length; i++) {
-      _loop(i);
-    }
-
-    text.push(template[length - 1]);
-    var output = text.join('').trim();
-    return svg ? output : output.replace(selfClosing, regular);
-  });
-
   var isArray = Array.isArray;
   var _ref = [],
       indexOf = _ref.indexOf,
@@ -98,6 +63,61 @@ window.uhtml = (function (exports) {
       }
     };
   };
+
+  /*! (c) Andrea Giammarchi - ISC */
+  var createContent = function (document) {
+
+    var FRAGMENT = 'fragment';
+    var TEMPLATE = 'template';
+    var HAS_CONTENT = ('content' in create(TEMPLATE));
+    var createHTML = HAS_CONTENT ? function (html) {
+      var template = create(TEMPLATE);
+      template.innerHTML = html;
+      return template.content;
+    } : function (html) {
+      var content = create(FRAGMENT);
+      var template = create(TEMPLATE);
+      var childNodes = null;
+
+      if (/^[^\S]*?<(col(?:group)?|t(?:head|body|foot|r|d|h))/i.test(html)) {
+        var selector = RegExp.$1;
+        template.innerHTML = '<table>' + html + '</table>';
+        childNodes = template.querySelectorAll(selector);
+      } else {
+        template.innerHTML = html;
+        childNodes = template.childNodes;
+      }
+
+      append(content, childNodes);
+      return content;
+    };
+    return function createContent(markup, type) {
+      return (type === 'svg' ? createSVG : createHTML)(markup);
+    };
+
+    function append(root, childNodes) {
+      var length = childNodes.length;
+
+      while (length--) {
+        root.appendChild(childNodes[0]);
+      }
+    }
+
+    function create(element) {
+      return element === FRAGMENT ? document.createDocumentFragment() : document.createElementNS('http://www.w3.org/1999/xhtml', element);
+    } // it could use createElementNS when hasNode is there
+    // but this fallback is equally fast and easier to maintain
+    // it is also battle tested already in all IE
+
+
+    function createSVG(svg) {
+      var content = create(FRAGMENT);
+      var template = create('div');
+      template.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg">' + svg + '</svg>';
+      append(content, template.firstChild.childNodes);
+      return content;
+    }
+  }(document);
 
   
 
@@ -322,103 +342,6 @@ window.uhtml = (function (exports) {
     };
   };
 
-  /*! (c) Andrea Giammarchi - ISC */
-  var createContent = function (document) {
-
-    var FRAGMENT = 'fragment';
-    var TEMPLATE = 'template';
-    var HAS_CONTENT = ('content' in create(TEMPLATE));
-    var createHTML = HAS_CONTENT ? function (html) {
-      var template = create(TEMPLATE);
-      template.innerHTML = html;
-      return template.content;
-    } : function (html) {
-      var content = create(FRAGMENT);
-      var template = create(TEMPLATE);
-      var childNodes = null;
-
-      if (/^[^\S]*?<(col(?:group)?|t(?:head|body|foot|r|d|h))/i.test(html)) {
-        var selector = RegExp.$1;
-        template.innerHTML = '<table>' + html + '</table>';
-        childNodes = template.querySelectorAll(selector);
-      } else {
-        template.innerHTML = html;
-        childNodes = template.childNodes;
-      }
-
-      append(content, childNodes);
-      return content;
-    };
-    return function createContent(markup, type) {
-      return (type === 'svg' ? createSVG : createHTML)(markup);
-    };
-
-    function append(root, childNodes) {
-      var length = childNodes.length;
-
-      while (length--) {
-        root.appendChild(childNodes[0]);
-      }
-    }
-
-    function create(element) {
-      return element === FRAGMENT ? document.createDocumentFragment() : document.createElementNS('http://www.w3.org/1999/xhtml', element);
-    } // it could use createElementNS when hasNode is there
-    // but this fallback is equally fast and easier to maintain
-    // it is also battle tested already in all IE
-
-
-    function createSVG(svg) {
-      var content = create(FRAGMENT);
-      var template = create('div');
-      template.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg">' + svg + '</svg>';
-      append(content, template.firstChild.childNodes);
-      return content;
-    }
-  }(document);
-
-  var reducePath = function reducePath(_ref, i) {
-    var childNodes = _ref.childNodes;
-    return childNodes[i];
-  }; // from a fragment container, create an array of indexes
-  // related to its child nodes, so that it's possible
-  // to retrieve later on exact node via reducePath
-
-  var createPath = function createPath(node) {
-    var path = [];
-    var _node = node,
-        parentNode = _node.parentNode;
-
-    while (parentNode) {
-      path.push(indexOf.call(parentNode.childNodes, node));
-      node = parentNode;
-      parentNode = node.parentNode;
-    }
-
-    return path;
-  };
-  var _document = document,
-      createTreeWalker = _document.createTreeWalker,
-      importNode = _document.importNode;
-
-  var IE = importNode.length != 1; // IE11 and old Edge discard empty nodes when cloning, potentially
-  // resulting in broken paths to find updates. The workaround here
-  // is to import once, upfront, the fragment that will be cloned
-  // later on, so that paths are retrieved from one already parsed,
-  // hence without missing child nodes once re-cloned.
-
-  var createFragment = IE ? function (text, type) {
-    return importNode.call(document, createContent(text, type), true);
-  } : createContent; // IE11 and old Edge have a different createTreeWalker signature that
-  // has been deprecated in other browsers. This export is needed only
-  // to guarantee the TreeWalker doesn't show warnings and, ultimately, works
-
-  var createWalker = IE ? function (fragment) {
-    return createTreeWalker.call(document, fragment, 1 | 128, null, false);
-  } : function (fragment) {
-    return createTreeWalker.call(document, fragment, 1 | 128);
-  };
-
   var diff = function diff(comment, oldNodes, newNodes) {
     return udomdiff(comment.parentNode, // TODO: there is a possible edge case where a node has been
     //       removed manually, or it was a keyed one, attached
@@ -518,6 +441,11 @@ window.uhtml = (function (exports) {
     return attribute(node, name
     /*, svg*/
     );
+  };
+
+  var reducePath = function reducePath(_ref, i) {
+    var childNodes = _ref.childNodes;
+    return childNodes[i];
   }; // each mapped update carries the update type and its path
   // the type is either node, attribute, or text, while
   // the path is how to retrieve the related node to update.
@@ -533,19 +461,128 @@ window.uhtml = (function (exports) {
     ) : text(node);
   }
 
-  // that contain the related unique id. In the attribute cases
-  // isµX="attribute-name" will be used to map current X update to that
-  // attribute name, while comments will be like <!--isµX-->, to map
-  // the update to that specific comment node, hence its parent.
-  // style and textarea will have <!--isµX--> text content, and are handled
-  // directly through text-only updates.
+  var _XPathResult = XPathResult,
+      ANY_TYPE = _XPathResult.ANY_TYPE;
+  var _document = document,
+      importNode = _document.importNode;
+  var IE = importNode.length != 1;
+  var createFragment = IE ? function (text, type) {
+    return importNode.call(document, createContent(text, type), true);
+  } : createContent;
+  var uid = 'isµ';
+  var xpath = new XPathEvaluator().createExpression("//*/@*[.=\"".concat(uid, "\"]|//*/comment()[.=\"").concat(uid, "\"]|//style[contains(text(),\"<!--").concat(uid, "-->\")]|//textarea[contains(text(),\"<!--").concat(uid, "-->\")]"), null);
+  var attr = /([^\s\\>"'=]+)\s*=\s*(['"]?)$/;
+  var empty = /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
+  var node = /<[a-z][^>]+$/i;
+  var notNode = />[^<>]*$/;
+  var selfClosing = /<([a-z]+[a-z0-9:._-]*)([^>]*?)(\/>)/ig;
+  var trimEnd = /\s+$/;
 
-  var prefix = 'isµ'; // Template Literals are unique per scope and static, meaning a template
-  // should be parsed once, and once only, as it will always represent the same
-  // content, within the exact same amount of updates each time.
-  // This cache relates each template to its unique content and updates.
+  var regular = function regular(original, name, extra) {
+    return empty.test(name) ? original : "<".concat(name).concat(extra.replace(trimEnd, ''), "></").concat(name, ">");
+  };
+
+  var createPath = function createPath(node) {
+    var path = [];
+    var _node = node,
+        parentNode = _node.parentNode;
+
+    while (parentNode) {
+      path.push(indexOf.call(parentNode.childNodes, node));
+      node = parentNode;
+      parentNode = node.parentNode;
+    }
+
+    return path;
+  };
+
+  var isNode = function isNode(template, i) {
+    return 0 < i-- && (node.test(template[i]) || !notNode.test(template[i]) && isNode(template, i));
+  }; // TODO: it looks like XPath `|` operator doesn't work as expected
+  //       as it crawls the three one rule per time, so that results
+  //       are never really ordered
+
+
+  var getXPath = function getXPath(child) {
+    var query = xpath.evaluate(child, ANY_TYPE, null);
+    var result = [];
+    var node;
+
+    while (node = query.iterateNext()) {
+      result.push(node);
+    }
+
+    return result;
+  };
+
+  var mapTemplate = function mapTemplate(type, template) {
+    var content = createFragment(parse(template, type === 'svg'), type);
+    var nodes = [];
+
+    for (var childNodes = content.childNodes, i = 0, length = childNodes.length; i < length; i++) {
+      var child = childNodes[i];
+      if (child.nodeType === 8) nodes.push({
+        type: 'node',
+        path: createPath(child)
+      });else {
+        getXPath(child).forEach(function (node) {
+          var nodeType = node.nodeType;
+          console.log(nodeType, node, node.parentElement);
+          if (nodeType === 8) nodes.push({
+            type: 'node',
+            path: createPath(node)
+          });else if (nodeType === 1) nodes.push({
+            type: 'text',
+            path: createPath(node)
+          });else {
+            var name = node.name,
+                ownerElement = node.ownerElement;
+            nodes.push({
+              type: 'attr',
+              path: createPath(ownerElement),
+              name: name
+            });
+            ownerElement.removeAttribute(name);
+          }
+        });
+      }
+    }
+
+    return {
+      content: content,
+      nodes: nodes
+    };
+  };
+
+  var parse = function parse(template, svg) {
+    var text = [];
+    var length = template.length;
+
+    for (var i = 1; i < length; i++) {
+      var chunk = template[i - 1];
+      text.push(attr.test(chunk) && isNode(template, i) ? chunk.replace(attr, function (_, $1, $2) {
+        return "".concat($1, "=").concat($2 || '"').concat(uid).concat($2 ? '' : '"');
+      }) : "".concat(chunk, "<!--").concat(uid, "-->"));
+    }
+
+    text.push(template[length - 1]);
+    var output = text.join('').trim();
+    return svg ? output : output.replace(selfClosing, regular);
+  };
 
   var cache = umap(new WeakMap());
+  var mapUpdates = (function (type, template) {
+    var _ref = cache.get(template) || cache.set(template, mapTemplate(type, template)),
+        content = _ref.content,
+        nodes = _ref.nodes;
+
+    var fragment = importNode.call(document, content, true);
+    return {
+      content: fragment,
+      updates: nodes.map(handlers, fragment)
+    };
+  });
+
   var createCache = function createCache() {
     return {
       stack: [],
@@ -578,106 +615,16 @@ window.uhtml = (function (exports) {
       updates: updates,
       wire: null
     };
-  }; // a template is instrumented to be able to retrieve where updates are needed.
-  // Each unique template becomes a fragment, cloned once per each other
-  // operation based on the same template, i.e. data => html`<p>${data}</p>`
-
-
-  var mapTemplate = function mapTemplate(type, template) {
-    var text = instrument(template, prefix, type === 'svg');
-    var content = createFragment(text, type); // once instrumented and reproduced as fragment, it's crawled
-    // to find out where each update is in the fragment tree
-
-    var tw = createWalker(content);
-    var nodes = [];
-    var length = template.length - 1;
-    var i = 0; // updates are searched via unique names, linearly increased across the tree
-    // <div isµ0="attr" isµ1="other"><!--isµ2--><style><!--isµ3--</style></div>
-
-    var search = "".concat(prefix).concat(i);
-
-    while (i < length) {
-      var node = tw.nextNode(); // if not all updates are bound but there's nothing else to crawl
-      // it means that there is something wrong with the template.
-
-      if (!node) throw "bad template: ".concat(text); // if the current node is a comment, and it contains isµX
-      // it means the update should take care of any content
-
-      if (node.nodeType === 8) {
-        // The only comments to be considered are those
-        // which content is exactly the same as the searched one.
-        if (node.textContent === search) {
-          nodes.push({
-            type: 'node',
-            path: createPath(node)
-          });
-          search = "".concat(prefix).concat(++i);
-        }
-      } else {
-        // if the node is not a comment, loop through all its attributes
-        // named isµX and relate attribute updates to this node and the
-        // attribute name, retrieved through node.getAttribute("isµX")
-        // the isµX attribute will be removed as irrelevant for the layout
-        // let svg = -1;
-        while (node.hasAttribute(search)) {
-          nodes.push({
-            type: 'attr',
-            path: createPath(node),
-            name: node.getAttribute(search) //svg: svg < 0 ? (svg = ('ownerSVGElement' in node ? 1 : 0)) : svg
-
-          });
-          node.removeAttribute(search);
-          search = "".concat(prefix).concat(++i);
-        } // if the node was a style or a textarea one, check its content
-        // and if it is <!--isµX--> then update tex-only this node
-
-
-        if (/^(?:style|textarea)$/i.test(node.tagName) && node.textContent.trim() === "<!--".concat(search, "-->")) {
-          nodes.push({
-            type: 'text',
-            path: createPath(node)
-          });
-          search = "".concat(prefix).concat(++i);
-        }
-      }
-    } // once all nodes to update, or their attributes, are known, the content
-    // will be cloned in the future to represent the template, and all updates
-    // related to such content retrieved right away without needing to re-crawl
-    // the exact same template, and its content, more than once.
-
-
-    return {
-      content: content,
-      nodes: nodes
-    };
-  }; // if a template is unknown, perform the previous mapping, otherwise grab
-  // its details such as the fragment with all nodes, and updates info.
-
-
-  var mapUpdates = function mapUpdates(type, template) {
-    var _ref = cache.get(template) || cache.set(template, mapTemplate(type, template)),
-        content = _ref.content,
-        nodes = _ref.nodes; // clone deeply the fragment
-
-
-    var fragment = importNode.call(document, content, true); // and relate an update handler per each node that needs one
-
-    var updates = nodes.map(handlers, fragment); // return the fragment and all updates to use within its nodes
-
-    return {
-      content: fragment,
-      updates: updates
-    };
   }; // as html and svg can be nested calls, but no parent node is known
   // until rendered somewhere, the unroll operation is needed to
   // discover what to do with each interpolation, which will result
   // into an update operation.
 
 
-  var unroll = function unroll(info, _ref2) {
-    var type = _ref2.type,
-        template = _ref2.template,
-        values = _ref2.values;
+  var unroll = function unroll(info, _ref) {
+    var type = _ref.type,
+        template = _ref.template,
+        values = _ref.values;
     var length = values.length; // interpolations can contain holes and arrays, so these need
     // to be recursively discovered
 
@@ -706,8 +653,8 @@ window.uhtml = (function (exports) {
   // related to each interpolation value, or null, if the render
   // was conditional and the value is not special (Array or Hole)
 
-  var unrollValues = function unrollValues(_ref3, values, length) {
-    var stack = _ref3.stack;
+  var unrollValues = function unrollValues(_ref2, values, length) {
+    var stack = _ref2.stack;
 
     for (var i = 0; i < length; i++) {
       var hole = values[i]; // each Hole gets unrolled and re-assigned as value
