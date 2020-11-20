@@ -26,14 +26,14 @@ exports.createTreeWalker = createTreeWalker;
 exports.importNode = importNode;
 
 // this "hack" tells the library if the browser is IE11 or old Edge
-const IE = importNode.length != 1;
+const isImportNodeLengthWrong = importNode.length != 1;
 
 // IE11 and old Edge discard empty nodes when cloning, potentially
 // resulting in broken paths to find updates. The workaround here
 // is to import once, upfront, the fragment that will be cloned
 // later on, so that paths are retrieved from one already parsed,
 // hence without missing child nodes once re-cloned.
-const createFragment = IE ?
+const createFragment = isImportNodeLengthWrong ?
   (text, type) => importNode.call(
     document,
     createContent(text, type),
@@ -45,7 +45,7 @@ exports.createFragment = createFragment;
 // IE11 and old Edge have a different createTreeWalker signature that
 // has been deprecated in other browsers. This export is needed only
 // to guarantee the TreeWalker doesn't show warnings and, ultimately, works
-const createWalker = IE ?
+const createWalker = isImportNodeLengthWrong ?
   fragment => createTreeWalker.call(document, fragment, 1 | 128, null, false) :
   fragment => createTreeWalker.call(document, fragment, 1 | 128);
 exports.createWalker = createWalker;

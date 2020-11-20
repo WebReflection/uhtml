@@ -401,19 +401,19 @@ window.uhtml = (function (exports) {
       createTreeWalker = _document.createTreeWalker,
       importNode = _document.importNode;
 
-  var IE = importNode.length != 1; // IE11 and old Edge discard empty nodes when cloning, potentially
+  var isImportNodeLengthWrong = importNode.length != 1; // IE11 and old Edge discard empty nodes when cloning, potentially
   // resulting in broken paths to find updates. The workaround here
   // is to import once, upfront, the fragment that will be cloned
   // later on, so that paths are retrieved from one already parsed,
   // hence without missing child nodes once re-cloned.
 
-  var createFragment = IE ? function (text, type) {
+  var createFragment = isImportNodeLengthWrong ? function (text, type) {
     return importNode.call(document, createContent(text, type), true);
   } : createContent; // IE11 and old Edge have a different createTreeWalker signature that
   // has been deprecated in other browsers. This export is needed only
   // to guarantee the TreeWalker doesn't show warnings and, ultimately, works
 
-  var createWalker = IE ? function (fragment) {
+  var createWalker = isImportNodeLengthWrong ? function (fragment) {
     return createTreeWalker.call(document, fragment, 1 | 128, null, false);
   } : function (fragment) {
     return createTreeWalker.call(document, fragment, 1 | 128);
