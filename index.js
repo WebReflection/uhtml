@@ -633,6 +633,7 @@ window.uhtml = (function (exports) {
 
 
         if (/^(?:style|textarea)$/i.test(node.tagName) && node.textContent.trim() === "<!--".concat(search, "-->")) {
+          node.textContent = '';
           nodes.push({
             type: 'text',
             path: createPath(node)

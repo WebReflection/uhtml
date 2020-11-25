@@ -97,6 +97,7 @@ const mapTemplate = (type, template) => {
         /^(?:style|textarea)$/i.test(node.tagName) &&
         node.textContent.trim() === `<!--${search}-->`
       ){
+        node.textContent = '';
         nodes.push({type: 'text', path: createPath(node)});
         search = `${prefix}${++i}`;
       }
