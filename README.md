@@ -8,6 +8,11 @@
 
 _micro html_ is a _~2.5K_ [lighterhtml](https://github.com/WebReflection/lighterhtml#readme) subset to build declarative and reactive UI via template literals tags.
 
+### 📣 Community Announcement
+
+Please ask questions in the [dedicated forum](https://webreflection.boards.net/) to help the community around this project grow ♥
+
+---
 
 ### V2 Breaking Change
 
