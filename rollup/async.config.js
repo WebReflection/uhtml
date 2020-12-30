@@ -1,6 +1,7 @@
 import {nodeResolve} from '@rollup/plugin-node-resolve';
 import {terser} from 'rollup-plugin-terser';
 import includePaths from 'rollup-plugin-includepaths';
+
 export default {
   input: './esm/async.js',
   plugins: [
@@ -12,8 +13,7 @@ export default {
     nodeResolve(),
     terser()
   ],
-  context: 'null',
-  moduleContext: 'null',
+  
   output: {
     exports: 'named',
     file: './async.js',
