@@ -14,9 +14,18 @@ Please ask questions in the [dedicated forum](https://webreflection.boards.net/)
 
 ---
 
-### V2 Breaking Change
+### V2.2 Update
 
-The recently introduced `data` helper [could conflict](https://github.com/WebReflection/uhtml/issues/14) with some node such as `<object>`, hence it has been replaced by the `.dataset` utility. Since `element.dataset = object` is an invalid operation, the sugar to simplify `data-` attributes is now never ambiguous and future-proof: `<element .dataset=${...} />` it is.
+  * the `new.js` file has been renamed as `es.js` to align with other modules of mine that follow the same pattern.
+  * this module now exports its very same utilities via `uhtml/async`, in order to automatically resolve asynchronous values passed along the template. Please note this means that exported `render`, `html`, and `svg` tags, are all asynchronous, hence these all return a promise.
+  * the `async.js` file is now published too, compatible with ES2015+ browsers (no `async` / `await` used)
+
+**Example**
+```js
+import {render, html, svg} from 'uhtml/async';
+
+render(document.body, html`a${Promise.resolve('b')}c`);
+```
 
 
 ### How To Use µhtml
@@ -294,3 +303,8 @@ Following a list of other points to consider when choosing _µhtml_ instead of _
 
   </div>
 </details>
+
+### V2 Breaking Change
+
+The recently introduced `data` helper [could conflict](https://github.com/WebReflection/uhtml/issues/14) with some node such as `<object>`, hence it has been replaced by the `.dataset` utility. Since `element.dataset = object` is an invalid operation, the sugar to simplify `data-` attributes is now never ambiguous and future-proof: `<element .dataset=${...} />` it is.
+

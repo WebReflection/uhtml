@@ -2,7 +2,7 @@ import {nodeResolve} from '@rollup/plugin-node-resolve';
 import {terser} from 'rollup-plugin-terser';
 import includePaths from 'rollup-plugin-includepaths';
 export default {
-  input: './esm/index.js',
+  input: './esm/async.js',
   plugins: [
     includePaths({
       include: {
@@ -16,7 +16,7 @@ export default {
   moduleContext: 'null',
   output: {
     exports: 'named',
-    file: './new.js',
+    file: './async.js',
     format: 'iife',
     name: 'uhtml'
   }

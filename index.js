@@ -1,4 +1,4 @@
-window.uhtml = (function (exports) {
+self.uhtml = (function (exports) {
   'use strict';
 
   var umap = (function (_) {
@@ -834,6 +834,8 @@ window.uhtml = (function (exports) {
   exports.html = html;
   exports.render = render;
   exports.svg = svg;
+
+  
 
   return exports;
 
