@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@ungap/create-content": "^0.2.0",
-    "async-tag": "^0.1.1",
+    "async-tag": "^0.2.0",
     "uarray": "^1.0.0",
     "udomdiff": "^1.1.0",
     "uhandlers": "^0.3.6",
