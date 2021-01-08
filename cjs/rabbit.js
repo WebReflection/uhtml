@@ -22,6 +22,9 @@ const prefix = 'isµ';
 // This cache relates each template to its unique content and updates.
 const cache = umap(new WeakMap);
 
+// a RegExp that helps checking nodes that cannot contain comments
+const textOnly = /^(?:plaintext|script|style|textarea|title|xmp)$/i;
+
 const createCache = () => ({
   stack: [],    // each template gets a stack for each interpolation "hole"
 
@@ -93,10 +96,10 @@ const mapTemplate = (type, template) => {
         node.removeAttribute(search);
         search = `${prefix}${++i}`;
       }
-      // if the node was a style or a textarea one, check its content
+      // if the node was a style, textarea, or others, check its content
       // and if it is <!--isµX--> then update tex-only this node
       if (
-        /^(?:style|textarea)$/i.test(node.tagName) &&
+        textOnly.test(node.tagName) &&
         node.textContent.trim() === `<!--${search}-->`
       ){
         node.textContent = '';

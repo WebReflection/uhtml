@@ -132,7 +132,16 @@ render(document.body, html`
 `);
 ```
 
-There are only two exceptional nodes that do not allow sparse content within themselves: the `style` element, and the `textarea` one.
+There are only few exceptional nodes that do not allow sparse content within themselves:
+
+  * `<plaintext>${content}</plaintext>`, *deprecated*, yet it cannot contain comments
+  * `<script>${content}</script>`, it can contain comments, but only whole text can be replaced
+  * `<style>${content}</style>`, it cannot contain comments
+  * `<textarea>${content}</textarea>`, same as above
+  * `<title>${content}</title>`, same as above
+  * `<xmp>${content}</xmp>`, same as above
+
+Following an example on how to populate these nodes (wrong + right way):
 
 ```js
 // DON'T DO THIS
