@@ -837,8 +837,6 @@ self.uhtml = (function (exports) {
   exports.render = render;
   exports.svg = svg;
 
-  
-
   return exports;
 
 }({}));

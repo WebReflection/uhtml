@@ -15,6 +15,7 @@ export default {
   ],
   
   output: {
+    esModule: false,
     exports: 'named',
     file: './async.js',
     format: 'iife',
