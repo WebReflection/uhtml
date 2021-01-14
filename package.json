@@ -26,7 +26,7 @@
     "@babel/preset-env": "^7.12.11",
     "@rollup/plugin-babel": "^5.2.2",
     "@rollup/plugin-node-resolve": "^11.0.1",
-    "@ungap/degap": "^0.2.2",
+    "@ungap/degap": "^0.2.3",
     "ascjs": "^4.0.3",
     "basichtml": "^2.4.0",
     "coveralls": "^3.1.0",
@@ -38,7 +38,7 @@
     "terser": "^5.5.1"
   },
   "dependencies": {
-    "@ungap/create-content": "^0.3.0",
+    "@ungap/create-content": "^0.3.1",
     "async-tag": "^0.2.0",
     "uarray": "^1.0.0",
     "udomdiff": "^1.1.0",

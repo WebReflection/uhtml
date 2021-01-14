@@ -349,10 +349,8 @@ self.uhtml = (function (exports) {
       append(content, childNodes);
       return content;
     };
-    return function createContent(markup, type, normalize) {
-      var content = (type === 'svg' ? createSVG : createHTML)(markup);
-      if (normalize) content.normalize();
-      return content;
+    return function createContent(markup, type) {
+      return (type === 'svg' ? createSVG : createHTML)(markup);
     };
 
     function append(root, childNodes) {
@@ -589,7 +587,7 @@ self.uhtml = (function (exports) {
 
   var mapTemplate = function mapTemplate(type, template) {
     var text = instrument(template, prefix, type === 'svg');
-    var content = createFragment(text, type, true); // once instrumented and reproduced as fragment, it's crawled
+    var content = createFragment(text, type); // once instrumented and reproduced as fragment, it's crawled
     // to find out where each update is in the fragment tree
 
     var tw = createWalker(content);
