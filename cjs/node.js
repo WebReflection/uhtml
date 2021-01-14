@@ -34,9 +34,9 @@ const isImportNodeLengthWrong = importNode.length != 1;
 // later on, so that paths are retrieved from one already parsed,
 // hence without missing child nodes once re-cloned.
 const createFragment = isImportNodeLengthWrong ?
-  (text, type) => importNode.call(
+  (text, type, normalize) => importNode.call(
     document,
-    createContent(text, type),
+    createContent(text, type, normalize),
     true
   ) :
   createContent;

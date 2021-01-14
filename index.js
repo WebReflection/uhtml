@@ -349,8 +349,10 @@ self.uhtml = (function (exports) {
       append(content, childNodes);
       return content;
     };
-    return function createContent(markup, type) {
-      return (type === 'svg' ? createSVG : createHTML)(markup);
+    return function createContent(markup, type, normalize) {
+      var content = (type === 'svg' ? createSVG : createHTML)(markup);
+      if (normalize) content.normalize();
+      return content;
     };
 
     function append(root, childNodes) {
@@ -407,8 +409,8 @@ self.uhtml = (function (exports) {
   // later on, so that paths are retrieved from one already parsed,
   // hence without missing child nodes once re-cloned.
 
-  var createFragment = isImportNodeLengthWrong ? function (text, type) {
-    return importNode.call(document, createContent(text, type), true);
+  var createFragment = isImportNodeLengthWrong ? function (text, type, normalize) {
+    return importNode.call(document, createContent(text, type, normalize), true);
   } : createContent; // IE11 and old Edge have a different createTreeWalker signature that
   // has been deprecated in other browsers. This export is needed only
   // to guarantee the TreeWalker doesn't show warnings and, ultimately, works
@@ -587,7 +589,7 @@ self.uhtml = (function (exports) {
 
   var mapTemplate = function mapTemplate(type, template) {
     var text = instrument(template, prefix, type === 'svg');
-    var content = createFragment(text, type); // once instrumented and reproduced as fragment, it's crawled
+    var content = createFragment(text, type, true); // once instrumented and reproduced as fragment, it's crawled
     // to find out where each update is in the fragment tree
 
     var tw = createWalker(content);
