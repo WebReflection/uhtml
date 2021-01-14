@@ -14,7 +14,6 @@
       const target = document.querySelector('#app');
 
       function updateTable(dbs) {
-        console.time('render');
         render(target, html`
         <table class="table table-striped latest-data">
           <tbody>${dbs.map((db, i) => html`
@@ -43,10 +42,8 @@
             }</tr>`
           )}</tbody>
         </table>`);
-        console.timeEnd('render');
       }
 
-      updateTable(ENV.generateData().toArray());
       updateTable(ENV.generateData().toArray());
 
       if (!window.perfMonitor) {
@@ -73,7 +70,7 @@
         setTimeout(update, ENV.timeout);
       }
 
-      // update();
+      update();
 
     }, {once: true});
     </script>
