@@ -10,7 +10,7 @@ _micro html_ is a _~2.5K_ [lighterhtml](https://github.com/WebReflection/lighter
 
 ### 📣 Community Announcement
 
-Please ask questions in the [dedicated forum](https://webreflection.boards.net/) to help the community around this project grow ♥
+Please ask questions in the [dedicated discussions repository](https://github.com/WebReflection/discussions), to help the community around this project grow ♥
 
 ---
 
