@@ -1,6 +1,6 @@
 'use strict';
 const {isArray, slice} = require('uarray');
-const udomdiff = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('udomdiff'));
+const udomdiff = (m => m.__esModule ? /* c8 ignore next */ m.default : /* c8 ignore next */ m)(require('udomdiff'));
 const {aria, attribute, data, event, ref, setter, text} = require('uhandlers');
 const {diffable} = require('uwire');
 

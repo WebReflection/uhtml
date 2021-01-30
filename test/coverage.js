@@ -1,4 +1,8 @@
-const {document} = require('basichtml').init();
+const {DOMParser} = require('linkedom');
+
+const document = (new DOMParser).parseFromString('', 'text/html');
+
+globalThis.document = document;
 
 const {render, html, svg} = require('../cjs');
 

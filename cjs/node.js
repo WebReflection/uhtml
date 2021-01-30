@@ -1,5 +1,5 @@
 'use strict';
-const createContent = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('@ungap/create-content'));
+const createContent = (m => m.__esModule ? /* c8 ignore next */ m.default : /* c8 ignore next */ m)(require('@ungap/create-content'));
 const {indexOf} = require('uarray');
 
 // from a generic path, retrieves the exact targeted node

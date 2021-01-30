@@ -1,6 +1,6 @@
 'use strict';
-const asyncTag = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('async-tag'));
-const umap = (m => m.__esModule ? /* istanbul ignore next */ m.default : /* istanbul ignore next */ m)(require('umap'));
+const asyncTag = (m => m.__esModule ? /* c8 ignore next */ m.default : /* c8 ignore next */ m)(require('async-tag'));
+const umap = (m => m.__esModule ? /* c8 ignore next */ m.default : /* c8 ignore next */ m)(require('umap'));
 
 const {render: $render, html: $html, svg: $svg} = require('./index.js');
 
