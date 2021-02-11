@@ -14,11 +14,19 @@ Please ask questions in the [dedicated discussions repository](https://github.co
 
 ---
 
+### V2.4 Update
+
+  * a new `?attribute=${value}` prefix, with a question mark, has landed, after [this long debate](https://github.com/WebReflection/discussions/discussions/13), and based to the fact *µhtml* never wants to be ambiguous. However, the mighty [lit-html](https://terodox.tech/lit-html-part-2/) put an end to the debate, disambiguating through a `?` question mark prefix, which explicits developers intents, and works well across browsers. So that's it: whenever you expect an attribute to be in, or out, use `?name=${value}` and win the day 🥳
+
 ### V2.2 Update
 
   * the `new.js` file has been renamed as `es.js` to align with other modules of mine that follow the same pattern.
   * this module now exports its very same utilities via `uhtml/async`, in order to automatically resolve asynchronous values passed along the template. Please note this means that exported `render`, `html`, and `svg` tags, are all asynchronous, hence these all return a promise.
   * the `async.js` file is now published too, compatible with ES2015+ browsers (no `async` / `await` used)
+
+---
+
+## How To
 
 **Example**
 ```js
