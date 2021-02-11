@@ -61,10 +61,10 @@ Most information about _µhtml_ are written in the [documentation file](./DOCUME
 The module exports the following functionalities:
 
   * a `render(where, what)` function to populate the `where` DOM node with `what` content, which can be a DOM node, or the returning value of `html` and `svg` tags. The `render` function returns the `where` DOM node itself.
-  * a `html` template literal [tag](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates), to produce any sort of _HTML_ content
-  * a `svg` template literal [tag](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates), to produce any sort of _SVG_ content
-  * both `html` and `svg` implements a `.for(reference[, id])` template tag function for _keyed_ weak relationships within the node
-  * both `html` and `svg` implements a `.node` template tag function for one-off HTML or SVG creation
+  * a `html` template literal [tag](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates), to produce any sort of _HTML_ content.
+  * a `svg` template literal [tag](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates), to produce any sort of _SVG_ content.
+  * both `html` and `svg` implements a `.for(reference[, id])` template tag function for _keyed_ weak relationships within the node. Please don't overuse this feature, as 90% of the time is not necessary, and it could make the rendering slower than it should. Also, consider the `ref` attribute, in case a reference to the current node is needed at any time.
+  * both `html` and `svg` implements a `.node` template tag function for *one-off* HTML or SVG creation. Please don't use `html.node` one off nodes within `render(...)` calls, as this utility exists to help creating fragments or nodes that should be *manually* added to the DOM, and *not* through `render` calls.
 
   </div>
 </details>
