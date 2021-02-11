@@ -1,7 +1,7 @@
 'use strict';
 const {isArray, slice} = require('uarray');
 const udomdiff = (m => m.__esModule ? /* c8 ignore next */ m.default : /* c8 ignore next */ m)(require('udomdiff'));
-const {aria, attribute, data, event, ref, setter, text} = require('uhandlers');
+const {aria, attribute, boolean, event, ref, setter, text} = require('uhandlers');
 const {diffable} = require('uwire');
 
 const {reducePath} = require('./node.js');
@@ -104,20 +104,16 @@ const handleAnything = comment => {
 //  * onevent=${...}  to automatically handle event listeners
 //  * generic=${...}  to handle an attribute just like an attribute
 const handleAttribute = (node, name/*, svg*/) => {
-  if (name === 'ref')
-    return ref(node);
+  switch (name[0]) {
+    case '?': return boolean(node, name.slice(1));
+    case '.': return setter(node, name.slice(1));
+    case 'o': if (name[1] === 'n') return event(node, name);
+  }
 
-  if (name === 'aria')
-    return aria(node);
-
-  if (name === '.dataset')
-    return data(node);
-
-  if (name.slice(0, 1) === '.')
-    return setter(node, name.slice(1));
-
-  if (name.slice(0, 2) === 'on')
-    return event(node, name);
+  switch (name) {
+    case 'ref': return ref(node);
+    case 'aria': return aria(node);
+  }
 
   return attribute(node, name/*, svg*/);
 };

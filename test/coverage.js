@@ -1,6 +1,6 @@
 const {DOMParser} = require('linkedom');
 
-const document = (new DOMParser).parseFromString('', 'text/html');
+const document = (new DOMParser).parseFromString('<html />', 'text/html');
 
 globalThis.document = document;
 
@@ -159,6 +159,12 @@ console.assert(body.firstElementChild.getAttribute('aria-labelledBy') === 'id', 
 
 render(body, html`<div .dataset=${{labelledBy: 'id'}} />`);
 console.assert(body.firstElementChild.dataset.labelledBy === 'id', '.dataset=${...}');
+
+render(body, html`<div ?thing=${1} />`);
+console.assert(body.firstElementChild.getAttribute('thing') === '', '?thing=${truthy}');
+
+render(body, html`<div ?thing=${0} />`);
+console.assert(!body.firstElementChild.hasAttribute('thing'), '?thing=${falsy}');
 
 // cover importNode
 delete require.cache[require.resolve('../cjs/handlers.js')];

@@ -1,6 +1,6 @@
 import {isArray, slice} from 'uarray';
 import udomdiff from 'udomdiff';
-import {aria, attribute, data, event, ref, setter, text} from 'uhandlers';
+import {aria, attribute, boolean, event, ref, setter, text} from 'uhandlers';
 import {diffable} from 'uwire';
 
 import {reducePath} from './node.js';
@@ -103,20 +103,16 @@ const handleAnything = comment => {
 //  * onevent=${...}  to automatically handle event listeners
 //  * generic=${...}  to handle an attribute just like an attribute
 const handleAttribute = (node, name/*, svg*/) => {
-  if (name === 'ref')
-    return ref(node);
+  switch (name[0]) {
+    case '?': return boolean(node, name.slice(1));
+    case '.': return setter(node, name.slice(1));
+    case 'o': if (name[1] === 'n') return event(node, name);
+  }
 
-  if (name === 'aria')
-    return aria(node);
-
-  if (name === '.dataset')
-    return data(node);
-
-  if (name.slice(0, 1) === '.')
-    return setter(node, name.slice(1));
-
-  if (name.slice(0, 2) === 'on')
-    return event(node, name);
+  switch (name) {
+    case 'ref': return ref(node);
+    case 'aria': return aria(node);
+  }
 
   return attribute(node, name/*, svg*/);
 };
