@@ -1,6 +1,6 @@
 'use strict';
 const {isArray, slice} = require('uarray');
-const udomdiff = (m => m.__esModule ? /* c8 ignore next */ m.default : /* c8 ignore next */ m)(require('udomdiff'));
+const udomdiff = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('udomdiff'));
 const {aria, attribute, boolean, event, ref, setter, text} = require('uhandlers');
 const {diffable} = require('uwire');
 
@@ -105,7 +105,7 @@ const handleAnything = comment => {
 //  * generic=${...}  to handle an attribute just like an attribute
 const handleAttribute = (node, name/*, svg*/) => {
   switch (name[0]) {
-    case '?': return boolean(node, name.slice(1));
+    case '?': return boolean(node, name.slice(1), false);
     case '.': return setter(node, name.slice(1));
     case 'o': if (name[1] === 'n') return event(node, name);
   }

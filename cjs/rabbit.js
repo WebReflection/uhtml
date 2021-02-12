@@ -1,6 +1,6 @@
 'use strict';
-const umap = (m => m.__esModule ? /* c8 ignore next */ m.default : /* c8 ignore next */ m)(require('umap'));
-const instrument = (m => m.__esModule ? /* c8 ignore next */ m.default : /* c8 ignore next */ m)(require('uparser'));
+const umap = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('umap'));
+const instrument = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('uparser'));
 const {isArray} = require('uarray');
 const {persistent} = require('uwire');
 

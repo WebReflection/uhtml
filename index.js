@@ -281,9 +281,13 @@ self.uhtml = (function (exports) {
     };
   };
 
-  var _boolean = function _boolean(node, key) {
-    return function (value) {
-      if (value) node.setAttribute(key, '');else node.removeAttribute(key);
+  var _boolean = function _boolean(node, key, oldValue) {
+    return function (newValue) {
+      if (oldValue !== !!newValue) {
+        // when IE won't be around anymore ...
+        // node.toggleAttribute(key, oldValue = !!newValue);
+        if (oldValue = !!newValue) node.setAttribute(key, '');else node.removeAttribute(key);
+      }
     };
   };
   var data = function data(_ref) {
@@ -518,7 +522,7 @@ self.uhtml = (function (exports) {
   ) {
     switch (name[0]) {
       case '?':
-        return _boolean(node, name.slice(1));
+        return _boolean(node, name.slice(1), false);
 
       case '.':
         return setter(node, name.slice(1));

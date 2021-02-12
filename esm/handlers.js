@@ -104,7 +104,7 @@ const handleAnything = comment => {
 //  * generic=${...}  to handle an attribute just like an attribute
 const handleAttribute = (node, name/*, svg*/) => {
   switch (name[0]) {
-    case '?': return boolean(node, name.slice(1));
+    case '?': return boolean(node, name.slice(1), false);
     case '.': return setter(node, name.slice(1));
     case 'o': if (name[1] === 'n') return event(node, name);
   }
