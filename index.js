@@ -465,7 +465,7 @@ self.uhtml = (function (exports) {
         case 'boolean':
           if (oldValue !== newValue) {
             oldValue = newValue;
-            if (text) text.textContent = newValue;else text = document.createTextNode(newValue);
+            if (text) text.nodeValue = newValue;else text = document.createTextNode(newValue);
             nodes = diff(comment, nodes, [text]);
           }
 
@@ -633,7 +633,7 @@ self.uhtml = (function (exports) {
       if (node.nodeType === 8) {
         // The only comments to be considered are those
         // which content is exactly the same as the searched one.
-        if (node.textContent === search) {
+        if (node.nodeValue === search) {
           nodes.push({
             type: 'node',
             path: createPath(node)

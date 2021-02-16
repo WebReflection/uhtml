@@ -45,7 +45,7 @@ const handleAnything = comment => {
         if (oldValue !== newValue) {
           oldValue = newValue;
           if (text)
-            text.textContent = newValue;
+            text.nodeValue = newValue;
           else
             text = document.createTextNode(newValue);
           nodes = diff(comment, nodes, [text]);
