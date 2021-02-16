@@ -7,3 +7,5 @@ package-lock.json
 uhtml-head.jpg
 LOGO.txt
 .travis.yml
+DOCUMENTATION.md
+V0.md
