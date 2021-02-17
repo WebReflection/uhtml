@@ -52,7 +52,7 @@ const handleAnything = comment => {
         }
         break;
       case 'function':
-        anyContent(newValue(node));
+        anyContent(newValue(comment));
         break;
       // null, and undefined are used to cleanup previous content
       case 'object':
