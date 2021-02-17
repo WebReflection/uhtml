@@ -14,6 +14,10 @@ Please ask questions in the [dedicated discussions repository](https://github.co
 
 ---
 
+### V2.5 Update
+
+  * an interpolated value, within a *DOM* element, can now be a `function`, enabling a world of *µhtml* extending possibilities, also aligning the behavior with both *lighterhtml* and *hyperHTML*. That is: `<el>${callback}</el>`! The `callback` will be invoked with the *comment* pin/placeholder as unique argument, where its `parentNode` would be the element containing such comment, if needed, and its returned value will be passed along the same mechanism that resolves already all other cases.
+
 ### V2.4 Update
 
   * a new `?attribute=${value}` prefix, with a question mark, has landed, after [this long debate](https://github.com/WebReflection/discussions/discussions/13), and based to the fact *µhtml* never wants to be ambiguous. However, the mighty [lit-html](https://terodox.tech/lit-html-part-2/) put an end to the debate, disambiguating through a `?` question mark prefix, which explicits developers intents, and works well across browsers. So that's it: whenever you expect an attribute to be in, or out, use `?name=${value}` and win the day 🥳

@@ -19,13 +19,13 @@ self.uhtml = (function (exports) {
 
   var attr = /([^\s\\>"'=]+)\s*=\s*(['"]?)$/;
   var empty = /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
-  var node = /<[a-z][^>]+$/i;
+  var node$1 = /<[a-z][^>]+$/i;
   var notNode = />[^<>]*$/;
   var selfClosing = /<([a-z]+[a-z0-9:._-]*)([^>]*?)(\/>)/ig;
   var trimEnd = /\s+$/;
 
   var isNode = function isNode(template, i) {
-    return 0 < i-- && (node.test(template[i]) || !notNode.test(template[i]) && isNode(template, i));
+    return 0 < i-- && (node$1.test(template[i]) || !notNode.test(template[i]) && isNode(template, i));
   };
 
   var regular = function regular(original, name, extra) {
@@ -469,6 +469,10 @@ self.uhtml = (function (exports) {
             nodes = diff(comment, nodes, [text]);
           }
 
+          break;
+
+        case 'function':
+          anyContent(newValue(node));
           break;
         // null, and undefined are used to cleanup previous content
 

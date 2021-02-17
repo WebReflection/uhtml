@@ -432,7 +432,7 @@ render(document.body, html`
 
 Beside nodes where the content will be inevitably just text, like it is for `style` or `textarea`, as example, every other interpolation can contain primitives, as strings, numbers, or even booleans, or the returned value of `html` or `svg`, plus regular DOM nodes.
 
-The only special case are _Array_ of either primitives, or returned values from `html` or `svg`.
+The only special case are _Array_ of either primitives, or returned values from `html` or `svg`, and since *2.5* _Function_, invoked and resolved after invoke.
 
 
 ```js
@@ -440,6 +440,7 @@ render(document.body, html`
   <ul>
     <li>This is ${'primitive'}</li>
     <li>This is joined as primitives: ${[1, 2, 3]}</li>
+    <li>This is a callback: ${utility}</li>
     ${lines.map((text, i) => html`
       <li>Row ${i} with content: ${text}</li>
     `)}

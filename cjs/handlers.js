@@ -51,6 +51,9 @@ const handleAnything = comment => {
           nodes = diff(comment, nodes, [text]);
         }
         break;
+      case 'function':
+        anyContent(newValue(node));
+        break;
       // null, and undefined are used to cleanup previous content
       case 'object':
       case 'undefined':
