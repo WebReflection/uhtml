@@ -465,14 +465,11 @@ self.uhtml = (function (exports) {
         case 'boolean':
           if (oldValue !== newValue) {
             oldValue = newValue;
-            if (text) text.nodeValue = newValue;else text = document.createTextNode(newValue);
+            if (!text) text = document.createTextNode('');
+            text.nodeValue = newValue;
             nodes = diff(comment, nodes, [text]);
           }
 
-          break;
-
-        case 'function':
-          anyContent(newValue(comment));
           break;
         // null, and undefined are used to cleanup previous content
 
@@ -507,6 +504,11 @@ self.uhtml = (function (exports) {
             nodes = diff(comment, nodes, newValue.nodeType === 11 ? slice.call(newValue.childNodes) : [newValue]);
           }
 
+          break;
+
+        case 'function':
+          anyContent(newValue(comment));
+          break;
       }
     };
 

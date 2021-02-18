@@ -43,15 +43,11 @@ const handleAnything = comment => {
       case 'boolean':
         if (oldValue !== newValue) {
           oldValue = newValue;
-          if (text)
-            text.nodeValue = newValue;
-          else
-            text = document.createTextNode(newValue);
+          if (!text)
+            text = document.createTextNode('');
+          text.nodeValue = newValue;
           nodes = diff(comment, nodes, [text]);
         }
-        break;
-      case 'function':
-        anyContent(newValue(comment));
         break;
       // null, and undefined are used to cleanup previous content
       case 'object':
@@ -92,6 +88,10 @@ const handleAnything = comment => {
               [newValue]
           );
         }
+        break;
+      case 'function':
+        anyContent(newValue(comment));
+        break;
     }
   };
   return anyContent;
