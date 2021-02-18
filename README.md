@@ -16,7 +16,7 @@ Please ask questions in the [dedicated discussions repository](https://github.co
 
 ### V2.5 Update
 
-  * an interpolated value, within a *DOM* element, can now be a `function`, enabling a world of *µhtml* extending possibilities, also aligning the behavior with both *lighterhtml* and *hyperHTML*. That is: `<el>${callback}</el>`! The `callback` will be invoked with the *comment* pin/placeholder as unique argument, where its `parentNode` would be the element containing such comment, if needed, and its returned value will be passed along the same mechanism that resolves already all other cases.
+  * an interpolated value, within a *DOM* element, can now be a `function`, enabling a world of *µhtml* extending possibilities, including [intents](https://github.com/WebReflection/uhtml-intents#readme), hence aligning the behavior with both *lighterhtml* and *hyperHTML*. That is: `<el>${callback}</el>`! The `callback` will be invoked with the *comment* pin/placeholder as unique argument, where its `parentNode` would be the element containing such comment, if needed, and its returned value will be passed along the same mechanism that resolves already all other cases.
 
 ### V2.4 Update
 
