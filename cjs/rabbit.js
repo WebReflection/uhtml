@@ -75,7 +75,7 @@ const mapTemplate = (type, template) => {
     if (node.nodeType === 8) {
       // The only comments to be considered are those
       // which content is exactly the same as the searched one.
-      if (node.nodeValue === search) {
+      if (node.data === search) {
         nodes.push({type: 'node', path: createPath(node)});
         search = `${prefix}${++i}`;
       }
