@@ -313,8 +313,12 @@ self.uhtml = (function (exports) {
     };
   };
   var ref = function ref(node) {
+    var oldValue;
     return function (value) {
-      if (typeof value === 'function') value(node);else value.current = node;
+      if (oldValue !== value) {
+        oldValue = value;
+        if (typeof value === 'function') value(node);else value.current = node;
+      }
     };
   };
   var setter = function setter(node, key) {
@@ -576,7 +580,7 @@ self.uhtml = (function (exports) {
   // content, within the exact same amount of updates each time.
   // This cache relates each template to its unique content and updates.
 
-  var cache = umap(new WeakMap()); // a RegExp that helps checking nodes that cannot contain comments
+  var cache$1 = umap(new WeakMap()); // a RegExp that helps checking nodes that cannot contain comments
 
   var textOnly = /^(?:plaintext|script|style|textarea|title|xmp)$/i;
   var createCache = function createCache() {
@@ -689,7 +693,7 @@ self.uhtml = (function (exports) {
 
 
   var mapUpdates = function mapUpdates(type, template) {
-    var _ref = cache.get(template) || cache.set(template, mapTemplate(type, template)),
+    var _ref = cache$1.get(template) || cache$1.set(template, mapTemplate(type, template)),
         content = _ref.content,
         nodes = _ref.nodes; // clone deeply the fragment
 
@@ -836,7 +840,7 @@ self.uhtml = (function (exports) {
   }; // each rendered node gets its own cache
 
 
-  var cache$1 = umap(new WeakMap()); // rendering means understanding what `html` or `svg` tags returned
+  var cache = umap(new WeakMap()); // rendering means understanding what `html` or `svg` tags returned
   // and it relates a specific node to its own unique cache.
   // Each time the content to render changes, the node is cleaned up
   // and the new new content is appended, and if such content is a Hole
@@ -844,7 +848,7 @@ self.uhtml = (function (exports) {
 
   var render = function render(where, what) {
     var hole = typeof what === 'function' ? what() : what;
-    var info = cache$1.get(where) || cache$1.set(where, createCache());
+    var info = cache.get(where) || cache.set(where, createCache());
     var wire = hole instanceof Hole ? unroll(info, hole) : hole;
 
     if (wire !== info.wire) {
