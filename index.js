@@ -503,7 +503,7 @@ self.uhtml = (function (exports) {
           // is not expected one, nothing happens, as easy as that.
 
 
-          if ('ELEMENT_NODE' in newValue && oldValue !== newValue) {
+          if (oldValue !== newValue && 'ELEMENT_NODE' in newValue) {
             oldValue = newValue;
             nodes = diff(comment, nodes, newValue.nodeType === 11 ? slice.call(newValue.childNodes) : [newValue]);
           }
