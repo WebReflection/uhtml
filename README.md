@@ -256,6 +256,59 @@ render(document.body, html`
 </details>
 
 <details>
+  <summary><strong>About data purity</strong></summary>
+  <div>
+
+In more than one occasion [developers got bitten](https://github.com/WebReflection/uhtml/issues/41) by the fact _µhtml_ can produce some cryptic error when `null`, or empty content, is provided as interpolation/hole.
+
+The problem is pretty simple:
+
+  * don't loop / pass data that should *not* be render
+  * sanitize data upfront instead of expecting this library to magically understand where, and how, such data should not be rendered
+
+A basic example would be the following:
+
+```js
+const dirtyData = [
+  {name: 'first'},
+  null,
+  {name: 'second'}
+];
+
+render(document.body, html`
+  <ul>
+    ${dirtyData.map(item => {
+      // ⚠ this should not happen in the first place!
+      if (!item)
+        return null;
+      return html`<li>${item.name}</li>`;
+    })}
+  </ul>
+`);
+```
+
+There are at least two workarounds to consider:
+
+  * use `data.filter(item => validate(item)).map(...)`
+  * returns an actual node:
+
+```js
+  if (!item)
+    return html`<!--ignore-->`;
+```
+
+Between these two workarounds, I believe the cleanest one is the former: sanitize data upfront!
+
+The benefits are:
+
+  * there are no unnecessary nodes in the DOM
+  * there are no weird cases to consider
+  * the mapping is pure, data in, node out
+
+  </div>
+</details>
+
+<details>
   <summary><strong>About Custom Elements</strong></summary>
   <div>
 
