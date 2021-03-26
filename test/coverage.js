@@ -4,6 +4,8 @@ const document = (new DOMParser).parseFromString('<html />', 'text/html');
 
 globalThis.document = document;
 
+const {Event} = document.defaultView;
+
 const {render, html, svg} = require('../cjs');
 
 const {body} = document;
@@ -43,7 +45,15 @@ render(div, () => html.for(body, 1)`this is a test`);
   if (i--) twice(i);
 }(1));
 
-render(div, html`<div test="${123}" onclick=${() => {}} .disabled=${true} .contentEditable=${false} null=${null} />`);
+let clicked = false;
+render(div, html`<div test="${123}" @click=${() => { clicked = true; }} .disabled=${true} .contentEditable=${false} null=${null} />`);
+div.firstElementChild.dispatchEvent(new Event('click'));
+console.assert(clicked, '@click worked');
+
+clicked = false;
+render(div, html`<div test="${123}" onclick=${() => { clicked = true; }} .disabled=${true} .contentEditable=${false} null=${null} />`);
+div.firstElementChild.dispatchEvent(new Event('click'));
+console.assert(clicked, 'onclick worked');
 
 render(document.createElement('div'), html`<textarea>${'test'}</textarea>`);
 render(document.createElement('div'), html`<style>${'test'}</style>`);
