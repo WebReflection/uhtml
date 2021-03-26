@@ -93,6 +93,7 @@ render(document.body, html`
         class=${`content ${extra}`}
         data-fancy=${fancy}>
     <p contenteditable=${editable}
+        @click=${listener}
         onclick=${listener}
         class="${['container', 'user'].join(' ')}">
       Hello ${user.name}, feel free to edit this content.
@@ -106,7 +107,7 @@ These are the rules to follow for attributes:
   * interpolated attributes don't require the usage of quotes, but these work either ways. `name=${value}` is OK, and so is `name="${value}"` or even `name='${value}'`
   * you cannot have sparse attribute interpolations: always use one interpolation to define each attribute that needs one, but never write things like `style="top:${x};left${y}"` as the parser will simply break with the error _bad template_. Use template literals within interpolations, if you want to obtain exact same result: ``style=${`top:${x};left${y}`}``
   * if the passed value is `null` or `undefined`, the attribute will be removed. If the value is something else, it will be set as is as value. If the attribute was previously removed, the same attribute will be placed back again. If the value is the same as it was before, nothing happens
-  * if the attribute name starts with `on`, as example, `onclick=${...}`, it will be set as listener. If the listener changes, the previous one will be automatically removed. If the listener is an `Array` like `[listener, {once:true}]`, the second entry of the array would be used as listener's options.
+  * if the attribute name starts with `on` or `@`, as example, `onclick=${...}` or `@click=${...}`, it will be set as listener. If the listener changes, the previous one will be automatically removed. If the listener is an `Array` like `[listener, {once:true}]`, the second entry of the array would be used as listener's options.
   * if the attribute starts with a `.` dot, as in `.setter=${value}`, the value will be passed directly to the element per each update. If such value is a known setter, either native elements or defined via Custom Elements, the setter will be invoked per each update, even if the value is the same
   * **new**: if the attribute starts with a `?` question mark, as in `?hidden=${value}`, the value will be toggled, accordingly with its *truthy*, or *falsy*, value.
   * if the attribute name is `ref`, as in `ref=${object}`, the `object.current` property will be assigned to the node, once this is rendered, and per each update. If a callback is passed instead, the callback will receive the node right away, same way [React ref](https://reactjs.org/docs/refs-and-the-dom.html) does.
