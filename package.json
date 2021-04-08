@@ -3,6 +3,7 @@
   "version": "2.7.1",
   "description": "A micro HTML/SVG render",
   "main": "cjs/index.js",
+  "types": "index.d.ts",
   "scripts": {
     "build": "npm run cjs && npm run rollup:async && npm run rollup:es && npm run rollup:babel && drop-babel-typeof ./index.js && npm run min && npm run test && npm run size",
     "cjs": "rm cjs/*.js && ascjs esm cjs",
