@@ -4,9 +4,9 @@ const document = (new DOMParser).parseFromString('<html />', 'text/html');
 
 globalThis.document = document;
 
-const {Event} = document.defaultView;
-
 const {render, html, svg} = require('../cjs');
+
+const {Event} = document.defaultView;
 
 const {body} = document;
 
