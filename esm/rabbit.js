@@ -1,10 +1,24 @@
 import umap from 'umap';
 import instrument from 'uparser';
-import {isArray} from 'uarray';
+import {indexOf, isArray} from 'uarray';
 import {persistent} from 'uwire';
 
 import {handlers} from './handlers.js';
-import {createFragment, createPath, createWalker, importNode} from './node.js';
+import {createFragment, createIterator} from './node.js';
+
+// from a fragment container, create an array of indexes
+// related to its child nodes, so that it's possible
+// to retrieve later on exact node via reducePath
+const createPath = node => {
+  const path = [];
+  let {parentNode} = node;
+  while (parentNode) {
+    path.push(indexOf.call(parentNode.childNodes, node));
+    node = parentNode;
+    parentNode = node.parentNode;
+  }
+  return path;
+};
 
 // the prefix is used to identify either comments, attributes, or nodes
 // that contain the related unique id. In the attribute cases
@@ -55,7 +69,7 @@ const mapTemplate = (type, template) => {
   const content = createFragment(text, type);
   // once instrumented and reproduced as fragment, it's crawled
   // to find out where each update is in the fragment tree
-  const tw = createWalker(content);
+  const tw = createIterator(content);
   const nodes = [];
   const length = template.length - 1;
   let i = 0;
@@ -121,7 +135,7 @@ const mapUpdates = (type, template) => {
     cache.set(template, mapTemplate(type, template))
   );
   // clone deeply the fragment
-  const fragment = importNode.call(document, content, true);
+  const fragment = document.importNode(content, true);
   // and relate an update handler per each node that needs one
   const updates = nodes.map(handlers, fragment);
   // return the fragment and all updates to use within its nodes
