@@ -336,102 +336,11 @@ self.uhtml = (function (exports) {
     };
   };
 
-  /*! (c) Andrea Giammarchi - ISC */
-  var createContent = function (document) {
-
-    var FRAGMENT = 'fragment';
-    var TEMPLATE = 'template';
-    var HAS_CONTENT = ('content' in create(TEMPLATE));
-    var createHTML = HAS_CONTENT ? function (html) {
-      var template = create(TEMPLATE);
-      template.innerHTML = html;
-      return template.content;
-    } : function (html) {
-      var content = create(FRAGMENT);
-      var template = create(TEMPLATE);
-      var childNodes = null;
-
-      if (/^[^\S]*?<(col(?:group)?|t(?:head|body|foot|r|d|h))/i.test(html)) {
-        var selector = RegExp.$1;
-        template.innerHTML = '<table>' + html + '</table>';
-        childNodes = template.querySelectorAll(selector);
-      } else {
-        template.innerHTML = html;
-        childNodes = template.childNodes;
-      }
-
-      append(content, childNodes);
-      return content;
-    };
-    return function createContent(markup, type) {
-      return (type === 'svg' ? createSVG : createHTML)(markup);
-    };
-
-    function append(root, childNodes) {
-      var length = childNodes.length;
-
-      while (length--) {
-        root.appendChild(childNodes[0]);
-      }
-    }
-
-    function create(element) {
-      return element === FRAGMENT ? document.createDocumentFragment() : document.createElementNS('http://www.w3.org/1999/xhtml', element);
-    } // it could use createElementNS when hasNode is there
-    // but this fallback is equally fast and easier to maintain
-    // it is also battle tested already in all IE
-
-
-    function createSVG(svg) {
-      var content = create(FRAGMENT);
-      var template = create('div');
-      template.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg">' + svg + '</svg>';
-      append(content, template.firstChild.childNodes);
-      return content;
-    }
-  }(document);
-
   var reducePath = function reducePath(_ref, i) {
     var childNodes = _ref.childNodes;
     return childNodes[i];
-  }; // from a fragment container, create an array of indexes
-  // related to its child nodes, so that it's possible
-  // to retrieve later on exact node via reducePath
+  }; // this helper avoid code bloat around handleAnything() callback
 
-  var createPath = function createPath(node) {
-    var path = [];
-    var _node = node,
-        parentNode = _node.parentNode;
-
-    while (parentNode) {
-      path.push(indexOf.call(parentNode.childNodes, node));
-      node = parentNode;
-      parentNode = node.parentNode;
-    }
-
-    return path;
-  };
-  var _document = document,
-      createTreeWalker = _document.createTreeWalker,
-      importNode = _document.importNode;
-
-  var isImportNodeLengthWrong = importNode.length != 1; // IE11 and old Edge discard empty nodes when cloning, potentially
-  // resulting in broken paths to find updates. The workaround here
-  // is to import once, upfront, the fragment that will be cloned
-  // later on, so that paths are retrieved from one already parsed,
-  // hence without missing child nodes once re-cloned.
-
-  var createFragment = isImportNodeLengthWrong ? function (text, type, normalize) {
-    return importNode.call(document, createContent(text, type, normalize), true);
-  } : createContent; // IE11 and old Edge have a different createTreeWalker signature that
-  // has been deprecated in other browsers. This export is needed only
-  // to guarantee the TreeWalker doesn't show warnings and, ultimately, works
-
-  var createWalker = isImportNodeLengthWrong ? function (fragment) {
-    return createTreeWalker.call(document, fragment, 1 | 128, null, false);
-  } : function (fragment) {
-    return createTreeWalker.call(document, fragment, 1 | 128);
-  };
 
   var diff = function diff(comment, oldNodes, newNodes) {
     return udomdiff(comment.parentNode, // TODO: there is a possible edge case where a node has been
@@ -572,12 +481,102 @@ self.uhtml = (function (exports) {
     ) : text(node);
   }
 
+  /*! (c) Andrea Giammarchi - ISC */
+  var createContent = function (document) {
+
+    var FRAGMENT = 'fragment';
+    var TEMPLATE = 'template';
+    var HAS_CONTENT = ('content' in create(TEMPLATE));
+    var createHTML = HAS_CONTENT ? function (html) {
+      var template = create(TEMPLATE);
+      template.innerHTML = html;
+      return template.content;
+    } : function (html) {
+      var content = create(FRAGMENT);
+      var template = create(TEMPLATE);
+      var childNodes = null;
+
+      if (/^[^\S]*?<(col(?:group)?|t(?:head|body|foot|r|d|h))/i.test(html)) {
+        var selector = RegExp.$1;
+        template.innerHTML = '<table>' + html + '</table>';
+        childNodes = template.querySelectorAll(selector);
+      } else {
+        template.innerHTML = html;
+        childNodes = template.childNodes;
+      }
+
+      append(content, childNodes);
+      return content;
+    };
+    return function createContent(markup, type) {
+      return (type === 'svg' ? createSVG : createHTML)(markup);
+    };
+
+    function append(root, childNodes) {
+      var length = childNodes.length;
+
+      while (length--) {
+        root.appendChild(childNodes[0]);
+      }
+    }
+
+    function create(element) {
+      return element === FRAGMENT ? document.createDocumentFragment() : document.createElementNS('http://www.w3.org/1999/xhtml', element);
+    } // it could use createElementNS when hasNode is there
+    // but this fallback is equally fast and easier to maintain
+    // it is also battle tested already in all IE
+
+
+    function createSVG(svg) {
+      var content = create(FRAGMENT);
+      var template = create('div');
+      template.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg">' + svg + '</svg>';
+      append(content, template.firstChild.childNodes);
+      return content;
+    }
+  }(document);
+
+  var isImportNodeLengthWrong = document.importNode.length != 1; // IE11 and old Edge discard empty nodes when cloning, potentially
+  // resulting in broken paths to find updates. The workaround here
+  // is to import once, upfront, the fragment that will be cloned
+  // later on, so that paths are retrieved from one already parsed,
+  // hence without missing child nodes once re-cloned.
+
+  var createFragment = isImportNodeLengthWrong ? function (text, type, normalize) {
+    return document.importNode(createContent(text, type, normalize), true);
+  } : createContent; // IE11 and old Edge have a different createTreeWalker signature that
+  // has been deprecated in other browsers. This export is needed only
+  // to guarantee the TreeWalker doesn't show warnings and, ultimately, works
+
+  var createWalker = isImportNodeLengthWrong ? function (fragment) {
+    return document.createTreeWalker(fragment, 1 | 128, null, false);
+  } : function (fragment) {
+    return document.createTreeWalker(fragment, 1 | 128);
+  };
+
+  // related to its child nodes, so that it's possible
+  // to retrieve later on exact node via reducePath
+
+  var createPath = function createPath(node) {
+    var path = [];
+    var _node = node,
+        parentNode = _node.parentNode;
+
+    while (parentNode) {
+      path.push(indexOf.call(parentNode.childNodes, node));
+      node = parentNode;
+      parentNode = node.parentNode;
+    }
+
+    return path;
+  }; // the prefix is used to identify either comments, attributes, or nodes
   // that contain the related unique id. In the attribute cases
   // isµX="attribute-name" will be used to map current X update to that
   // attribute name, while comments will be like <!--isµX-->, to map
   // the update to that specific comment node, hence its parent.
   // style and textarea will have <!--isµX--> text content, and are handled
   // directly through text-only updates.
+
 
   var prefix = 'isµ'; // Template Literals are unique per scope and static, meaning a template
   // should be parsed once, and once only, as it will always represent the same
@@ -702,7 +701,7 @@ self.uhtml = (function (exports) {
         nodes = _ref.nodes; // clone deeply the fragment
 
 
-    var fragment = importNode.call(document, content, true); // and relate an update handler per each node that needs one
+    var fragment = document.importNode(content, true); // and relate an update handler per each node that needs one
 
     var updates = nodes.map(handlers, fragment); // return the fragment and all updates to use within its nodes
 

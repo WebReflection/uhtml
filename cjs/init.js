@@ -211,29 +211,8 @@ const text = node => {
 
 
 
-
-// from a generic path, retrieves the exact targeted node
-const reducePath = ({childNodes}, i) => childNodes[i];
-
-// from a fragment container, create an array of indexes
-// related to its child nodes, so that it's possible
-// to retrieve later on exact node via reducePath
-const createPath = node => {
-  const path = [];
-  let {parentNode} = node;
-  while (parentNode) {
-    path.push(indexOf.call(parentNode.childNodes, node));
-    node = parentNode;
-    parentNode = node.parentNode;
-  }
-  return path;
-};
-
-const {createTreeWalker, importNode} = document;
-
-
 // this "hack" tells the library if the browser is IE11 or old Edge
-const isImportNodeLengthWrong = importNode.length != 1;
+const isImportNodeLengthWrong = document.importNode.length != 1;
 
 // IE11 and old Edge discard empty nodes when cloning, potentially
 // resulting in broken paths to find updates. The workaround here
@@ -241,8 +220,7 @@ const isImportNodeLengthWrong = importNode.length != 1;
 // later on, so that paths are retrieved from one already parsed,
 // hence without missing child nodes once re-cloned.
 const createFragment = isImportNodeLengthWrong ?
-  (text, type, normalize) => importNode.call(
-    document,
+  (text, type, normalize) => document.importNode(
     createContent(text, type, normalize),
     true
   ) :
@@ -252,15 +230,16 @@ const createFragment = isImportNodeLengthWrong ?
 // has been deprecated in other browsers. This export is needed only
 // to guarantee the TreeWalker doesn't show warnings and, ultimately, works
 const createWalker = isImportNodeLengthWrong ?
-  fragment => createTreeWalker.call(document, fragment, 1 | 128, null, false) :
-  fragment => createTreeWalker.call(document, fragment, 1 | 128);
+  fragment => document.createTreeWalker(fragment, 1 | 128, null, false) :
+  fragment => document.createTreeWalker(fragment, 1 | 128);
 
 
 
 
 
 
-
+// from a generic path, retrieves the exact targeted node
+const reducePath = ({childNodes}, i) => childNodes[i];
 
 // this helper avoid code bloat around handleAnything() callback
 const diff = (comment, oldNodes, newNodes) => udomdiff(
@@ -402,6 +381,20 @@ function handlers(options) {
 
 
 
+// from a fragment container, create an array of indexes
+// related to its child nodes, so that it's possible
+// to retrieve later on exact node via reducePath
+const createPath = node => {
+  const path = [];
+  let {parentNode} = node;
+  while (parentNode) {
+    path.push(indexOf.call(parentNode.childNodes, node));
+    node = parentNode;
+    parentNode = node.parentNode;
+  }
+  return path;
+};
+
 // the prefix is used to identify either comments, attributes, or nodes
 // that contain the related unique id. In the attribute cases
 // isµX="attribute-name" will be used to map current X update to that
@@ -517,7 +510,7 @@ const mapUpdates = (type, template) => {
     cache.set(template, mapTemplate(type, template))
   );
   // clone deeply the fragment
-  const fragment = importNode.call(document, content, true);
+  const fragment = document.importNode(content, true);
   // and relate an update handler per each node that needs one
   const updates = nodes.map(handlers, fragment);
   // return the fragment and all updates to use within its nodes

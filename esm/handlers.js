@@ -3,7 +3,8 @@ import udomdiff from 'udomdiff';
 import {aria, attribute, boolean, event, ref, setter, text} from 'uhandlers';
 import {diffable} from 'uwire';
 
-import {reducePath} from './node.js';
+// from a generic path, retrieves the exact targeted node
+const reducePath = ({childNodes}, i) => childNodes[i];
 
 // this helper avoid code bloat around handleAnything() callback
 const diff = (comment, oldNodes, newNodes) => udomdiff(

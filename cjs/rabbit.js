@@ -1,11 +1,25 @@
 'use strict';
 const umap = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('umap'));
 const instrument = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('uparser'));
-const {isArray} = require('uarray');
+const {indexOf, isArray} = require('uarray');
 const {persistent} = require('uwire');
 
 const {handlers} = require('./handlers.js');
-const {createFragment, createPath, createWalker, importNode} = require('./node.js');
+const {createFragment, createWalker} = require('./node.js');
+
+// from a fragment container, create an array of indexes
+// related to its child nodes, so that it's possible
+// to retrieve later on exact node via reducePath
+const createPath = node => {
+  const path = [];
+  let {parentNode} = node;
+  while (parentNode) {
+    path.push(indexOf.call(parentNode.childNodes, node));
+    node = parentNode;
+    parentNode = node.parentNode;
+  }
+  return path;
+};
 
 // the prefix is used to identify either comments, attributes, or nodes
 // that contain the related unique id. In the attribute cases
@@ -123,7 +137,7 @@ const mapUpdates = (type, template) => {
     cache.set(template, mapTemplate(type, template))
   );
   // clone deeply the fragment
-  const fragment = importNode.call(document, content, true);
+  const fragment = document.importNode(content, true);
   // and relate an update handler per each node that needs one
   const updates = nodes.map(handlers, fragment);
   // return the fragment and all updates to use within its nodes

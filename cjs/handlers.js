@@ -4,7 +4,8 @@ const udomdiff = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 
 const {aria, attribute, boolean, event, ref, setter, text} = require('uhandlers');
 const {diffable} = require('uwire');
 
-const {reducePath} = require('./node.js');
+// from a generic path, retrieves the exact targeted node
+const reducePath = ({childNodes}, i) => childNodes[i];
 
 // this helper avoid code bloat around handleAnything() callback
 const diff = (comment, oldNodes, newNodes) => udomdiff(
