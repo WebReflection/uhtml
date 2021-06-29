@@ -24,24 +24,24 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.14.6",
-    "@babel/preset-env": "^7.14.5",
+    "@babel/preset-env": "^7.14.7",
     "@rollup/plugin-babel": "^5.3.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
-    "@ungap/degap": "^0.2.6",
+    "@ungap/degap": "^0.2.7",
     "ascjs": "^5.0.1",
     "c8": "^7.7.3",
-    "coveralls": "^3.1.0",
+    "coveralls": "^3.1.1",
     "drop-babel-typeof": "^1.0.3",
-    "linkedom": "^0.9.3",
-    "rollup": "^2.51.2",
+    "linkedom": "^0.9.7",
+    "rollup": "^2.52.3",
     "rollup-plugin-includepaths": "^0.2.4",
     "rollup-plugin-terser": "^7.0.2",
-    "terser": "^5.7.0"
+    "terser": "^5.7.1"
   },
   "dependencies": {
     "@ungap/create-content": "^0.3.1",
     "async-tag": "^0.2.0",
-    "jsx2tag": "^0.2.1",
+    "jsx2tag": "^0.3.0",
     "uarray": "^1.0.0",
     "udomdiff": "^1.1.0",
     "uhandlers": "^0.5.0",
@@ -63,6 +63,10 @@
     "./init": {
       "import": "./esm/init.js",
       "default": "./cjs/init.js"
+    },
+    "./json": {
+      "import": "./esm/json.js",
+      "default": "./cjs/json.js"
     },
     "./jsx": {
       "import": "./esm/x.js",

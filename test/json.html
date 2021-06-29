@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>uhtml/json</title>
+  <script type="module">
+  import {render, html} from '../esm/json.js';
+  const strong = name => html.json`<strong>${name}</strong>`;
+  const greetings = name => html.json`
+    <div>Hello ${strong(name)} 👋</div>
+  `;
+
+  console.log(greetings('console'));
+  render(document.body, greetings('World'));
+  setTimeout(() => {
+    render(document.body, greetings('uhtml/json'));
+  }, 1000);
+  </script>
+</head>
+</html>
