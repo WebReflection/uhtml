@@ -7,11 +7,11 @@ const ids = umap(new WeakMap);
 let id = 0;
 
 const tag = type => (template, ...values) => ({
-  type,
-  template,
-  values,
   id: ids.get(template) ||
-      ids.set(template, id++)
+      ids.set(template, id++),
+  type,
+  values,
+  template
 });
 
 html.json = tag('html');
@@ -35,10 +35,10 @@ const asJSON = value => isJSON(value) ? unroll(value) : value;
 const isJSON = thing => (
   typeof thing === 'object' &&
   thing !== null &&
+  'id' in thing &&
   'type' in thing &&
-  'template' in thing &&
   'values' in thing &&
-  'id' in thing
+  'template' in thing
 );
 
 const render = (where, what) => $render(

@@ -8,9 +8,9 @@
   <script type="module">
   import {render, html} from '../esm/json.js';
   const strong = name => html.json`<strong>${name}</strong>`;
-  const greetings = name => html.json`
+  const greetings = name => JSON.parse(JSON.stringify(html.json`
     <div>Hello ${strong(name)} 👋</div>
-  `;
+  `));
 
   console.log(greetings('console'));
   render(document.body, greetings('World'));
