@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+        content="style-src 'self' http: 'nonce-ijeLM8+5uwZ7ZXFmK+H2dwIWdiKJ1A4zhZIsq2Ffqqo=' https: 'nonce-ijeLM8+5uwZ7ZXFmK+H2dwIWdiKJ1A4zhZIsq2Ffqqo='">
+  <script type="module" nonce="ijeLM8+5uwZ7ZXFmK+H2dwIWdiKJ1A4zhZIsq2Ffqqo=">
+    import {render, html} from 'https://cdn.skypack.dev/uhtml';
+    switch (location.search) {
+      case '?class':
+        render(document.body, html.node`<input value=${3} class=${'test'} type=number min=1 />`);
+        break;
+      case '?style':
+        render(document.body, html.node`<input value=${2} style=${'1px solid red;'} type=number min=1 />`);
+        break;
+      case '?hole':
+        render(document.body, html`<input value=${1} type=number min=1 />`);
+        break;
+      default:
+        render(document.body, html.node`<input value=${1} type=number min=1 />`);
+        break;
+    }
+  </script>
+</head>
+<body></body>
+</html>
