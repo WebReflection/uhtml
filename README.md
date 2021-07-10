@@ -1,6 +1,6 @@
 # <em>µ</em>html
 
-[![Downloads](https://img.shields.io/npm/dm/uhtml.svg)](https://www.npmjs.com/package/uhtml) [![Build Status](https://travis-ci.com/WebReflection/uhtml.svg?branch=master)](https://travis-ci.com/WebReflection/uhtml) [![Coverage Status](https://coveralls.io/repos/github/WebReflection/uhtml/badge.svg?branch=master)](https://coveralls.io/github/WebReflection/uhtml?branch=master) [![CSP strict](https://webreflection.github.io/csp/strict.svg)](https://webreflection.github.io/csp/#-csp-strict)
+[![Downloads](https://img.shields.io/npm/dm/uhtml.svg)](https://www.npmjs.com/package/uhtml) [![Build Status](https://travis-ci.com/WebReflection/uhtml.svg?branch=main)](https://travis-ci.com/WebReflection/uhtml) [![Coverage Status](https://coveralls.io/repos/github/WebReflection/uhtml/badge.svg?branch=main)](https://coveralls.io/github/WebReflection/uhtml?branch=main) [![CSP strict](https://webreflection.github.io/csp/strict.svg)](https://webreflection.github.io/csp/#-csp-strict)
 
 ![snow flake](./uhtml-head.jpg)
 
