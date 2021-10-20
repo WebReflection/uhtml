@@ -240,7 +240,7 @@ self.uhtml = (function (exports) {
                   } // this node has no meaning in the future list, so it's more than safe
                   // to remove it, and check the next live node out instead, meaning
                   // that only the live list index should be forwarded
-                  else parentNode.removeChild(get(a[aStart++], -1));
+                  else if(get(a[aStart], -1).parentNode = parentNode) parentNode.removeChild(get(a[aStart++], -1));
                 }
     }
 
