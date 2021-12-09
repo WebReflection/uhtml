@@ -101,6 +101,12 @@ self.uhtml = (function (exports) {
 
   
 
+  function _classCallCheck(instance, Constructor) {
+    if (!(instance instanceof Constructor)) {
+      throw new TypeError("Cannot call a class as a function");
+    }
+  }
+
   /**
    * ISC License
    *
@@ -247,6 +253,23 @@ self.uhtml = (function (exports) {
     return b;
   });
 
+  var Foreign = function Foreign(handler, value) {
+    _classCallCheck(this, Foreign);
+
+    this._ = function () {
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return handler.apply(void 0, args.concat([value]));
+    };
+  }; // flag for foreign checks (slower path, fast by default)
+
+  var useForeign = false;
+  var foreign = function foreign(handler, value) {
+    useForeign = true;
+    return new Foreign(handler, value);
+  };
   var aria = function aria(node) {
     return function (values) {
       for (var key in values) {
@@ -270,11 +293,18 @@ self.uhtml = (function (exports) {
             orphan = true;
           }
         } else {
-          attributeNode.value = newValue;
+          var value = useForeign && newValue instanceof Foreign ? newValue._(node, name) : newValue;
 
-          if (orphan) {
-            node.setAttributeNodeNS(attributeNode);
-            orphan = false;
+          if (value == null) {
+            if (!orphan) node.removeAttributeNode(attributeNode);
+            orphan = true;
+          } else {
+            attributeNode.value = value;
+
+            if (orphan) {
+              node.setAttributeNodeNS(attributeNode);
+              orphan = false;
+            }
           }
         }
       }
@@ -301,8 +331,9 @@ self.uhtml = (function (exports) {
   };
   var event = function event(node, name) {
     var oldValue,
+        lower,
         type = name.slice(2);
-    if (!(name in node) && name.toLowerCase() in node) type = type.toLowerCase();
+    if (!(name in node) && (lower = name.toLowerCase()) in node) type = lower.slice(2);
     return function (newValue) {
       var info = isArray(newValue) ? newValue : [newValue, false];
 
@@ -871,6 +902,7 @@ self.uhtml = (function (exports) {
   var svg = tag('svg');
 
   exports.Hole = Hole;
+  exports.foreign = foreign;
   exports.html = html;
   exports.render = render;
   exports.svg = svg;

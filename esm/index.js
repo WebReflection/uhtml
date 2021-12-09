@@ -1,5 +1,6 @@
 import umap from 'umap';
 import {Hole, createCache, unroll} from './rabbit.js';
+import {foreign} from 'uhandlers';
 
 const {create, defineProperties} = Object;
 
@@ -69,4 +70,4 @@ const render = (where, what) => {
 const html = tag('html');
 const svg = tag('svg');
 
-export {Hole, render, html, svg};
+export {Hole, render, html, svg, foreign};

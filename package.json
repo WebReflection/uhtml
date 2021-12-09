@@ -44,7 +44,7 @@
     "jsx2tag": "^0.3.0",
     "uarray": "^1.0.0",
     "udomdiff": "^1.1.0",
-    "uhandlers": "^0.5.0",
+    "uhandlers": "^0.6.0",
     "umap": "^1.0.2",
     "uparser": "^0.2.1",
     "uwire": "^1.1.0"

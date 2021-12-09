@@ -1,6 +1,7 @@
 'use strict';
 const umap = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('umap'));
 const {Hole, createCache, unroll} = require('./rabbit.js');
+const {foreign} = require('uhandlers');
 
 const {create, defineProperties} = Object;
 
@@ -74,3 +75,4 @@ exports.Hole = Hole;
 exports.render = render;
 exports.html = html;
 exports.svg = svg;
+exports.foreign = foreign;

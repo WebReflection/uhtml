@@ -1,6 +1,6 @@
 # <em>µ</em>html
 
-[![Downloads](https://img.shields.io/npm/dm/uhtml.svg)](https://www.npmjs.com/package/uhtml) [![Build Status](https://travis-ci.com/WebReflection/uhtml.svg?branch=main)](https://travis-ci.com/WebReflection/uhtml) [![Coverage Status](https://coveralls.io/repos/github/WebReflection/uhtml/badge.svg?branch=main)](https://coveralls.io/github/WebReflection/uhtml?branch=main) [![CSP strict](https://webreflection.github.io/csp/strict.svg)](https://webreflection.github.io/csp/#-csp-strict)
+[![Downloads](https://img.shields.io/npm/dm/uhtml.svg)](https://www.npmjs.com/package/uhtml) [![build status](https://github.com/WebReflection/uhtml/actions/workflows/node.js.yml/badge.svg)](https://github.com/WebReflection/uhtml/actions) [![Coverage Status](https://coveralls.io/repos/github/WebReflection/uhtml/badge.svg?branch=main)](https://coveralls.io/github/WebReflection/uhtml?branch=main) [![CSP strict](https://webreflection.github.io/csp/strict.svg)](https://webreflection.github.io/csp/#-csp-strict)
 
 ![snow flake](./uhtml-head.jpg)
 
@@ -13,6 +13,23 @@ _micro html_ is a _~2.5K_ [lighterhtml](https://github.com/WebReflection/lighter
 Please ask questions in the [dedicated discussions repository](https://github.com/WebReflection/discussions), to help the community around this project grow ♥
 
 ---
+
+### V2.8 Update
+
+  * added *µhandlers* [foreign](https://github.com/WebReflection/uhandlers#api) export to enable arbitrary attributes handling!
+
+```js
+import {html, foreign} from 'uhtml';
+
+const handler = (node, name, value) => {
+  // P, any, {data: 123}
+  console.log(node, name, value);
+  // return null/undefined to remove it
+  return value.data;
+};
+
+html`<p any=${foreign(handler, {data: 123})}>foreign</p>`;
+```
 
 ### V2.5 Update
 

@@ -109,6 +109,20 @@ const persistent = fragment => {
 
 
 
+class Foreign {
+  constructor(handler, value) {
+    this._ = (...args) => handler(...args, value);
+  }
+}
+
+// flag for foreign checks (slower path, fast by default)
+let useForeign = false;
+
+const foreign = (handler, value) => {
+  useForeign = true;
+  return new Foreign(handler, value);
+};
+
 const aria = node => values => {
   for (const key in values) {
     const name = key === 'role' ? key : `aria-${key}`;
@@ -133,10 +147,19 @@ const attribute = (node, name) => {
         }
       }
       else {
-        attributeNode.value = newValue;
-        if (orphan) {
-          node.setAttributeNodeNS(attributeNode);
-          orphan = false;
+        const value = useForeign && (newValue instanceof Foreign) ?
+                        newValue._(node, name) : newValue;
+        if (value == null) {
+          if (!orphan)
+            node.removeAttributeNode(attributeNode);
+            orphan = true;
+        }
+        else {
+          attributeNode.value = value;
+          if (orphan) {
+            node.setAttributeNodeNS(attributeNode);
+            orphan = false;
+          }
         }
       }
     }
@@ -165,9 +188,9 @@ const data = ({dataset}) => values => {
 };
 
 const event = (node, name) => {
-  let oldValue, type = name.slice(2);
-  if (!(name in node) && name.toLowerCase() in node)
-    type = type.toLowerCase();
+  let oldValue, lower, type = name.slice(2);
+  if (!(name in node) && (lower = name.toLowerCase()) in node)
+    type = lower.slice(2);
   return newValue => {
     const info = isArray(newValue) ? newValue : [newValue, false];
     if (oldValue !== info[0]) {
@@ -592,6 +615,7 @@ function Hole(type, template, values) {
 
 
 
+
 const {create, defineProperties} = Object;
 
 // both `html` and `svg` template literal tags are polluted
@@ -660,7 +684,7 @@ const render = (where, what) => {
 const html = tag('html');
 const svg = tag('svg');
 
-return {Hole, render, html, svg};
+return {Hole, render, html, svg, foreign};
 
 /**end**/
 };
