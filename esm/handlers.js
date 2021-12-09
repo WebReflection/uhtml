@@ -98,6 +98,17 @@ const handleAnything = comment => {
   return anyContent;
 };
 
+const customHandlers = [];
+
+/**
+ * add custom handler for attributes in form (node, name) => newValue => { ** code ** }
+ * should return handler for newValue or null
+ *  * @param handler
+ */
+export function addCustomAttributeHandler(handler){
+  customHandlers.push(handler);
+}
+
 // attributes can be:
 //  * ref=${...}      for hooks and other purposes
 //  * aria=${...}     for aria attributes
@@ -109,6 +120,11 @@ const handleAnything = comment => {
 //  * onevent=${...}  to automatically handle event listeners
 //  * generic=${...}  to handle an attribute just like an attribute
 const handleAttribute = (node, name/*, svg*/) => {
+  for (let customHandler of customHandlers) {
+    const handler = customHandler(node, name);
+    if (handler)
+      return handler;
+  }
   switch (name[0]) {
     case '?': return boolean(node, name.slice(1), false);
     case '.': return setter(node, name.slice(1));

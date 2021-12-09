@@ -70,3 +70,4 @@ const html = tag('html');
 const svg = tag('svg');
 
 export {Hole, render, html, svg};
+export {addCustomAttributeHandler} from "./handlers.js";
