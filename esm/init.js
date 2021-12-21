@@ -1,66 +1,28 @@
-import umap from 'umap';
-import instrument from 'uparser';
+import {WeakMap} from '@webreflection/dsm';
+import instrument from '@webreflection/uparser';
 import {indexOf, isArray, slice} from 'uarray';
 import udomdiff from 'udomdiff';
 
 export default ({document}) => {
   /**start**/
 /*! (c) Andrea Giammarchi - ISC */
-var createContent = (function (document) {'use strict';
-  var FRAGMENT = 'fragment';
-  var TEMPLATE = 'template';
-  var HAS_CONTENT = 'content' in create(TEMPLATE);
+const createHTML = ml => {
+  const template = document.createElement('template');
+  template.innerHTML = ml;
+  return template.content;
+};
 
-  var createHTML = HAS_CONTENT ?
-    function (html) {
-      var template = create(TEMPLATE);
-      template.innerHTML = html;
-      return template.content;
-    } :
-    function (html) {
-      var content = create(FRAGMENT);
-      var template = create(TEMPLATE);
-      var childNodes = null;
-      if (/^[^\S]*?<(col(?:group)?|t(?:head|body|foot|r|d|h))/i.test(html)) {
-        var selector = RegExp.$1;
-        template.innerHTML = '<table>' + html + '</table>';
-        childNodes = template.querySelectorAll(selector);
-      } else {
-        template.innerHTML = html;
-        childNodes = template.childNodes;
-      }
-      append(content, childNodes);
-      return content;
-    };
+const root = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+const range = document.createRange();
+const createSVG = ml => {
+  root.innerHTML = ml;
+  range.setStartBefore(svg.firstChild);
+  range.setEndAfter(svg.lastChild);
+  return range.extractContents();
+};
 
-  return function createContent(markup, type) {
-    return (type === 'svg' ? createSVG : createHTML)(markup);
-  };
+const createContent = (ml, type) => (type === 'svg' ? createSVG : createHTML)(ml);
 
-  function append(root, childNodes) {
-    var length = childNodes.length;
-    while (length--)
-      root.appendChild(childNodes[0]);
-  }
-
-  function create(element) {
-    return element === FRAGMENT ?
-      document.createDocumentFragment() :
-      document.createElementNS('http://www.w3.org/1999/xhtml', element);
-  }
-
-  // it could use createElementNS when hasNode is there
-  // but this fallback is equally fast and easier to maintain
-  // it is also battle tested already in all IE
-  function createSVG(svg) {
-    var content = create(FRAGMENT);
-    var template = create('div');
-    template.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg">' + svg + '</svg>';
-    append(content, template.firstChild.childNodes);
-    return content;
-  }
-
-}(document));
 
 
 
@@ -84,24 +46,19 @@ const diffable = (node, operation) => node.nodeType === nodeType ?
 ;
 
 const persistent = fragment => {
+  const {firstChild, lastChild} = fragment;
+  if (firstChild === lastChild)
+    return lastChild || fragment;
   const {childNodes} = fragment;
-  const {length} = childNodes;
-  if (length < 2)
-    return length ? childNodes[0] : fragment;
   const nodes = slice.call(childNodes, 0);
-  const firstChild = nodes[0];
-  const lastChild = nodes[length - 1];
   return {
     ELEMENT_NODE,
     nodeType,
     firstChild,
     lastChild,
     valueOf() {
-      if (childNodes.length !== length) {
-        let i = 0;
-        while (i < length)
-          fragment.appendChild(nodes[i++]);
-      }
+      if (childNodes.length !== nodes.length)
+        fragment.append(...nodes);
       return fragment;
     }
   };
@@ -109,19 +66,17 @@ const persistent = fragment => {
 
 
 
+// flag for foreign checks (slower path, fast by default)
+let useForeign = false;
+
 class Foreign {
   constructor(handler, value) {
+    useForeign = true;
     this._ = (...args) => handler(...args, value);
   }
 }
 
-// flag for foreign checks (slower path, fast by default)
-let useForeign = false;
-
-const foreign = (handler, value) => {
-  useForeign = true;
-  return new Foreign(handler, value);
-};
+const foreign = (handler, value) => new Foreign(handler, value);
 
 const aria = node => values => {
   for (const key in values) {
@@ -230,30 +185,6 @@ const text = node => {
     }
   };
 };
-
-
-
-// this "hack" tells the library if the browser is IE11 or old Edge
-const isImportNodeLengthWrong = document.importNode.length != 1;
-
-// IE11 and old Edge discard empty nodes when cloning, potentially
-// resulting in broken paths to find updates. The workaround here
-// is to import once, upfront, the fragment that will be cloned
-// later on, so that paths are retrieved from one already parsed,
-// hence without missing child nodes once re-cloned.
-const createFragment = isImportNodeLengthWrong ?
-  (text, type, normalize) => document.importNode(
-    createContent(text, type, normalize),
-    true
-  ) :
-  createContent;
-
-// IE11 and old Edge have a different createTreeWalker signature that
-// has been deprecated in other browsers. This export is needed only
-// to guarantee the TreeWalker doesn't show warnings and, ultimately, works
-const createWalker = isImportNodeLengthWrong ?
-  fragment => document.createTreeWalker(fragment, 1 | 128, null, false) :
-  fragment => document.createTreeWalker(fragment, 1 | 128);
 
 
 
@@ -412,7 +343,7 @@ const createPath = node => {
   while (parentNode) {
     path.push(indexOf.call(parentNode.childNodes, node));
     node = parentNode;
-    parentNode = node.parentNode;
+    ({parentNode} = node);
   }
   return path;
 };
@@ -430,27 +361,18 @@ const prefix = 'isµ';
 // should be parsed once, and once only, as it will always represent the same
 // content, within the exact same amount of updates each time.
 // This cache relates each template to its unique content and updates.
-const cache = umap(new WeakMap);
+const cache = new WeakMap;
 
 // a RegExp that helps checking nodes that cannot contain comments
 const textOnly = /^(?:plaintext|script|style|textarea|title|xmp)$/i;
 
-const createCache = () => ({
-  stack: [],    // each template gets a stack for each interpolation "hole"
-
-  entry: null,  // each entry contains details, such as:
-                //  * the template that is representing
-                //  * the type of node it represents (html or svg)
-                //  * the content fragment with all nodes
-                //  * the list of updates per each node (template holes)
-                //  * the "wired" node or fragment that will get updates
-                // if the template or type are different from the previous one
-                // the entry gets re-created each time
-
-  wire: null    // each rendered node represent some wired content and
-                // this reference to the latest one. If different, the node
-                // will be cleaned up and the new "wire" will be appended
-});
+class Cache {
+  constructor() {
+    this.stack = [];
+    this.entry = null;
+    this.wire = null;
+  }
+}
 
 // the entry stored in the rendered node cache, and per each "hole"
 const createEntry = (type, template) => {
@@ -463,11 +385,12 @@ const createEntry = (type, template) => {
 // operation based on the same template, i.e. data => html`<p>${data}</p>`
 const mapTemplate = (type, template) => {
   const text = instrument(template, prefix, type === 'svg');
-  const content = createFragment(text, type);
+  const content = createContent(text, type);
   // once instrumented and reproduced as fragment, it's crawled
   // to find out where each update is in the fragment tree
-  const tw = createWalker(content);
+  const tw = document.createTreeWalker(content, 1 | 128);
   const nodes = [];
+  const paths = new Map;
   const length = template.length - 1;
   let i = 0;
   // updates are searched via unique names, linearly increased across the tree
@@ -485,7 +408,10 @@ const mapTemplate = (type, template) => {
       // The only comments to be considered are those
       // which content is exactly the same as the searched one.
       if (node.data === search) {
-        nodes.push({type: 'node', path: createPath(node)});
+        nodes.push({
+          type: 'node',
+          path: paths.get(node) || paths.set(node, createPath(node))
+        });
         search = `${prefix}${++i}`;
       }
     }
@@ -498,7 +424,7 @@ const mapTemplate = (type, template) => {
       while (node.hasAttribute(search)) {
         nodes.push({
           type: 'attr',
-          path: createPath(node),
+          path: paths.get(node) || paths.set(node, createPath(node)),
           name: node.getAttribute(search),
           //svg: svg < 0 ? (svg = ('ownerSVGElement' in node ? 1 : 0)) : svg
         });
@@ -512,7 +438,10 @@ const mapTemplate = (type, template) => {
         node.textContent.trim() === `<!--${search}-->`
       ){
         node.textContent = '';
-        nodes.push({type: 'text', path: createPath(node)});
+        nodes.push({
+          type: 'text',
+          path: paths.get(node) || paths.set(node, createPath(node))
+        });
         search = `${prefix}${++i}`;
       }
     }
@@ -544,20 +473,20 @@ const mapUpdates = (type, template) => {
 // discover what to do with each interpolation, which will result
 // into an update operation.
 const unroll = (info, {type, template, values}) => {
-  const {length} = values;
   // interpolations can contain holes and arrays, so these need
   // to be recursively discovered
-  unrollValues(info, values, length);
+  unrollValues(info, values);
   let {entry} = info;
   // if the cache entry is either null or different from the template
   // and the type this unroll should resolve, create a new entry
   // assigning a new content fragment and the list of updates.
   if (!entry || (entry.template !== template || entry.type !== type))
     info.entry = (entry = createEntry(type, template));
+
   const {content, updates, wire} = entry;
   // even if the fragment and its nodes is not live yet,
   // it is already possible to update via interpolations values.
-  for (let i = 0; i < length; i++)
+  for (let i = 0; i < values.length; i++)
     updates[i](values[i]);
   // if the entry was new, or representing a different template or type,
   // create a new persistent entity to use during diffing.
@@ -569,23 +498,23 @@ const unroll = (info, {type, template, values}) => {
 // the stack retains, per each interpolation value, the cache
 // related to each interpolation value, or null, if the render
 // was conditional and the value is not special (Array or Hole)
-const unrollValues = ({stack}, values, length) => {
+const unrollValues = ({stack}, values) => {
+  const {length} = values;
   for (let i = 0; i < length; i++) {
     const hole = values[i];
     // each Hole gets unrolled and re-assigned as value
     // so that domdiff will deal with a node/wire, not with a hole
     if (hole instanceof Hole)
       values[i] = unroll(
-        stack[i] || (stack[i] = createCache()),
+        stack[i] || (stack[i] = new Cache),
         hole
       );
     // arrays are recursively resolved so that each entry will contain
     // also a DOM node or a wire, hence it can be diffed if/when needed
     else if (isArray(hole))
       unrollValues(
-        stack[i] || (stack[i] = createCache()),
-        hole,
-        hole.length
+        stack[i] || (stack[i] = new Cache),
+        hole
       );
     // if the value is nothing special, the stack doesn't need to retain data
     // this is useful also to cleanup previously retained data, if the value
@@ -595,22 +524,24 @@ const unrollValues = ({stack}, values, length) => {
     else
       stack[i] = null;
   }
+  // very dirty but better than splice
   if (length < stack.length)
-    stack.splice(length);
+    stack.length = length;
 };
 
-/**
- * Holds all details wrappers needed to render the content further on.
- * @constructor
- * @param {string} type The hole type, either `html` or `svg`.
- * @param {string[]} template The template literals used to the define the content.
- * @param {Array} values Zero, one, or more interpolated values to render.
- */
-function Hole(type, template, values) {
-  this.type = type;
-  this.template = template;
-  this.values = values;
-};
+class Hole {
+  /**
+   * Holds all details wrappers needed to render the content further on.
+   * @param {string} type The hole type, either `html` or `svg`.
+   * @param {string[]} template The template literals used to the define the content.
+   * @param {Array} values Zero, one, or more interpolated values to render.
+   */
+  constructor(type, template, values) {
+    this.type = type;
+    this.template = template;
+    this.values = values;
+  }
+}
 
 
 
@@ -622,7 +553,7 @@ const {create, defineProperties} = Object;
 // with a `for(ref[, id])` and a `node` tag too
 const tag = type => {
   // both `html` and `svg` tags have their own _cache
-  const keyed = umap(new WeakMap);
+  const keyed = new WeakMap;
   // keyed operations always re-use the same _cache and unroll
   // the template and its interpolations right away
   const fixed = _cache => (template, ...values) => unroll(
@@ -639,9 +570,9 @@ const tag = type => {
         // which is showing keyed results, and optionally a unique id per each
         // related node, handy with JSON results and mutable list of objects
         // that usually carry a unique identifier
-        value(ref, id) {
+        value: (ref, id) => {
           const memo = keyed.get(ref) || keyed.set(ref, create(null));
-          return memo[id] || (memo[id] = fixed(createCache()));
+          return memo[id] || (memo[id] = fixed(new Cache));
         }
       },
       node: {
@@ -649,7 +580,7 @@ const tag = type => {
         // this might return the single created node, or a fragment with all
         // nodes present at the root level and, of course, their child nodes
         value: (template, ...values) => unroll(
-          createCache(),
+          new Cache,
           {type, template, values}
         ).valueOf()
       }
@@ -658,7 +589,7 @@ const tag = type => {
 };
 
 // each rendered node gets its own _cache
-const _cache = umap(new WeakMap);
+const _cache = new WeakMap;
 
 // rendering means understanding what `html` or `svg` tags returned
 // and it relates a specific node to its own unique _cache.
@@ -667,7 +598,7 @@ const _cache = umap(new WeakMap);
 // then it's "unrolled" to resolve all its inner nodes.
 const render = (where, what) => {
   const hole = typeof what === 'function' ? what() : what;
-  const info = _cache.get(where) || _cache.set(where, createCache());
+  const info = _cache.get(where) || _cache.set(where, new Cache);
   const wire = hole instanceof Hole ? unroll(info, hole) : hole;
   if (wire !== info.wire) {
     info.wire = wire;

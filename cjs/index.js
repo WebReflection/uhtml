@@ -1,6 +1,6 @@
 'use strict';
-const umap = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('umap'));
-const {Hole, createCache, unroll} = require('./rabbit.js');
+const {WeakMap} = require('@webreflection/dsm');
+const {Hole, Cache, unroll} = require('./rabbit.js');
 const {foreign} = require('uhandlers');
 
 const {create, defineProperties} = Object;
@@ -9,7 +9,7 @@ const {create, defineProperties} = Object;
 // with a `for(ref[, id])` and a `node` tag too
 const tag = type => {
   // both `html` and `svg` tags have their own cache
-  const keyed = umap(new WeakMap);
+  const keyed = new WeakMap;
   // keyed operations always re-use the same cache and unroll
   // the template and its interpolations right away
   const fixed = cache => (template, ...values) => unroll(
@@ -26,9 +26,9 @@ const tag = type => {
         // which is showing keyed results, and optionally a unique id per each
         // related node, handy with JSON results and mutable list of objects
         // that usually carry a unique identifier
-        value(ref, id) {
+        value: (ref, id) => {
           const memo = keyed.get(ref) || keyed.set(ref, create(null));
-          return memo[id] || (memo[id] = fixed(createCache()));
+          return memo[id] || (memo[id] = fixed(new Cache));
         }
       },
       node: {
@@ -36,7 +36,7 @@ const tag = type => {
         // this might return the single created node, or a fragment with all
         // nodes present at the root level and, of course, their child nodes
         value: (template, ...values) => unroll(
-          createCache(),
+          new Cache,
           {type, template, values}
         ).valueOf()
       }
@@ -45,7 +45,7 @@ const tag = type => {
 };
 
 // each rendered node gets its own cache
-const cache = umap(new WeakMap);
+const cache = new WeakMap;
 
 // rendering means understanding what `html` or `svg` tags returned
 // and it relates a specific node to its own unique cache.
@@ -54,7 +54,7 @@ const cache = umap(new WeakMap);
 // then it's "unrolled" to resolve all its inner nodes.
 const render = (where, what) => {
   const hole = typeof what === 'function' ? what() : what;
-  const info = cache.get(where) || cache.set(where, createCache());
+  const info = cache.get(where) || cache.set(where, new Cache);
   const wire = hole instanceof Hole ? unroll(info, hole) : hole;
   if (wire !== info.wire) {
     info.wire = wire;

@@ -1,9 +1,9 @@
 'use strict';
-const umap = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('umap'));
+const {Map, WeakMap} = require('@webreflection/dsm');
 const {render: $render, html, svg} = require('./index.js');
 
 // Sender (SW, Worker, postMessage)
-const ids = umap(new WeakMap);
+const ids = new WeakMap;
 let id = 0;
 
 const tag = type => (template, ...values) => ({
@@ -18,7 +18,7 @@ html.json = tag('html');
 svg.json = tag('svg');
 
 // Receiver (onmessage, from SW, Workers, etc)
-const templates = umap(new Map);
+const templates = new Map;
 
 const unroll = ({type, template, values, id}) => (
   (type === 'svg' ? svg : html).apply(

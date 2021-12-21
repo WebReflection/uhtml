@@ -2,7 +2,7 @@
 const {isArray, slice} = require('uarray');
 const udomdiff = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('udomdiff'));
 const {aria, attribute, boolean, event, ref, setter, text} = require('uhandlers');
-const {diffable} = require('uwire');
+const {diffable} = require('@webreflection/uwire');
 
 // from a generic path, retrieves the exact targeted node
 const reducePath = ({childNodes}, i) => childNodes[i];

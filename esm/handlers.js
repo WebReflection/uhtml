@@ -1,7 +1,7 @@
 import {isArray, slice} from 'uarray';
 import udomdiff from 'udomdiff';
 import {aria, attribute, boolean, event, ref, setter, text} from 'uhandlers';
-import {diffable} from 'uwire';
+import {diffable} from '@webreflection/uwire';
 
 // from a generic path, retrieves the exact targeted node
 const reducePath = ({childNodes}, i) => childNodes[i];

@@ -1,10 +1,10 @@
-import umap from 'umap';
-import instrument from 'uparser';
+import {Map, WeakMap} from '@webreflection/dsm';
+import instrument from '@webreflection/uparser';
 import {indexOf, isArray} from 'uarray';
-import {persistent} from 'uwire';
+import {persistent} from '@webreflection/uwire';
+import createContent from '@webreflection/create-content';
 
 import {handlers} from './handlers.js';
-import {createFragment, createWalker} from './node.js';
 
 // from a fragment container, create an array of indexes
 // related to its child nodes, so that it's possible
@@ -15,7 +15,7 @@ const createPath = node => {
   while (parentNode) {
     path.push(indexOf.call(parentNode.childNodes, node));
     node = parentNode;
-    parentNode = node.parentNode;
+    ({parentNode} = node);
   }
   return path;
 };
@@ -33,27 +33,18 @@ const prefix = 'isµ';
 // should be parsed once, and once only, as it will always represent the same
 // content, within the exact same amount of updates each time.
 // This cache relates each template to its unique content and updates.
-const cache = umap(new WeakMap);
+const cache = new WeakMap;
 
 // a RegExp that helps checking nodes that cannot contain comments
 const textOnly = /^(?:plaintext|script|style|textarea|title|xmp)$/i;
 
-export const createCache = () => ({
-  stack: [],    // each template gets a stack for each interpolation "hole"
-
-  entry: null,  // each entry contains details, such as:
-                //  * the template that is representing
-                //  * the type of node it represents (html or svg)
-                //  * the content fragment with all nodes
-                //  * the list of updates per each node (template holes)
-                //  * the "wired" node or fragment that will get updates
-                // if the template or type are different from the previous one
-                // the entry gets re-created each time
-
-  wire: null    // each rendered node represent some wired content and
-                // this reference to the latest one. If different, the node
-                // will be cleaned up and the new "wire" will be appended
-});
+export class Cache {
+  constructor() {
+    this.stack = [];
+    this.entry = null;
+    this.wire = null;
+  }
+}
 
 // the entry stored in the rendered node cache, and per each "hole"
 const createEntry = (type, template) => {
@@ -66,11 +57,12 @@ const createEntry = (type, template) => {
 // operation based on the same template, i.e. data => html`<p>${data}</p>`
 const mapTemplate = (type, template) => {
   const text = instrument(template, prefix, type === 'svg');
-  const content = createFragment(text, type);
+  const content = createContent(text, type);
   // once instrumented and reproduced as fragment, it's crawled
   // to find out where each update is in the fragment tree
-  const tw = createWalker(content);
+  const tw = document.createTreeWalker(content, 1 | 128);
   const nodes = [];
+  const paths = new Map;
   const length = template.length - 1;
   let i = 0;
   // updates are searched via unique names, linearly increased across the tree
@@ -88,7 +80,10 @@ const mapTemplate = (type, template) => {
       // The only comments to be considered are those
       // which content is exactly the same as the searched one.
       if (node.data === search) {
-        nodes.push({type: 'node', path: createPath(node)});
+        nodes.push({
+          type: 'node',
+          path: paths.get(node) || paths.set(node, createPath(node))
+        });
         search = `${prefix}${++i}`;
       }
     }
@@ -101,7 +96,7 @@ const mapTemplate = (type, template) => {
       while (node.hasAttribute(search)) {
         nodes.push({
           type: 'attr',
-          path: createPath(node),
+          path: paths.get(node) || paths.set(node, createPath(node)),
           name: node.getAttribute(search),
           //svg: svg < 0 ? (svg = ('ownerSVGElement' in node ? 1 : 0)) : svg
         });
@@ -115,7 +110,10 @@ const mapTemplate = (type, template) => {
         node.textContent.trim() === `<!--${search}-->`
       ){
         node.textContent = '';
-        nodes.push({type: 'text', path: createPath(node)});
+        nodes.push({
+          type: 'text',
+          path: paths.get(node) || paths.set(node, createPath(node))
+        });
         search = `${prefix}${++i}`;
       }
     }
@@ -147,20 +145,20 @@ const mapUpdates = (type, template) => {
 // discover what to do with each interpolation, which will result
 // into an update operation.
 export const unroll = (info, {type, template, values}) => {
-  const {length} = values;
   // interpolations can contain holes and arrays, so these need
   // to be recursively discovered
-  unrollValues(info, values, length);
+  unrollValues(info, values);
   let {entry} = info;
   // if the cache entry is either null or different from the template
   // and the type this unroll should resolve, create a new entry
   // assigning a new content fragment and the list of updates.
   if (!entry || (entry.template !== template || entry.type !== type))
     info.entry = (entry = createEntry(type, template));
+
   const {content, updates, wire} = entry;
   // even if the fragment and its nodes is not live yet,
   // it is already possible to update via interpolations values.
-  for (let i = 0; i < length; i++)
+  for (let i = 0; i < values.length; i++)
     updates[i](values[i]);
   // if the entry was new, or representing a different template or type,
   // create a new persistent entity to use during diffing.
@@ -172,23 +170,23 @@ export const unroll = (info, {type, template, values}) => {
 // the stack retains, per each interpolation value, the cache
 // related to each interpolation value, or null, if the render
 // was conditional and the value is not special (Array or Hole)
-const unrollValues = ({stack}, values, length) => {
+const unrollValues = ({stack}, values) => {
+  const {length} = values;
   for (let i = 0; i < length; i++) {
     const hole = values[i];
     // each Hole gets unrolled and re-assigned as value
     // so that domdiff will deal with a node/wire, not with a hole
     if (hole instanceof Hole)
       values[i] = unroll(
-        stack[i] || (stack[i] = createCache()),
+        stack[i] || (stack[i] = new Cache),
         hole
       );
     // arrays are recursively resolved so that each entry will contain
     // also a DOM node or a wire, hence it can be diffed if/when needed
     else if (isArray(hole))
       unrollValues(
-        stack[i] || (stack[i] = createCache()),
-        hole,
-        hole.length
+        stack[i] || (stack[i] = new Cache),
+        hole
       );
     // if the value is nothing special, the stack doesn't need to retain data
     // this is useful also to cleanup previously retained data, if the value
@@ -198,19 +196,21 @@ const unrollValues = ({stack}, values, length) => {
     else
       stack[i] = null;
   }
+  // very dirty but better than splice
   if (length < stack.length)
-    stack.splice(length);
+    stack.length = length;
 };
 
-/**
- * Holds all details wrappers needed to render the content further on.
- * @constructor
- * @param {string} type The hole type, either `html` or `svg`.
- * @param {string[]} template The template literals used to the define the content.
- * @param {Array} values Zero, one, or more interpolated values to render.
- */
-export function Hole(type, template, values) {
-  this.type = type;
-  this.template = template;
-  this.values = values;
-};
+export class Hole {
+  /**
+   * Holds all details wrappers needed to render the content further on.
+   * @param {string} type The hole type, either `html` or `svg`.
+   * @param {string[]} template The template literals used to the define the content.
+   * @param {Array} values Zero, one, or more interpolated values to render.
+   */
+  constructor(type, template, values) {
+    this.type = type;
+    this.template = template;
+    this.values = values;
+  }
+}
