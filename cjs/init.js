@@ -110,19 +110,17 @@ const persistent = fragment => {
 
 
 
+// flag for foreign checks (slower path, fast by default)
+let useForeign = false;
+
 class Foreign {
   constructor(handler, value) {
+    useForeign = true;
     this._ = (...args) => handler(...args, value);
   }
 }
 
-// flag for foreign checks (slower path, fast by default)
-let useForeign = false;
-
-const foreign = (handler, value) => {
-  useForeign = true;
-  return new Foreign(handler, value);
-};
+const foreign = (handler, value) => new Foreign(handler, value);
 
 const aria = node => values => {
   for (const key in values) {
