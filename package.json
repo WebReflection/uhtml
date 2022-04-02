@@ -5,10 +5,11 @@
   "main": "cjs/index.js",
   "types": "index.d.ts",
   "scripts": {
-    "build": "node pony.js && npm run cjs && npm run rollup:async && npm run rollup:es && npm run rollup:babel && drop-babel-typeof ./index.js && npm run min && npm run test && npm run size",
+    "build": "node pony.js && npm run cjs && npm run rollup:async && npm run rollup:es && npm run rollup:esm && npm run rollup:babel && drop-babel-typeof ./index.js && npm run min && npm run test && npm run size",
     "cjs": "rm cjs/*.js && ascjs --no-default esm cjs",
     "rollup:async": "rollup --config rollup/async.config.js && sed -i.bck 's/^var /self./' async.js && rm -rf async.js.bck",
     "rollup:es": "rollup --config rollup/es.config.js && sed -i.bck 's/^var /self./' es.js && rm -rf es.js.bck",
+    "rollup:esm": "rollup --config rollup/esm.config.js",
     "rollup:babel": "rollup --config rollup/babel.config.js && sed -i.bck 's/^var /self./' index.js && rm -rf index.js.bck",
     "min": "sed -i.bck 's/function typeof/function _$/' index.js && rm -rf index.js.bck && terser index.js -c -m -o min.js",
     "size": "cat min.js | brotli | wc -c && cat es.js | brotli | wc -c",

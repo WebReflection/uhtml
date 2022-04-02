@@ -6,7 +6,7 @@
   <title>Document</title>
   <script type="module">
   // npx ucdn --debug
-  import {render, html, svg} from '../esm/index.js';
+  import {render, html, svg} from '../esm.js';
 
   const dispatch = (id, detail) => () => {
     document.dispatchEvent(new CustomEvent(id, {detail}));
