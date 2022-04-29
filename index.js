@@ -1,104 +1,6 @@
 self.uhtml = (function (exports) {
   'use strict';
 
-  var umap = (function (_) {
-    return {
-      // About: get: _.get.bind(_)
-      // It looks like WebKit/Safari didn't optimize bind at all,
-      // so that using bind slows it down by 60%.
-      // Firefox and Chrome are just fine in both cases,
-      // so let's use the approach that works fast everywhere 👍
-      get: function get(key) {
-        return _.get(key);
-      },
-      set: function set(key, value) {
-        return _.set(key, value), value;
-      }
-    };
-  });
-
-  var attr = /([^\s\\>"'=]+)\s*=\s*(['"]?)$/;
-  var empty = /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
-  var node = /<[a-z][^>]+$/i;
-  var notNode = />[^<>]*$/;
-  var selfClosing = /<([a-z]+[a-z0-9:._-]*)([^>]*?)(\/>)/ig;
-  var trimEnd = /\s+$/;
-
-  var isNode = function isNode(template, i) {
-    return 0 < i-- && (node.test(template[i]) || !notNode.test(template[i]) && isNode(template, i));
-  };
-
-  var regular = function regular(original, name, extra) {
-    return empty.test(name) ? original : "<".concat(name).concat(extra.replace(trimEnd, ''), "></").concat(name, ">");
-  };
-
-  var instrument = (function (template, prefix, svg) {
-    var text = [];
-    var length = template.length;
-
-    var _loop = function _loop(i) {
-      var chunk = template[i - 1];
-      text.push(attr.test(chunk) && isNode(template, i) ? chunk.replace(attr, function (_, $1, $2) {
-        return "".concat(prefix).concat(i - 1, "=").concat($2 || '"').concat($1).concat($2 ? '' : '"');
-      }) : "".concat(chunk, "<!--").concat(prefix).concat(i - 1, "-->"));
-    };
-
-    for (var i = 1; i < length; i++) {
-      _loop(i);
-    }
-
-    text.push(template[length - 1]);
-    var output = text.join('').trim();
-    return svg ? output : output.replace(selfClosing, regular);
-  });
-
-  var isArray = Array.isArray;
-  var _ref = [],
-      indexOf = _ref.indexOf,
-      slice = _ref.slice;
-
-  var ELEMENT_NODE = 1;
-  var nodeType = 111;
-
-  var remove = function remove(_ref) {
-    var firstChild = _ref.firstChild,
-        lastChild = _ref.lastChild;
-    var range = document.createRange();
-    range.setStartAfter(firstChild);
-    range.setEndAfter(lastChild);
-    range.deleteContents();
-    return firstChild;
-  };
-
-  var diffable = function diffable(node, operation) {
-    return node.nodeType === nodeType ? 1 / operation < 0 ? operation ? remove(node) : node.lastChild : operation ? node.valueOf() : node.firstChild : node;
-  };
-  var persistent = function persistent(fragment) {
-    var childNodes = fragment.childNodes;
-    var length = childNodes.length;
-    if (length < 2) return length ? childNodes[0] : fragment;
-    var nodes = slice.call(childNodes, 0);
-    var firstChild = nodes[0];
-    var lastChild = nodes[length - 1];
-    return {
-      ELEMENT_NODE: ELEMENT_NODE,
-      nodeType: nodeType,
-      firstChild: firstChild,
-      lastChild: lastChild,
-      valueOf: function valueOf() {
-        if (childNodes.length !== length) {
-          var i = 0;
-
-          while (i < length) {
-            fragment.appendChild(nodes[i++]);
-          }
-        }
-
-        return fragment;
-      }
-    };
-  };
-
   function _$(obj) {
     "@babel/helpers - typeof";
 
@@ -133,6 +35,415 @@ self.uhtml = (function (exports) {
     });
     return Constructor;
   }
+
+  function _inherits(subClass, superClass) {
+    if (typeof superClass !== "function" && superClass !== null) {
+      throw new TypeError("Super expression must either be null or a function");
+    }
+
+    subClass.prototype = Object.create(superClass && superClass.prototype, {
+      constructor: {
+        value: subClass,
+        writable: true,
+        configurable: true
+      }
+    });
+    Object.defineProperty(subClass, "prototype", {
+      writable: false
+    });
+    if (superClass) _setPrototypeOf(subClass, superClass);
+  }
+
+  function _getPrototypeOf(o) {
+    _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) {
+      return o.__proto__ || Object.getPrototypeOf(o);
+    };
+    return _getPrototypeOf(o);
+  }
+
+  function _setPrototypeOf(o, p) {
+    _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
+      o.__proto__ = p;
+      return o;
+    };
+
+    return _setPrototypeOf(o, p);
+  }
+
+  function _isNativeReflectConstruct() {
+    if (typeof Reflect === "undefined" || !Reflect.construct) return false;
+    if (Reflect.construct.sham) return false;
+    if (typeof Proxy === "function") return true;
+
+    try {
+      Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {}));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function _construct(Parent, args, Class) {
+    if (_isNativeReflectConstruct()) {
+      _construct = Reflect.construct;
+    } else {
+      _construct = function _construct(Parent, args, Class) {
+        var a = [null];
+        a.push.apply(a, args);
+        var Constructor = Function.bind.apply(Parent, a);
+        var instance = new Constructor();
+        if (Class) _setPrototypeOf(instance, Class.prototype);
+        return instance;
+      };
+    }
+
+    return _construct.apply(null, arguments);
+  }
+
+  function _isNativeFunction(fn) {
+    return Function.toString.call(fn).indexOf("[native code]") !== -1;
+  }
+
+  function _wrapNativeSuper(Class) {
+    var _cache = typeof Map === "function" ? new Map() : undefined;
+
+    _wrapNativeSuper = function _wrapNativeSuper(Class) {
+      if (Class === null || !_isNativeFunction(Class)) return Class;
+
+      if (typeof Class !== "function") {
+        throw new TypeError("Super expression must either be null or a function");
+      }
+
+      if (typeof _cache !== "undefined") {
+        if (_cache.has(Class)) return _cache.get(Class);
+
+        _cache.set(Class, Wrapper);
+      }
+
+      function Wrapper() {
+        return _construct(Class, arguments, _getPrototypeOf(this).constructor);
+      }
+
+      Wrapper.prototype = Object.create(Class.prototype, {
+        constructor: {
+          value: Wrapper,
+          enumerable: false,
+          writable: true,
+          configurable: true
+        }
+      });
+      return _setPrototypeOf(Wrapper, Class);
+    };
+
+    return _wrapNativeSuper(Class);
+  }
+
+  function _assertThisInitialized(self) {
+    if (self === void 0) {
+      throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+    }
+
+    return self;
+  }
+
+  function _possibleConstructorReturn(self, call) {
+    if (call && (typeof call === "object" || typeof call === "function")) {
+      return call;
+    } else if (call !== void 0) {
+      throw new TypeError("Derived constructors may only return object or undefined");
+    }
+
+    return _assertThisInitialized(self);
+  }
+
+  function _createSuper(Derived) {
+    var hasNativeReflectConstruct = _isNativeReflectConstruct();
+
+    return function _createSuperInternal() {
+      var Super = _getPrototypeOf(Derived),
+          result;
+
+      if (hasNativeReflectConstruct) {
+        var NewTarget = _getPrototypeOf(this).constructor;
+
+        result = Reflect.construct(Super, arguments, NewTarget);
+      } else {
+        result = Super.apply(this, arguments);
+      }
+
+      return _possibleConstructorReturn(this, result);
+    };
+  }
+
+  function _superPropBase(object, property) {
+    while (!Object.prototype.hasOwnProperty.call(object, property)) {
+      object = _getPrototypeOf(object);
+      if (object === null) break;
+    }
+
+    return object;
+  }
+
+  function _get() {
+    if (typeof Reflect !== "undefined" && Reflect.get) {
+      _get = Reflect.get;
+    } else {
+      _get = function _get(target, property, receiver) {
+        var base = _superPropBase(target, property);
+
+        if (!base) return;
+        var desc = Object.getOwnPropertyDescriptor(base, property);
+
+        if (desc.get) {
+          return desc.get.call(arguments.length < 3 ? target : receiver);
+        }
+
+        return desc.value;
+      };
+    }
+
+    return _get.apply(this, arguments);
+  }
+
+  function _toConsumableArray(arr) {
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
+  }
+
+  function _arrayWithoutHoles(arr) {
+    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
+  }
+
+  function _iterableToArray(iter) {
+    if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter);
+  }
+
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(o);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+  }
+
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+
+    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+    return arr2;
+  }
+
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+  }
+
+  var MapSet = /*#__PURE__*/function (_Map) {
+    _inherits(MapSet, _Map);
+
+    var _super = _createSuper(MapSet);
+
+    function MapSet() {
+      _classCallCheck(this, MapSet);
+
+      return _super.apply(this, arguments);
+    }
+
+    _createClass(MapSet, [{
+      key: "set",
+      value: function set(key, value) {
+        _get(_getPrototypeOf(MapSet.prototype), "set", this).call(this, key, value);
+
+        return value;
+      }
+    }]);
+
+    return MapSet;
+  }( /*#__PURE__*/_wrapNativeSuper(Map));
+  var WeakMapSet = /*#__PURE__*/function (_WeakMap) {
+    _inherits(WeakMapSet, _WeakMap);
+
+    var _super2 = _createSuper(WeakMapSet);
+
+    function WeakMapSet() {
+      _classCallCheck(this, WeakMapSet);
+
+      return _super2.apply(this, arguments);
+    }
+
+    _createClass(WeakMapSet, [{
+      key: "set",
+      value: function set(key, value) {
+        _get(_getPrototypeOf(WeakMapSet.prototype), "set", this).call(this, key, value);
+
+        return value;
+      }
+    }]);
+
+    return WeakMapSet;
+  }( /*#__PURE__*/_wrapNativeSuper(WeakMap));
+
+  /*! (c) Andrea Giammarchi - ISC */
+  var empty = /^(?:area|base|br|col|embed|hr|img|input|keygen|link|menuitem|meta|param|source|track|wbr)$/i;
+  var elements = /<([a-z]+[a-z0-9:._-]*)([^>]*?)(\/?)>/g;
+  var attributes = /([^\s\\>"'=]+)\s*=\s*(['"]?)\x01/g;
+  var holes = /[\x01\x02]/g; // \x01 Node.ELEMENT_NODE
+  // \x02 Node.ATTRIBUTE_NODE
+
+  /**
+   * Given a template, find holes as both nodes and attributes and
+   * return a string with holes as either comment nodes or named attributes.
+   * @param {string[]} template a template literal tag array
+   * @param {string} prefix prefix to use per each comment/attribute
+   * @param {boolean} svg enforces self-closing tags
+   * @returns {string} X/HTML with prefixed comments or attributes
+   */
+
+  var instrument = (function (template, prefix, svg) {
+    var i = 0;
+    return template.join('\x01').replace(elements, function (_, name, attrs, selfClosing) {
+      var ml = name + attrs.replace(attributes, '\x02=$2$1').trimEnd();
+      if (selfClosing.length) ml += svg || empty.test(name) ? ' /' : '></' + name;
+      return '<' + ml + '>';
+    }).replace(holes, function (hole) {
+      return hole === '\x01' ? '<!--' + prefix + i++ + '-->' : prefix + i++;
+    });
+  });
+
+  var ELEMENT_NODE = 1;
+  var nodeType = 111;
+
+  var remove = function remove(_ref) {
+    var firstChild = _ref.firstChild,
+        lastChild = _ref.lastChild;
+    var range = document.createRange();
+    range.setStartAfter(firstChild);
+    range.setEndAfter(lastChild);
+    range.deleteContents();
+    return firstChild;
+  };
+
+  var diffable = function diffable(node, operation) {
+    return node.nodeType === nodeType ? 1 / operation < 0 ? operation ? remove(node) : node.lastChild : operation ? node.valueOf() : node.firstChild : node;
+  };
+  var persistent = function persistent(fragment) {
+    var firstChild = fragment.firstChild,
+        lastChild = fragment.lastChild;
+    if (firstChild === lastChild) return lastChild || fragment;
+    var childNodes = fragment.childNodes;
+
+    var nodes = _toConsumableArray(childNodes);
+
+    return {
+      ELEMENT_NODE: ELEMENT_NODE,
+      nodeType: nodeType,
+      firstChild: firstChild,
+      lastChild: lastChild,
+      valueOf: function valueOf() {
+        if (childNodes.length !== nodes.length) fragment.append.apply(fragment, _toConsumableArray(nodes));
+        return fragment;
+      }
+    };
+  };
+
+  var isArray$1 = Array.isArray;
+
+  var aria = function aria(node) {
+    return function (values) {
+      for (var key in values) {
+        var name = key === 'role' ? key : "aria-".concat(key);
+        var value = values[key];
+        if (value == null) node.removeAttribute(name);else node.setAttribute(name, value);
+      }
+    };
+  };
+  var attribute = function attribute(node, name) {
+    var oldValue,
+        orphan = true;
+    var attributeNode = document.createAttributeNS(null, name);
+    return function (newValue) {
+      if (oldValue !== newValue) {
+        oldValue = newValue;
+
+        if (oldValue == null) {
+          if (!orphan) {
+            node.removeAttributeNode(attributeNode);
+            orphan = true;
+          }
+        } else {
+          var value = newValue;
+
+          if (value == null) {
+            if (!orphan) node.removeAttributeNode(attributeNode);
+            orphan = true;
+          } else {
+            attributeNode.value = value;
+
+            if (orphan) {
+              node.setAttributeNodeNS(attributeNode);
+              orphan = false;
+            }
+          }
+        }
+      }
+    };
+  };
+
+  var _boolean = function _boolean(node, key, oldValue) {
+    return function (newValue) {
+      if (oldValue !== !!newValue) {
+        // when IE won't be around anymore ...
+        // node.toggleAttribute(key, oldValue = !!newValue);
+        if (oldValue = !!newValue) node.setAttribute(key, '');else node.removeAttribute(key);
+      }
+    };
+  };
+  var data = function data(_ref) {
+    var dataset = _ref.dataset;
+    return function (values) {
+      for (var key in values) {
+        var value = values[key];
+        if (value == null) delete dataset[key];else dataset[key] = value;
+      }
+    };
+  };
+  var event = function event(node, name) {
+    var oldValue,
+        lower,
+        type = name.slice(2);
+    if (!(name in node) && (lower = name.toLowerCase()) in node) type = lower.slice(2);
+    return function (newValue) {
+      var info = isArray$1(newValue) ? newValue : [newValue, false];
+
+      if (oldValue !== info[0]) {
+        if (oldValue) node.removeEventListener(type, oldValue, info[1]);
+        if (oldValue = info[0]) node.addEventListener(type, oldValue, info[1]);
+      }
+    };
+  };
+  var ref = function ref(node) {
+    var oldValue;
+    return function (value) {
+      if (oldValue !== value) {
+        oldValue = value;
+        if (typeof value === 'function') value(node);else value.current = node;
+      }
+    };
+  };
+  var setter = function setter(node, key) {
+    return key === 'dataset' ? data(node) : function (value) {
+      node[key] = value;
+    };
+  };
+  var text = function text(node) {
+    var oldValue;
+    return function (newValue) {
+      if (oldValue != newValue) {
+        oldValue = newValue;
+        node.textContent = newValue == null ? '' : newValue;
+      }
+    };
+  };
 
   /**
    * ISC License
@@ -280,118 +591,40 @@ self.uhtml = (function (exports) {
     return b;
   });
 
-  var useForeign = false;
-  var Foreign = /*#__PURE__*/_createClass(function Foreign(handler, value) {
-    _classCallCheck(this, Foreign);
+  var isArray = Array.isArray,
+      prototype = Array.prototype;
+  var indexOf = prototype.indexOf;
 
-    useForeign = true;
+  var _Proxy = new Proxy(document, {
+    get: function get(target, method) {
+      return target[method].bind(target);
+    }
+  }),
+      createDocumentFragment = _Proxy.createDocumentFragment,
+      createElement = _Proxy.createElement,
+      createElementNS = _Proxy.createElementNS,
+      createTextNode = _Proxy.createTextNode,
+      createTreeWalker = _Proxy.createTreeWalker,
+      importNode = _Proxy.importNode;
 
-    this._ = function () {
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      return handler.apply(void 0, args.concat([value]));
-    };
-  });
-  var foreign = function foreign(handler, value) {
-    return new Foreign(handler, value);
-  };
-  var aria = function aria(node) {
-    return function (values) {
-      for (var key in values) {
-        var name = key === 'role' ? key : "aria-".concat(key);
-        var value = values[key];
-        if (value == null) node.removeAttribute(name);else node.setAttribute(name, value);
-      }
-    };
-  };
-  var attribute = function attribute(node, name) {
-    var oldValue,
-        orphan = true;
-    var attributeNode = document.createAttributeNS(null, name);
-    return function (newValue) {
-      if (oldValue !== newValue) {
-        oldValue = newValue;
-
-        if (oldValue == null) {
-          if (!orphan) {
-            node.removeAttributeNode(attributeNode);
-            orphan = true;
-          }
-        } else {
-          var value = useForeign && newValue instanceof Foreign ? newValue._(node, name) : newValue;
-
-          if (value == null) {
-            if (!orphan) node.removeAttributeNode(attributeNode);
-            orphan = true;
-          } else {
-            attributeNode.value = value;
-
-            if (orphan) {
-              node.setAttributeNodeNS(attributeNode);
-              orphan = false;
-            }
-          }
-        }
-      }
-    };
+  var createHTML = function createHTML(html) {
+    var template = createElement('template');
+    template.innerHTML = html;
+    return template.content;
   };
 
-  var _boolean = function _boolean(node, key, oldValue) {
-    return function (newValue) {
-      if (oldValue !== !!newValue) {
-        // when IE won't be around anymore ...
-        // node.toggleAttribute(key, oldValue = !!newValue);
-        if (oldValue = !!newValue) node.setAttribute(key, '');else node.removeAttribute(key);
-      }
-    };
-  };
-  var data = function data(_ref) {
-    var dataset = _ref.dataset;
-    return function (values) {
-      for (var key in values) {
-        var value = values[key];
-        if (value == null) delete dataset[key];else dataset[key] = value;
-      }
-    };
-  };
-  var event = function event(node, name) {
-    var oldValue,
-        lower,
-        type = name.slice(2);
-    if (!(name in node) && (lower = name.toLowerCase()) in node) type = lower.slice(2);
-    return function (newValue) {
-      var info = isArray(newValue) ? newValue : [newValue, false];
+  var xml;
 
-      if (oldValue !== info[0]) {
-        if (oldValue) node.removeEventListener(type, oldValue, info[1]);
-        if (oldValue = info[0]) node.addEventListener(type, oldValue, info[1]);
-      }
-    };
+  var createSVG = function createSVG(svg) {
+    if (!xml) xml = createElementNS('http://www.w3.org/2000/svg', 'svg');
+    xml.innerHTML = svg;
+    var content = createDocumentFragment();
+    content.append.apply(content, _toConsumableArray(xml.childNodes));
+    return content;
   };
-  var ref = function ref(node) {
-    var oldValue;
-    return function (value) {
-      if (oldValue !== value) {
-        oldValue = value;
-        if (typeof value === 'function') value(node);else value.current = node;
-      }
-    };
-  };
-  var setter = function setter(node, key) {
-    return key === 'dataset' ? data(node) : function (value) {
-      node[key] = value;
-    };
-  };
-  var text = function text(node) {
-    var oldValue;
-    return function (newValue) {
-      if (oldValue != newValue) {
-        oldValue = newValue;
-        node.textContent = newValue == null ? '' : newValue;
-      }
-    };
+
+  var createContent = function createContent(text, svg) {
+    return svg ? createSVG(text) : createHTML(text);
   };
 
   var reducePath = function reducePath(_ref, i) {
@@ -436,7 +669,7 @@ self.uhtml = (function (exports) {
         case 'boolean':
           if (oldValue !== newValue) {
             oldValue = newValue;
-            if (!text) text = document.createTextNode('');
+            if (!text) text = createTextNode('');
             text.data = newValue;
             nodes = diff(comment, nodes, [text]);
           }
@@ -472,7 +705,7 @@ self.uhtml = (function (exports) {
 
           if (oldValue !== newValue && 'ELEMENT_NODE' in newValue) {
             oldValue = newValue;
-            nodes = diff(comment, nodes, newValue.nodeType === 11 ? slice.call(newValue.childNodes) : [newValue]);
+            nodes = diff(comment, nodes, newValue.nodeType === 11 ? _toConsumableArray(newValue.childNodes) : [newValue]);
           }
 
           break;
@@ -539,79 +772,6 @@ self.uhtml = (function (exports) {
     ) : text(node);
   }
 
-  /*! (c) Andrea Giammarchi - ISC */
-  var createContent = function (document) {
-
-    var FRAGMENT = 'fragment';
-    var TEMPLATE = 'template';
-    var HAS_CONTENT = ('content' in create(TEMPLATE));
-    var createHTML = HAS_CONTENT ? function (html) {
-      var template = create(TEMPLATE);
-      template.innerHTML = html;
-      return template.content;
-    } : function (html) {
-      var content = create(FRAGMENT);
-      var template = create(TEMPLATE);
-      var childNodes = null;
-
-      if (/^[^\S]*?<(col(?:group)?|t(?:head|body|foot|r|d|h))/i.test(html)) {
-        var selector = RegExp.$1;
-        template.innerHTML = '<table>' + html + '</table>';
-        childNodes = template.querySelectorAll(selector);
-      } else {
-        template.innerHTML = html;
-        childNodes = template.childNodes;
-      }
-
-      append(content, childNodes);
-      return content;
-    };
-    return function createContent(markup, type) {
-      return (type === 'svg' ? createSVG : createHTML)(markup);
-    };
-
-    function append(root, childNodes) {
-      var length = childNodes.length;
-
-      while (length--) {
-        root.appendChild(childNodes[0]);
-      }
-    }
-
-    function create(element) {
-      return element === FRAGMENT ? document.createDocumentFragment() : document.createElementNS('http://www.w3.org/1999/xhtml', element);
-    } // it could use createElementNS when hasNode is there
-    // but this fallback is equally fast and easier to maintain
-    // it is also battle tested already in all IE
-
-
-    function createSVG(svg) {
-      var content = create(FRAGMENT);
-      var template = create('div');
-      template.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg">' + svg + '</svg>';
-      append(content, template.firstChild.childNodes);
-      return content;
-    }
-  }(document);
-
-  var isImportNodeLengthWrong = document.importNode.length != 1; // IE11 and old Edge discard empty nodes when cloning, potentially
-  // resulting in broken paths to find updates. The workaround here
-  // is to import once, upfront, the fragment that will be cloned
-  // later on, so that paths are retrieved from one already parsed,
-  // hence without missing child nodes once re-cloned.
-
-  var createFragment = isImportNodeLengthWrong ? function (text, type, normalize) {
-    return document.importNode(createContent(text, type, normalize), true);
-  } : createContent; // IE11 and old Edge have a different createTreeWalker signature that
-  // has been deprecated in other browsers. This export is needed only
-  // to guarantee the TreeWalker doesn't show warnings and, ultimately, works
-
-  var createWalker = isImportNodeLengthWrong ? function (fragment) {
-    return document.createTreeWalker(fragment, 1 | 128, null, false);
-  } : function (fragment) {
-    return document.createTreeWalker(fragment, 1 | 128);
-  };
-
   // related to its child nodes, so that it's possible
   // to retrieve later on exact node via reducePath
 
@@ -623,7 +783,8 @@ self.uhtml = (function (exports) {
     while (parentNode) {
       path.push(indexOf.call(parentNode.childNodes, node));
       node = parentNode;
-      parentNode = node.parentNode;
+      var _node2 = node;
+      parentNode = _node2.parentNode;
     }
 
     return path;
@@ -641,9 +802,9 @@ self.uhtml = (function (exports) {
   // content, within the exact same amount of updates each time.
   // This cache relates each template to its unique content and updates.
 
-  var cache$1 = umap(new WeakMap()); // a RegExp that helps checking nodes that cannot contain comments
+  var cache$1 = new WeakMapSet(); // a RegExp that helps checking nodes that cannot contain comments
 
-  var textOnly = /^(?:plaintext|script|style|textarea|title|xmp)$/i;
+  var textOnly = /^(?:textarea|script|style|title|plaintext|xmp)$/;
   var createCache = function createCache() {
     return {
       stack: [],
@@ -682,11 +843,12 @@ self.uhtml = (function (exports) {
 
 
   var mapTemplate = function mapTemplate(type, template) {
-    var text = instrument(template, prefix, type === 'svg');
-    var content = createFragment(text, type); // once instrumented and reproduced as fragment, it's crawled
+    var svg = type === 'svg';
+    var text = instrument(template, prefix, svg);
+    var content = createContent(text, svg); // once instrumented and reproduced as fragment, it's crawled
     // to find out where each update is in the fragment tree
 
-    var tw = createWalker(content);
+    var tw = createTreeWalker(content, 1 | 128);
     var nodes = [];
     var length = template.length - 1;
     var i = 0; // updates are searched via unique names, linearly increased across the tree
@@ -721,8 +883,7 @@ self.uhtml = (function (exports) {
           nodes.push({
             type: 'attr',
             path: createPath(node),
-            name: node.getAttribute(search) //svg: svg < 0 ? (svg = ('ownerSVGElement' in node ? 1 : 0)) : svg
-
+            name: node.getAttribute(search)
           });
           node.removeAttribute(search);
           search = "".concat(prefix).concat(++i);
@@ -730,7 +891,7 @@ self.uhtml = (function (exports) {
         // and if it is <!--isµX--> then update tex-only this node
 
 
-        if (textOnly.test(node.tagName) && node.textContent.trim() === "<!--".concat(search, "-->")) {
+        if (textOnly.test(node.localName) && node.textContent.trim() === "<!--".concat(search, "-->")) {
           node.textContent = '';
           nodes.push({
             type: 'text',
@@ -759,7 +920,7 @@ self.uhtml = (function (exports) {
         nodes = _ref.nodes; // clone deeply the fragment
 
 
-    var fragment = document.importNode(content, true); // and relate an update handler per each node that needs one
+    var fragment = importNode(content, true); // and relate an update handler per each node that needs one
 
     var updates = nodes.map(handlers, fragment); // return the fragment and all updates to use within its nodes
 
@@ -777,10 +938,9 @@ self.uhtml = (function (exports) {
     var type = _ref2.type,
         template = _ref2.template,
         values = _ref2.values;
-    var length = values.length; // interpolations can contain holes and arrays, so these need
+    // interpolations can contain holes and arrays, so these need
     // to be recursively discovered
-
-    unrollValues(info, values, length);
+    var length = unrollValues(info, values);
     var entry = info.entry; // if the cache entry is either null or different from the template
     // and the type this unroll should resolve, create a new entry
     // assigning a new content fragment and the list of updates.
@@ -805,8 +965,9 @@ self.uhtml = (function (exports) {
   // related to each interpolation value, or null, if the render
   // was conditional and the value is not special (Array or Hole)
 
-  var unrollValues = function unrollValues(_ref3, values, length) {
+  var unrollValues = function unrollValues(_ref3, values) {
     var stack = _ref3.stack;
+    var length = values.length;
 
     for (var i = 0; i < length; i++) {
       var hole = values[i]; // each Hole gets unrolled and re-assigned as value
@@ -814,7 +975,7 @@ self.uhtml = (function (exports) {
 
       if (hole instanceof Hole) values[i] = unroll(stack[i] || (stack[i] = createCache()), hole); // arrays are recursively resolved so that each entry will contain
       // also a DOM node or a wire, hence it can be diffed if/when needed
-      else if (isArray(hole)) unrollValues(stack[i] || (stack[i] = createCache()), hole, hole.length); // if the value is nothing special, the stack doesn't need to retain data
+      else if (isArray(hole)) unrollValues(stack[i] || (stack[i] = createCache()), hole); // if the value is nothing special, the stack doesn't need to retain data
       // this is useful also to cleanup previously retained data, if the value
       // was a Hole, or an Array, but not anymore, i.e.:
       // const update = content => html`<div>${content}</div>`;
@@ -823,6 +984,7 @@ self.uhtml = (function (exports) {
     }
 
     if (length < stack.length) stack.splice(length);
+    return length;
   };
   /**
    * Holds all details wrappers needed to render the content further on.
@@ -833,19 +995,19 @@ self.uhtml = (function (exports) {
    */
 
 
-  function Hole(type, template, values) {
+  var Hole = /*#__PURE__*/_createClass(function Hole(type, template, values) {
+    _classCallCheck(this, Hole);
+
     this.type = type;
     this.template = template;
     this.values = values;
-  }
+  });
 
-  var create = Object.create,
-      defineProperties = Object.defineProperties; // both `html` and `svg` template literal tags are polluted
   // with a `for(ref[, id])` and a `node` tag too
 
   var tag = function tag(type) {
     // both `html` and `svg` tags have their own cache
-    var keyed = umap(new WeakMap()); // keyed operations always re-use the same cache and unroll
+    var keyed = new WeakMapSet(); // keyed operations always re-use the same cache and unroll
     // the template and its interpolations right away
 
     var fixed = function fixed(cache) {
@@ -862,7 +1024,7 @@ self.uhtml = (function (exports) {
       };
     };
 
-    return defineProperties( // non keyed operations are recognized as instance of Hole
+    return Object.assign( // non keyed operations are recognized as instance of Hole
     // during the "unroll", recursively resolved and updated
     function (template) {
       for (var _len2 = arguments.length, values = new Array(_len2 > 1 ? _len2 - 1 : 0), _key2 = 1; _key2 < _len2; _key2++) {
@@ -871,37 +1033,29 @@ self.uhtml = (function (exports) {
 
       return new Hole(type, template, values);
     }, {
-      "for": {
-        // keyed operations need a reference object, usually the parent node
-        // which is showing keyed results, and optionally a unique id per each
-        // related node, handy with JSON results and mutable list of objects
-        // that usually carry a unique identifier
-        value: function value(ref, id) {
-          var memo = keyed.get(ref) || keyed.set(ref, create(null));
-          return memo[id] || (memo[id] = fixed(createCache()));
-        }
+      // keyed operations need a reference object, usually the parent node
+      // which is showing keyed results, and optionally a unique id per each
+      // related node, handy with JSON results and mutable list of objects
+      // that usually carry a unique identifier
+      "for": function _for(ref, id) {
+        var memo = keyed.get(ref) || keyed.set(ref, new MapSet());
+        return memo.get(id) || memo.set(id, fixed(createCache()));
       },
-      node: {
-        // it is possible to create one-off content out of the box via node tag
-        // this might return the single created node, or a fragment with all
-        // nodes present at the root level and, of course, their child nodes
-        value: function value(template) {
-          for (var _len3 = arguments.length, values = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
-            values[_key3 - 1] = arguments[_key3];
-          }
-
-          return unroll(createCache(), {
-            type: type,
-            template: template,
-            values: values
-          }).valueOf();
+      // it is possible to create one-off content out of the box via node tag
+      // this might return the single created node, or a fragment with all
+      // nodes present at the root level and, of course, their child nodes
+      node: function node(template) {
+        for (var _len3 = arguments.length, values = new Array(_len3 > 1 ? _len3 - 1 : 0), _key3 = 1; _key3 < _len3; _key3++) {
+          values[_key3 - 1] = arguments[_key3];
         }
+
+        return unroll(createCache(), new Hole(type, template, values)).valueOf();
       }
     });
   }; // each rendered node gets its own cache
 
 
-  var cache = umap(new WeakMap()); // rendering means understanding what `html` or `svg` tags returned
+  var cache = new WeakMapSet(); // rendering means understanding what `html` or `svg` tags returned
   // and it relates a specific node to its own unique cache.
   // Each time the content to render changes, the node is cleaned up
   // and the new new content is appended, and if such content is a Hole
@@ -913,13 +1067,12 @@ self.uhtml = (function (exports) {
     var wire = hole instanceof Hole ? unroll(info, hole) : hole;
 
     if (wire !== info.wire) {
-      info.wire = wire;
-      where.textContent = ''; // valueOf() simply returns the node itself, but in case it was a "wire"
+      info.wire = wire; // valueOf() simply returns the node itself, but in case it was a "wire"
       // it will eventually re-append all nodes to its fragment so that such
       // fragment can be re-appended many times in a meaningful way
       // (wires are basically persistent fragments facades with special behavior)
 
-      where.appendChild(wire.valueOf());
+      where.replaceChildren(wire.valueOf());
     }
 
     return where;
@@ -929,7 +1082,6 @@ self.uhtml = (function (exports) {
   var svg = tag('svg');
 
   exports.Hole = Hole;
-  exports.foreign = foreign;
   exports.html = html;
   exports.render = render;
   exports.svg = svg;

@@ -10,7 +10,6 @@ export default {
       babelHelpers: 'bundled'
     })
   ],
-  
   output: {
     esModule: false,
     exports: 'named',

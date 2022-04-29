@@ -1,5 +1,6 @@
 'use strict';
-const umap = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('umap'));
+const {WeakMapSet} = require('@webreflection/mapset');
+
 const instrument = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('uparser'));
 const {indexOf, isArray, slice} = require('uarray');
 const udomdiff = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('udomdiff'));
@@ -429,7 +430,7 @@ const prefix = 'isµ';
 // should be parsed once, and once only, as it will always represent the same
 // content, within the exact same amount of updates each time.
 // This cache relates each template to its unique content and updates.
-const cache = umap(new WeakMap);
+const cache = new WeakMapSet;
 
 // a RegExp that helps checking nodes that cannot contain comments
 const textOnly = /^(?:plaintext|script|style|textarea|title|xmp)$/i;
@@ -621,7 +622,7 @@ const {create, defineProperties} = Object;
 // with a `for(ref[, id])` and a `node` tag too
 const tag = type => {
   // both `html` and `svg` tags have their own _cache
-  const keyed = umap(new WeakMap);
+  const keyed = new WeakMapSet;
   // keyed operations always re-use the same _cache and unroll
   // the template and its interpolations right away
   const fixed = _cache => (template, ...values) => unroll(
@@ -657,12 +658,12 @@ const tag = type => {
 };
 
 // each rendered node gets its own _cache
-const _cache = umap(new WeakMap);
+const _cache = new WeakMapSet;
 
 // rendering means understanding what `html` or `svg` tags returned
 // and it relates a specific node to its own unique _cache.
 // Each time the content to render changes, the node is cleaned up
-// and the new new content is appended, and if such content is a Hole
+// and the new content is appended, and if such content is a Hole
 // then it's "unrolled" to resolve all its inner nodes.
 const render = (where, what) => {
   const hole = typeof what === 'function' ? what() : what;

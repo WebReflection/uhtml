@@ -1,10 +1,9 @@
-import umap from 'umap';
-import instrument from 'uparser';
-import {indexOf, isArray} from 'uarray';
-import {persistent} from 'uwire';
+import {WeakMapSet} from '@webreflection/mapset';
+import instrument from '@webreflection/uparser';
+import {persistent} from '@webreflection/uwire';
 
 import {handlers} from './handlers.js';
-import {createFragment, createWalker} from './node.js';
+import {isArray, indexOf, createContent, createTreeWalker, importNode} from './utils.js';
 
 // from a fragment container, create an array of indexes
 // related to its child nodes, so that it's possible
@@ -15,7 +14,7 @@ const createPath = node => {
   while (parentNode) {
     path.push(indexOf.call(parentNode.childNodes, node));
     node = parentNode;
-    parentNode = node.parentNode;
+    ({parentNode} = node);
   }
   return path;
 };
@@ -33,10 +32,10 @@ const prefix = 'isµ';
 // should be parsed once, and once only, as it will always represent the same
 // content, within the exact same amount of updates each time.
 // This cache relates each template to its unique content and updates.
-const cache = umap(new WeakMap);
+const cache = new WeakMapSet;
 
 // a RegExp that helps checking nodes that cannot contain comments
-const textOnly = /^(?:plaintext|script|style|textarea|title|xmp)$/i;
+const textOnly = /^(?:textarea|script|style|title|plaintext|xmp)$/;
 
 export const createCache = () => ({
   stack: [],    // each template gets a stack for each interpolation "hole"
@@ -65,11 +64,12 @@ const createEntry = (type, template) => {
 // Each unique template becomes a fragment, cloned once per each other
 // operation based on the same template, i.e. data => html`<p>${data}</p>`
 const mapTemplate = (type, template) => {
-  const text = instrument(template, prefix, type === 'svg');
-  const content = createFragment(text, type);
+  const svg = type === 'svg';
+  const text = instrument(template, prefix, svg);
+  const content = createContent(text, svg);
   // once instrumented and reproduced as fragment, it's crawled
   // to find out where each update is in the fragment tree
-  const tw = createWalker(content);
+  const tw = createTreeWalker(content, 1 | 128);
   const nodes = [];
   const length = template.length - 1;
   let i = 0;
@@ -102,8 +102,7 @@ const mapTemplate = (type, template) => {
         nodes.push({
           type: 'attr',
           path: createPath(node),
-          name: node.getAttribute(search),
-          //svg: svg < 0 ? (svg = ('ownerSVGElement' in node ? 1 : 0)) : svg
+          name: node.getAttribute(search)
         });
         node.removeAttribute(search);
         search = `${prefix}${++i}`;
@@ -111,7 +110,7 @@ const mapTemplate = (type, template) => {
       // if the node was a style, textarea, or others, check its content
       // and if it is <!--isµX--> then update tex-only this node
       if (
-        textOnly.test(node.tagName) &&
+        textOnly.test(node.localName) &&
         node.textContent.trim() === `<!--${search}-->`
       ){
         node.textContent = '';
@@ -135,7 +134,7 @@ const mapUpdates = (type, template) => {
     cache.set(template, mapTemplate(type, template))
   );
   // clone deeply the fragment
-  const fragment = document.importNode(content, true);
+  const fragment = importNode(content, true);
   // and relate an update handler per each node that needs one
   const updates = nodes.map(handlers, fragment);
   // return the fragment and all updates to use within its nodes
@@ -147,10 +146,9 @@ const mapUpdates = (type, template) => {
 // discover what to do with each interpolation, which will result
 // into an update operation.
 export const unroll = (info, {type, template, values}) => {
-  const {length} = values;
   // interpolations can contain holes and arrays, so these need
   // to be recursively discovered
-  unrollValues(info, values, length);
+  const length = unrollValues(info, values);
   let {entry} = info;
   // if the cache entry is either null or different from the template
   // and the type this unroll should resolve, create a new entry
@@ -172,7 +170,8 @@ export const unroll = (info, {type, template, values}) => {
 // the stack retains, per each interpolation value, the cache
 // related to each interpolation value, or null, if the render
 // was conditional and the value is not special (Array or Hole)
-const unrollValues = ({stack}, values, length) => {
+const unrollValues = ({stack}, values) => {
+  const {length} = values;
   for (let i = 0; i < length; i++) {
     const hole = values[i];
     // each Hole gets unrolled and re-assigned as value
@@ -185,11 +184,7 @@ const unrollValues = ({stack}, values, length) => {
     // arrays are recursively resolved so that each entry will contain
     // also a DOM node or a wire, hence it can be diffed if/when needed
     else if (isArray(hole))
-      unrollValues(
-        stack[i] || (stack[i] = createCache()),
-        hole,
-        hole.length
-      );
+      unrollValues(stack[i] || (stack[i] = createCache()), hole);
     // if the value is nothing special, the stack doesn't need to retain data
     // this is useful also to cleanup previously retained data, if the value
     // was a Hole, or an Array, but not anymore, i.e.:
@@ -200,6 +195,7 @@ const unrollValues = ({stack}, values, length) => {
   }
   if (length < stack.length)
     stack.splice(length);
+  return length;
 };
 
 /**
@@ -209,8 +205,10 @@ const unrollValues = ({stack}, values, length) => {
  * @param {string[]} template The template literals used to the define the content.
  * @param {Array} values Zero, one, or more interpolated values to render.
  */
-export function Hole(type, template, values) {
-  this.type = type;
-  this.template = template;
-  this.values = values;
+export class Hole {
+  constructor(type, template, values) {
+    this.type = type;
+    this.template = template;
+    this.values = values;
+  }
 };

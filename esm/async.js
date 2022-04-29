@@ -1,12 +1,13 @@
+import {WeakMapSet} from '@webreflection/mapset';
+
 import asyncTag from 'async-tag';
-import umap from 'umap';
 
 import {render as $render, html as $html, svg as $svg} from './index.js';
 
 const {defineProperties} = Object;
 
 const tag = original => {
-  const wrap = umap(new WeakMap);
+  const wrap = new WeakMapSet;
   return defineProperties(
     asyncTag(original),
     {

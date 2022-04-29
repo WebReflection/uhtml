@@ -1,7 +1,9 @@
-import {isArray, slice} from 'uarray';
-import udomdiff from 'udomdiff';
+import {diffable} from '@webreflection/uwire';
+
 import {aria, attribute, boolean, event, ref, setter, text} from 'uhandlers';
-import {diffable} from 'uwire';
+import udomdiff from 'udomdiff';
+
+import {isArray, createTextNode} from './utils.js';
 
 // from a generic path, retrieves the exact targeted node
 const reducePath = ({childNodes}, i) => childNodes[i];
@@ -45,7 +47,7 @@ const handleAnything = comment => {
         if (oldValue !== newValue) {
           oldValue = newValue;
           if (!text)
-            text = document.createTextNode('');
+            text = createTextNode('');
           text.data = newValue;
           nodes = diff(comment, nodes, [text]);
         }
@@ -85,7 +87,7 @@ const handleAnything = comment => {
             comment,
             nodes,
             newValue.nodeType === 11 ?
-              slice.call(newValue.childNodes) :
+              [...newValue.childNodes] :
               [newValue]
           );
         }
