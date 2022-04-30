@@ -1,6 +1,6 @@
 {
   "name": "@webreflection/uhtml",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A micro HTML/SVG render",
   "main": "cjs/index.js",
   "types": "index.d.ts",
