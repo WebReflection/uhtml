@@ -14,6 +14,12 @@ Please ask questions in the [dedicated discussions repository](https://github.co
 
 ---
 
+### V3.0 Update
+
+  * removed IE and legacy Edge compatibility
+  * simplified template parsing
+  * cleaned up dependencies 
+
 ### V2.8 Update
 
   * added *µhandlers* [foreign](https://github.com/WebReflection/uhandlers#api) export to enable arbitrary attributes handling!

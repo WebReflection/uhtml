@@ -1,70 +1,45 @@
 import {WeakMapSet} from '@webreflection/mapset';
+import instrument from '@webreflection/uparser';
 
-import instrument from 'uparser';
-import {indexOf, isArray, slice} from 'uarray';
 import udomdiff from 'udomdiff';
 
 export default ({document}) => {
   /**start**/
-/*! (c) Andrea Giammarchi - ISC */
-var createContent = (function (document) {'use strict';
-  var FRAGMENT = 'fragment';
-  var TEMPLATE = 'template';
-  var HAS_CONTENT = 'content' in create(TEMPLATE);
-
-  var createHTML = HAS_CONTENT ?
-    function (html) {
-      var template = create(TEMPLATE);
-      template.innerHTML = html;
-      return template.content;
-    } :
-    function (html) {
-      var content = create(FRAGMENT);
-      var template = create(TEMPLATE);
-      var childNodes = null;
-      if (/^[^\S]*?<(col(?:group)?|t(?:head|body|foot|r|d|h))/i.test(html)) {
-        var selector = RegExp.$1;
-        template.innerHTML = '<table>' + html + '</table>';
-        childNodes = template.querySelectorAll(selector);
-      } else {
-        template.innerHTML = html;
-        childNodes = template.childNodes;
-      }
-      append(content, childNodes);
-      return content;
-    };
-
-  return function createContent(markup, type) {
-    return (type === 'svg' ? createSVG : createHTML)(markup);
-  };
-
-  function append(root, childNodes) {
-    var length = childNodes.length;
-    while (length--)
-      root.appendChild(childNodes[0]);
-  }
-
-  function create(element) {
-    return element === FRAGMENT ?
-      document.createDocumentFragment() :
-      document.createElementNS('http://www.w3.org/1999/xhtml', element);
-  }
-
-  // it could use createElementNS when hasNode is there
-  // but this fallback is equally fast and easier to maintain
-  // it is also battle tested already in all IE
-  function createSVG(svg) {
-    var content = create(FRAGMENT);
-    var template = create('div');
-    template.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg">' + svg + '</svg>';
-    append(content, template.firstChild.childNodes);
-    return content;
-  }
-
-}(document));
+const {isArray, prototype} = Array;
+const {indexOf} = prototype;
 
 
 
+const {
+  createDocumentFragment,
+  createElement,
+  createElementNS,
+  createTextNode,
+  createTreeWalker,
+  importNode
+} = new Proxy(document, {
+  get: (target, method) => target[method].bind(target)
+});
+
+
+
+const createHTML = html => {
+  const template = createElement('template');
+  template.innerHTML = html;
+  return template.content;
+};
+
+let xml;
+const createSVG = svg => {
+  if (!xml) xml = createElementNS('http://www.w3.org/2000/svg', 'svg');
+  xml.innerHTML = svg;
+  const content = createDocumentFragment();
+  content.append(...xml.childNodes);
+  return content;
+};
+
+const createContent = (text, svg) => svg ?
+                              createSVG(text) : createHTML(text);
 
 const ELEMENT_NODE = 1;
 const nodeType = 111;
@@ -85,24 +60,19 @@ const diffable = (node, operation) => node.nodeType === nodeType ?
 ;
 
 const persistent = fragment => {
+  const {firstChild, lastChild} = fragment;
+  if (firstChild === lastChild)
+    return lastChild || fragment;
   const {childNodes} = fragment;
-  const {length} = childNodes;
-  if (length < 2)
-    return length ? childNodes[0] : fragment;
-  const nodes = slice.call(childNodes, 0);
-  const firstChild = nodes[0];
-  const lastChild = nodes[length - 1];
+  const nodes = [...childNodes];
   return {
     ELEMENT_NODE,
     nodeType,
     firstChild,
     lastChild,
     valueOf() {
-      if (childNodes.length !== length) {
-        let i = 0;
-        while (i < length)
-          fragment.appendChild(nodes[i++]);
-      }
+      if (childNodes.length !== nodes.length)
+        fragment.append(...nodes);
       return fragment;
     }
   };
@@ -232,28 +202,6 @@ const text = node => {
 
 
 
-// this "hack" tells the library if the browser is IE11 or old Edge
-const isImportNodeLengthWrong = document.importNode.length != 1;
-
-// IE11 and old Edge discard empty nodes when cloning, potentially
-// resulting in broken paths to find updates. The workaround here
-// is to import once, upfront, the fragment that will be cloned
-// later on, so that paths are retrieved from one already parsed,
-// hence without missing child nodes once re-cloned.
-const createFragment = isImportNodeLengthWrong ?
-  (text, type, normalize) => document.importNode(
-    createContent(text, type, normalize),
-    true
-  ) :
-  createContent;
-
-// IE11 and old Edge have a different createTreeWalker signature that
-// has been deprecated in other browsers. This export is needed only
-// to guarantee the TreeWalker doesn't show warnings and, ultimately, works
-const createWalker = isImportNodeLengthWrong ?
-  fragment => document.createTreeWalker(fragment, 1 | 128, null, false) :
-  fragment => document.createTreeWalker(fragment, 1 | 128);
-
 
 
 
@@ -301,7 +249,7 @@ const handleAnything = comment => {
         if (oldValue !== newValue) {
           oldValue = newValue;
           if (!text)
-            text = document.createTextNode('');
+            text = createTextNode('');
           text.data = newValue;
           nodes = diff(comment, nodes, [text]);
         }
@@ -341,7 +289,7 @@ const handleAnything = comment => {
             comment,
             nodes,
             newValue.nodeType === 11 ?
-              slice.call(newValue.childNodes) :
+              [...newValue.childNodes] :
               [newValue]
           );
         }
@@ -401,7 +349,6 @@ function handlers(options) {
 
 
 
-
 // from a fragment container, create an array of indexes
 // related to its child nodes, so that it's possible
 // to retrieve later on exact node via reducePath
@@ -411,7 +358,7 @@ const createPath = node => {
   while (parentNode) {
     path.push(indexOf.call(parentNode.childNodes, node));
     node = parentNode;
-    parentNode = node.parentNode;
+    ({parentNode} = node);
   }
   return path;
 };
@@ -432,7 +379,7 @@ const prefix = 'isµ';
 const cache = new WeakMapSet;
 
 // a RegExp that helps checking nodes that cannot contain comments
-const textOnly = /^(?:plaintext|script|style|textarea|title|xmp)$/i;
+const textOnly = /^(?:textarea|script|style|title|plaintext|xmp)$/;
 
 const createCache = () => ({
   stack: [],    // each template gets a stack for each interpolation "hole"
@@ -461,11 +408,12 @@ const createEntry = (type, template) => {
 // Each unique template becomes a fragment, cloned once per each other
 // operation based on the same template, i.e. data => html`<p>${data}</p>`
 const mapTemplate = (type, template) => {
-  const text = instrument(template, prefix, type === 'svg');
-  const content = createFragment(text, type);
+  const svg = type === 'svg';
+  const text = instrument(template, prefix, svg);
+  const content = createContent(text, svg);
   // once instrumented and reproduced as fragment, it's crawled
   // to find out where each update is in the fragment tree
-  const tw = createWalker(content);
+  const tw = createTreeWalker(content, 1 | 128);
   const nodes = [];
   const length = template.length - 1;
   let i = 0;
@@ -498,8 +446,7 @@ const mapTemplate = (type, template) => {
         nodes.push({
           type: 'attr',
           path: createPath(node),
-          name: node.getAttribute(search),
-          //svg: svg < 0 ? (svg = ('ownerSVGElement' in node ? 1 : 0)) : svg
+          name: node.getAttribute(search)
         });
         node.removeAttribute(search);
         search = `${prefix}${++i}`;
@@ -507,7 +454,7 @@ const mapTemplate = (type, template) => {
       // if the node was a style, textarea, or others, check its content
       // and if it is <!--isµX--> then update tex-only this node
       if (
-        textOnly.test(node.tagName) &&
+        textOnly.test(node.localName) &&
         node.textContent.trim() === `<!--${search}-->`
       ){
         node.textContent = '';
@@ -531,7 +478,7 @@ const mapUpdates = (type, template) => {
     cache.set(template, mapTemplate(type, template))
   );
   // clone deeply the fragment
-  const fragment = document.importNode(content, true);
+  const fragment = importNode(content, true);
   // and relate an update handler per each node that needs one
   const updates = nodes.map(handlers, fragment);
   // return the fragment and all updates to use within its nodes
@@ -543,10 +490,9 @@ const mapUpdates = (type, template) => {
 // discover what to do with each interpolation, which will result
 // into an update operation.
 const unroll = (info, {type, template, values}) => {
-  const {length} = values;
   // interpolations can contain holes and arrays, so these need
   // to be recursively discovered
-  unrollValues(info, values, length);
+  const length = unrollValues(info, values);
   let {entry} = info;
   // if the cache entry is either null or different from the template
   // and the type this unroll should resolve, create a new entry
@@ -568,7 +514,8 @@ const unroll = (info, {type, template, values}) => {
 // the stack retains, per each interpolation value, the cache
 // related to each interpolation value, or null, if the render
 // was conditional and the value is not special (Array or Hole)
-const unrollValues = ({stack}, values, length) => {
+const unrollValues = ({stack}, values) => {
+  const {length} = values;
   for (let i = 0; i < length; i++) {
     const hole = values[i];
     // each Hole gets unrolled and re-assigned as value
@@ -581,11 +528,7 @@ const unrollValues = ({stack}, values, length) => {
     // arrays are recursively resolved so that each entry will contain
     // also a DOM node or a wire, hence it can be diffed if/when needed
     else if (isArray(hole))
-      unrollValues(
-        stack[i] || (stack[i] = createCache()),
-        hole,
-        hole.length
-      );
+      unrollValues(stack[i] || (stack[i] = createCache()), hole);
     // if the value is nothing special, the stack doesn't need to retain data
     // this is useful also to cleanup previously retained data, if the value
     // was a Hole, or an Array, but not anymore, i.e.:
@@ -596,6 +539,7 @@ const unrollValues = ({stack}, values, length) => {
   }
   if (length < stack.length)
     stack.splice(length);
+  return length;
 };
 
 /**
@@ -605,17 +549,17 @@ const unrollValues = ({stack}, values, length) => {
  * @param {string[]} template The template literals used to the define the content.
  * @param {Array} values Zero, one, or more interpolated values to render.
  */
-function Hole(type, template, values) {
-  this.type = type;
-  this.template = template;
-  this.values = values;
+class Hole {
+  constructor(type, template, values) {
+    this.type = type;
+    this.template = template;
+    this.values = values;
+  }
 };
 
 
 
 
-
-const {create, defineProperties} = Object;
 
 // both `html` and `svg` template literal tags are polluted
 // with a `for(ref[, id])` and a `node` tag too
@@ -628,30 +572,23 @@ const tag = type => {
     _cache,
     {type, template, values}
   );
-  return defineProperties(
+  return Object.assign(
     // non keyed operations are recognized as instance of Hole
     // during the "unroll", recursively resolved and updated
     (template, ...values) => new Hole(type, template, values),
     {
-      for: {
-        // keyed operations need a reference object, usually the parent node
-        // which is showing keyed results, and optionally a unique id per each
-        // related node, handy with JSON results and mutable list of objects
-        // that usually carry a unique identifier
-        value(ref, id) {
-          const memo = keyed.get(ref) || keyed.set(ref, create(null));
-          return memo[id] || (memo[id] = fixed(createCache()));
-        }
+      // keyed operations need a reference object, usually the parent node
+      // which is showing keyed results, and optionally a unique id per each
+      // related node, handy with JSON results and mutable list of objects
+      // that usually carry a unique identifier
+      for(ref, id) {
+        const memo = keyed.get(ref) || keyed.set(ref, new MapSet);
+        return memo.get(id) || memo.set(id, fixed(createCache()));
       },
-      node: {
-        // it is possible to create one-off content out of the box via node tag
-        // this might return the single created node, or a fragment with all
-        // nodes present at the root level and, of course, their child nodes
-        value: (template, ...values) => unroll(
-          createCache(),
-          {type, template, values}
-        ).valueOf()
-      }
+      // it is possible to create one-off content out of the box via node tag
+      // this might return the single created node, or a fragment with all
+      // nodes present at the root level and, of course, their child nodes
+      node: (template, ...values) => unroll(createCache(), new Hole(type, template, values)).valueOf()
     }
   );
 };
@@ -662,7 +599,7 @@ const _cache = new WeakMapSet;
 // rendering means understanding what `html` or `svg` tags returned
 // and it relates a specific node to its own unique _cache.
 // Each time the content to render changes, the node is cleaned up
-// and the new content is appended, and if such content is a Hole
+// and the new new content is appended, and if such content is a Hole
 // then it's "unrolled" to resolve all its inner nodes.
 const render = (where, what) => {
   const hole = typeof what === 'function' ? what() : what;
@@ -670,12 +607,11 @@ const render = (where, what) => {
   const wire = hole instanceof Hole ? unroll(info, hole) : hole;
   if (wire !== info.wire) {
     info.wire = wire;
-    where.textContent = '';
     // valueOf() simply returns the node itself, but in case it was a "wire"
     // it will eventually re-append all nodes to its fragment so that such
     // fragment can be re-appended many times in a meaningful way
     // (wires are basically persistent fragments facades with special behavior)
-    where.appendChild(wire.valueOf());
+    where.replaceChildren(wire.valueOf());
   }
   return where;
 };
@@ -683,7 +619,7 @@ const render = (where, what) => {
 const html = tag('html');
 const svg = tag('svg');
 
-return {Hole, render, html, svg, foreign};
+return {Hole, render, html, svg};
 
 /**end**/
 };

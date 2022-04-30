@@ -178,7 +178,6 @@ console.assert(!body.firstElementChild.hasAttribute('thing'), '?thing=${falsy}')
 
 // cover importNode
 delete require.cache[require.resolve('../cjs/handlers.js')];
-delete require.cache[require.resolve('../cjs/node.js')];
 delete require.cache[require.resolve('../cjs/rabbit.js')];
 delete require.cache[require.resolve('../cjs')];
 const importNode = document.importNode;
