@@ -1,8 +1,10 @@
 'use strict';
-const {isArray, slice} = require('uarray');
-const udomdiff = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('udomdiff'));
+const {diffable} = require('@webreflection/uwire');
+
 const {aria, attribute, boolean, event, ref, setter, text} = require('uhandlers');
-const {diffable} = require('uwire');
+const udomdiff = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('udomdiff'));
+
+const {isArray, createTextNode} = require('./utils.js');
 
 // from a generic path, retrieves the exact targeted node
 const reducePath = ({childNodes}, i) => childNodes[i];
@@ -46,7 +48,7 @@ const handleAnything = comment => {
         if (oldValue !== newValue) {
           oldValue = newValue;
           if (!text)
-            text = document.createTextNode('');
+            text = createTextNode('');
           text.data = newValue;
           nodes = diff(comment, nodes, [text]);
         }
@@ -86,7 +88,7 @@ const handleAnything = comment => {
             comment,
             nodes,
             newValue.nodeType === 11 ?
-              slice.call(newValue.childNodes) :
+              [...newValue.childNodes] :
               [newValue]
           );
         }

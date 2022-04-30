@@ -1,8 +1,9 @@
-import umap from 'umap';
+import {MapSet, WeakMapSet} from '@webreflection/mapset';
+
 import {render as $render, html, svg} from './index.js';
 
 // Sender (SW, Worker, postMessage)
-const ids = umap(new WeakMap);
+const ids = new WeakMapSet;
 let id = 0;
 
 const tag = type => (template, ...values) => ({
@@ -17,7 +18,7 @@ html.json = tag('html');
 svg.json = tag('svg');
 
 // Receiver (onmessage, from SW, Workers, etc)
-const templates = umap(new Map);
+const templates = new MapSet;
 
 const unroll = ({type, template, values, id}) => (
   (type === 'svg' ? svg : html).apply(

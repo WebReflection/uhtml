@@ -1,50 +1,41 @@
-import umap from 'umap';
-import {Hole, createCache, unroll} from './rabbit.js';
-import {foreign} from 'uhandlers';
+import {MapSet, WeakMapSet} from '@webreflection/mapset';
 
-const {create, defineProperties} = Object;
+import {Hole, createCache, unroll} from './rabbit.js';
 
 // both `html` and `svg` template literal tags are polluted
 // with a `for(ref[, id])` and a `node` tag too
 const tag = type => {
   // both `html` and `svg` tags have their own cache
-  const keyed = umap(new WeakMap);
+  const keyed = new WeakMapSet;
   // keyed operations always re-use the same cache and unroll
   // the template and its interpolations right away
   const fixed = cache => (template, ...values) => unroll(
     cache,
     {type, template, values}
   );
-  return defineProperties(
+  return Object.assign(
     // non keyed operations are recognized as instance of Hole
     // during the "unroll", recursively resolved and updated
     (template, ...values) => new Hole(type, template, values),
     {
-      for: {
-        // keyed operations need a reference object, usually the parent node
-        // which is showing keyed results, and optionally a unique id per each
-        // related node, handy with JSON results and mutable list of objects
-        // that usually carry a unique identifier
-        value(ref, id) {
-          const memo = keyed.get(ref) || keyed.set(ref, create(null));
-          return memo[id] || (memo[id] = fixed(createCache()));
-        }
+      // keyed operations need a reference object, usually the parent node
+      // which is showing keyed results, and optionally a unique id per each
+      // related node, handy with JSON results and mutable list of objects
+      // that usually carry a unique identifier
+      for(ref, id) {
+        const memo = keyed.get(ref) || keyed.set(ref, new MapSet);
+        return memo.get(id) || memo.set(id, fixed(createCache()));
       },
-      node: {
-        // it is possible to create one-off content out of the box via node tag
-        // this might return the single created node, or a fragment with all
-        // nodes present at the root level and, of course, their child nodes
-        value: (template, ...values) => unroll(
-          createCache(),
-          {type, template, values}
-        ).valueOf()
-      }
+      // it is possible to create one-off content out of the box via node tag
+      // this might return the single created node, or a fragment with all
+      // nodes present at the root level and, of course, their child nodes
+      node: (template, ...values) => unroll(createCache(), new Hole(type, template, values)).valueOf()
     }
   );
 };
 
 // each rendered node gets its own cache
-const cache = umap(new WeakMap);
+const cache = new WeakMapSet;
 
 // rendering means understanding what `html` or `svg` tags returned
 // and it relates a specific node to its own unique cache.
@@ -57,12 +48,11 @@ const render = (where, what) => {
   const wire = hole instanceof Hole ? unroll(info, hole) : hole;
   if (wire !== info.wire) {
     info.wire = wire;
-    where.textContent = '';
     // valueOf() simply returns the node itself, but in case it was a "wire"
     // it will eventually re-append all nodes to its fragment so that such
     // fragment can be re-appended many times in a meaningful way
     // (wires are basically persistent fragments facades with special behavior)
-    where.appendChild(wire.valueOf());
+    where.replaceChildren(wire.valueOf());
   }
   return where;
 };
@@ -70,4 +60,4 @@ const render = (where, what) => {
 const html = tag('html');
 const svg = tag('svg');
 
-export {Hole, render, html, svg, foreign};
+export {Hole, render, html, svg};

@@ -1,13 +1,14 @@
 'use strict';
+const {WeakMapSet} = require('@webreflection/mapset');
+
 const asyncTag = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('async-tag'));
-const umap = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('umap'));
 
 const {render: $render, html: $html, svg: $svg} = require('./index.js');
 
 const {defineProperties} = Object;
 
 const tag = original => {
-  const wrap = umap(new WeakMap);
+  const wrap = new WeakMapSet;
   return defineProperties(
     asyncTag(original),
     {
