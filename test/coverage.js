@@ -1,4 +1,4 @@
-const {DOMParser} = require('linkedom');
+const {DOMParser, HTMLElement} = require('linkedom');
 
 const document = (new DOMParser).parseFromString('<html />', 'text/html');
 
@@ -9,6 +9,14 @@ const {render, html, svg} = require('../cjs');
 const {Event} = document.defaultView;
 
 const {body} = document;
+
+const elementA = html.node`<div>foo</div>`;
+const elementB = html.node`
+  <div>bar</div>
+`;
+
+console.assert(elementA instanceof HTMLElement, 'elementA not instanceof HTMLElement');
+console.assert(elementB instanceof HTMLElement, 'elementB not instanceof HTMLElement');
 
 const fragment = () => html`<p>1</p><p>2</p>`;
 const variousContent = content => html`${content}`;

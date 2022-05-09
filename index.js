@@ -36,6 +36,7 @@ self.uhtml = (function (exports) {
     let i = 0;
     return template
             .join('\x01')
+            .trim()
             .replace(
               elements,
               (_, name, attrs, selfClosing) => {
