@@ -65,7 +65,7 @@ render(document.body, html`a${Promise.resolve('b')}c`);
 
 ### How To Use µhtml
 
-Install the module via `npm i uhtml` and consume it as such:
+Install the module via `npm i uhtml` and consume it like so:
 
 ```js
 import {render, html, svg} from 'uhtml';
@@ -87,7 +87,7 @@ import {render, html, svg} from 'https://unpkg.com/uhtml?module';
 
 ## API Documentation
 
-Most information about _µhtml_ are written in the [documentation file](./DOCUMENTATION.md), but following you can read most essential details.
+Most information about _µhtml_ is written in the [documentation file](./DOCUMENTATION.md), but the following gives essential details.
 
 <details>
   <summary><strong>API Summary</strong></summary>
@@ -95,11 +95,11 @@ Most information about _µhtml_ are written in the [documentation file](./DOCUME
 
 The module exports the following functionalities:
 
-  * a `render(where, what)` function to populate the `where` DOM node with `what` content, which can be a DOM node, or the returning value of `html` and `svg` tags. The `render` function returns the `where` DOM node itself.
-  * a `html` template literal [tag](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates), to produce any sort of _HTML_ content.
-  * a `svg` template literal [tag](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates), to produce any sort of _SVG_ content.
-  * both `html` and `svg` implements a `.for(reference[, id])` template tag function for _keyed_ weak relationships within the node. Please don't overuse this feature, as 90% of the time is not necessary, and it could make the rendering slower than it should. Also, consider the `ref` attribute, in case a reference to the current node is needed at any time.
-  * both `html` and `svg` implements a `.node` template tag function for *one-off* HTML or SVG creation. Please don't use `html.node` one off nodes within `render(...)` calls, as this utility exists to help creating fragments or nodes that should be *manually* added to the DOM, and *not* through `render` calls.
+  * a `render(where, what)` function to populate the `where` DOM node with `what` content, which can be a DOM node, or the return value of `html` and `svg` tags. The `render` function returns the `where` DOM node itself.
+  * an `html` template literal [tag](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates), to produce any sort of _HTML_ content.
+  * an `svg` template literal [tag](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates), to produce any sort of _SVG_ content.
+  * both `html` and `svg` implement a `.for(reference[, id])` template tag function for _keyed_ weak relationships within the node. Please don't overuse this feature, as 90% of the time is not necessary, and it could make the rendering slower than it should be. Also, consider the `ref` attribute, in case a reference to the current node is needed at any time.
+  * both `html` and `svg` implement a `.node` template tag function for *one-off* HTML or SVG creation. Please don't use `html.node` one off nodes within `render(...)` calls, as this utility exists to help create fragments or nodes that should be *manually* added to the DOM, and *not* through `render` calls.
 
   </div>
 </details>
@@ -108,7 +108,7 @@ The module exports the following functionalities:
   <summary><strong>About Attributes</strong></summary>
   <div>
 
-Any element can have one or more attribute, either interpolated or not.
+Any element can have one or more attributes, either interpolated or not.
 
 ```js
 render(document.body, html`
@@ -127,18 +127,18 @@ render(document.body, html`
 
 These are the rules to follow for attributes:
 
-  * interpolated attributes don't require the usage of quotes, but these work either ways. `name=${value}` is OK, and so is `name="${value}"` or even `name='${value}'`
-  * you cannot have sparse attribute interpolations: always use one interpolation to define each attribute that needs one, but never write things like `style="top:${x};left${y}"` as the parser will simply break with the error _bad template_. Use template literals within interpolations, if you want to obtain exact same result: ``style=${`top:${x};left${y}`}``
-  * if the passed value is `null` or `undefined`, the attribute will be removed. If the value is something else, it will be set as is as value. If the attribute was previously removed, the same attribute will be placed back again. If the value is the same as it was before, nothing happens
-  * if the attribute name starts with `on` or `@`, as example, `onclick=${...}` or `@click=${...}`, it will be set as listener. If the listener changes, the previous one will be automatically removed. If the listener is an `Array` like `[listener, {once:true}]`, the second entry of the array would be used as listener's options.
-  * if the attribute starts with a `.` dot, as in `.setter=${value}`, the value will be passed directly to the element per each update. If such value is a known setter, either native elements or defined via Custom Elements, the setter will be invoked per each update, even if the value is the same
-  * **new**: if the attribute starts with a `?` question mark, as in `?hidden=${value}`, the value will be toggled, accordingly with its *truthy*, or *falsy*, value.
-  * if the attribute name is `ref`, as in `ref=${object}`, the `object.current` property will be assigned to the node, once this is rendered, and per each update. If a callback is passed instead, the callback will receive the node right away, same way [React ref](https://reactjs.org/docs/refs-and-the-dom.html) does. Please note that *conditional renders will not cleanup the reference*, if this is not assigned to the new node.
+  * interpolated attributes don't require the usage of quotes, but these work either way. `name=${value}` is OK, and so is `name="${value}"` or even `name='${value}'`
+  * you cannot have sparse attribute interpolations: always use one interpolation to define each attribute that needs one, but never write things like `style="top:${x};left${y}"` as the parser will simply break with the error _bad template_. Use template literals within interpolations, if you want to obtain the exact same result: ``style=${`top:${x};left${y}`}``
+  * if the passed value is `null` or `undefined`, the attribute will be removed. If the value is something else, it will be set as-is as the value. If the attribute was previously removed, the same attribute will be placed back again. If the value is the same as it was before, nothing happens
+  * if the attribute name starts with `on` or `@`, as example, `onclick=${...}` or `@click=${...}`, it will be set as a listener. If the listener changes, the previous one will be automatically removed. If the listener is an `Array` like `[listener, {once:true}]`, the second entry of the array will be used as the listener's options.
+  * if the attribute starts with a `.` dot, as in `.setter=${value}`, the value will be passed directly to the element per each update. If such a value is a known setter, either native elements or defined via Custom Elements, the setter will be invoked per each update, even if the value is the same
+  * **new**: if the attribute starts with a `?` question mark, as in `?hidden=${value}`, the value will be toggled, accordingly to its *truthy* or *falsy*, value.
+  * if the attribute name is `ref`, as in `ref=${object}`, the `object.current` property will be assigned to the node, once this is rendered, and per each update. If a callback is passed instead, the callback will receive the node right away, similar to how [React ref](https://reactjs.org/docs/refs-and-the-dom.html) does. Please note that *conditional renders will not cleanup the reference*, if this is not assigned to the new node.
   * if the attribute name is `aria`, as in `aria=${object}`, aria attributes are applied to the node, including the `role` one.
   * if the attribute name is `.dataset`, as in `.dataset=${object}`, the `node.dataset` gets populated with all values.
 
 
-Following an example of both `aria` and `data` cases:
+The following is an example of both the `aria` and `data` cases:
 
 ```js
 // the aria special case
@@ -178,7 +178,7 @@ There are only few exceptional nodes that do not allow sparse content within the
   * `<title>${content}</title>`, same as above
   * `<xmp>${content}</xmp>`, same as above
 
-Following an example on how to populate these nodes (wrong + right way):
+The following is an example on how to populate these nodes (wrong + right way):
 
 ```js
 // DON'T DO THIS
@@ -206,7 +206,7 @@ render(document.body, html`
 `);
 ```
 
-Beside nodes where the content will be inevitably just text, like it is for `style` or `textarea`, as example, every other interpolation can contain primitives, as strings, numbers, or even booleans, or the returned value of `html` or `svg`, plus regular DOM nodes.
+Beside nodes where the content will inevitably be just text (e.g., as it is for `style` or `textarea`), every other interpolation can contain primitives as strings, numbers, booleans, or the returned value of `html` or `svg`, plus regular DOM nodes.
 
 The only special case are _Array_ of either primitives, or returned values from `html` or `svg`.
 
@@ -230,7 +230,7 @@ render(document.body, html`
   <summary><strong>About Rendering Content</strong></summary>
   <div>
 
-The second `what` argument of the `render(where, what)` signature can be either a function, which returning value will be used to populate the content, the result of `html` or `svg` tags, or a DOM node, so that it is possible to render within a render.
+The second `what` argument of the `render(where, what)` signature can be either a function, whose return value will be used to populate the content, the result of `html` or `svg` tags, or a DOM node, so that it is possible to render within a render.
 
 
 ```js
@@ -262,9 +262,9 @@ clicker(0);
   <summary><strong>About keyed renders</strong></summary>
   <div>
 
-_µhtml_ `html` and `svg` tags implement exact same API offered by _lighterhtml_.
+_µhtml_ `html` and `svg` tags implement exactly the same API offered by _lighterhtml_.
 
-This means that both `html.for(reference[, id])` and `svg.for(reference[, id])` will weakly relate the node with the reference, and an optional unique id, instead of using its internal auto-referenced algorithm.
+This means that both `html.for(reference[, id])` and `svg.for(reference[, id])` will weakly relate the node with the reference and an optional unique id, instead of using its internal auto-referenced algorithm.
 
 ```js
 render(document.body, html`
@@ -283,11 +283,11 @@ render(document.body, html`
   <summary><strong>About data purity</strong></summary>
   <div>
 
-In more than one occasion [developers got bitten](https://github.com/WebReflection/uhtml/issues/41) by the fact _µhtml_ can produce some cryptic error when `null`, or empty content, is provided as interpolation/hole.
+On more than one occasion [developers got bitten](https://github.com/WebReflection/uhtml/issues/41) by the fact _µhtml_ can produce some cryptic error when `null`, or empty content is provided as interpolation/hole.
 
 The problem is pretty simple:
 
-  * don't loop / pass data that should *not* be render
+  * don't loop / pass data that should *not* be rendered
   * sanitize data upfront instead of expecting this library to magically understand where, and how, such data should not be rendered
 
 A basic example would be the following:
@@ -314,7 +314,7 @@ render(document.body, html`
 There are at least two workarounds to consider:
 
   * use `data.filter(item => validate(item)).map(...)`
-  * returns an actual node:
+  * return an actual node:
 
 ```js
   if (!item)
@@ -327,7 +327,7 @@ The benefits are:
 
   * there are no unnecessary nodes in the DOM
   * there are no weird cases to consider
-  * the mapping is pure, data in, node out
+  * the mapping is pure: data in, node out
 
   </div>
 </details>
@@ -336,7 +336,7 @@ The benefits are:
   <summary><strong>About Custom Elements</strong></summary>
   <div>
 
-Custom Elements are either brought you, in a simplified manner, via [µce](https://github.com/WebReflection/uce#readme) (_micro custom elements_), which is a 3K library based on _µhtml_, or via vanilla JS, as demoed in [WebComponents.dev](https://webcomponents.dev/edit/dP0G85PrChRv7CsAvGXb).
+Custom Elements are available either via [µce](https://github.com/WebReflection/uce#readme) (_micro custom elements_, a 3K library based on _µhtml_), or via vanilla JS, as demoed in [WebComponents.dev](https://webcomponents.dev/edit/dP0G85PrChRv7CsAvGXb).
 
   </div>
 </details>
@@ -356,12 +356,12 @@ This module works in IE11, Edge, and every other Desktop to Mobile browser, incl
 
 ### µhtml vs [lighterhtml](https://github.com/WebReflection/lighterhtml#readme)
 
-You could read an [exhaustive summary of features differences](https://gist.github.com/WebReflection/761052d6dae7c8207d2fcba7cdede295#dom-engines-features-comparison), but the first thing to keep in mind, is that _lighterhtml_ is at pair with _uhtml_ features, but not vice-versa, meaning if you need anything more, you can always switch to _lighterhtml_ later on, and without changing a single line of code.
+You could read an [exhaustive summary of features differences](https://gist.github.com/WebReflection/761052d6dae7c8207d2fcba7cdede295#dom-engines-features-comparison), but the first thing to keep in mind, is that _lighterhtml_ is at par with _uhtml_ features, but not vice-versa, meaning if you need anything more, you can always switch to _lighterhtml_ later on, and without changing a single line of code.
 
-Following a list of other points to consider when choosing _µhtml_ instead of _lighterhtml_ (or vice-versa).
+The following is a list of other points to consider when choosing _µhtml_ over of _lighterhtml_ (or vice-versa).
 
 <details>
-  <summary><strong>Differently from <em>lighterhtml</em></strong></summary>
+  <summary><strong>Differences from <em>lighterhtml</em></strong></summary>
   <div>
 
   * there are **no sparse attributes**, each attribute *must* have a single interpolated value: `attribute=${value}` is OK, `attribute="${a}${b}"` is not, and `attribute="some ${'partial'}"` is not allowed neither.
@@ -375,19 +375,19 @@ Following a list of other points to consider when choosing _µhtml_ instead of _
 </details>
 
 <details>
-  <summary><strong>Similarly or better than <em>lighterhtml</em></strong></summary>
+  <summary><strong>Similar or better than <em>lighterhtml</em></strong></summary>
   <div>
 
   * _uhtml_ should *not* suffer any of the IE11/Edge issues, or invalid SVG attributes warnings, as the parsing is done differently 🎉
   * nested `html` and `svg` are allowed like in _lighterhtml_. The version `0` of this library didn't allow that, hence it was more "_surprise prone_". _uhtml_ in that sense is more like a drop-in replacement for _lighterhtml_, and vice-versa
   * keyed results via `htmlfor(...)` or `svg.for(...)`, as well as one-off node creation, via `html.node` or `svg.node` are the same found in _lighterhtml_
   * both `aria=${object}`, and  `ref=${...}` special attributes work same as _lighterhtml_
-  * the `.dataset=${object}` helper work the same as _lighterhtml_
+  * the `.dataset=${object}` helper works the same as _lighterhtml_
   * the `.property=${...}` *direct setter* is still available
   * self closing nodes are also supported, go wild with `<custom-elements />` or even `<span />`
   * the wire parsing logic has been simplified even more, resulting in slightly [better bootstrap and update performance](https://github.com/krausest/js-framework-benchmark/pull/698)
-  * it's half of _lighterhtml_ production size, mostly because ...
-  * there are no 3rd parts dependencies, except for [µparser](https://github.com/WebReflection/uparser#readme), [µdomdiff](https://github.com/WebReflection/udomdiff#readme), and for `@ungap/create-content`, needed only for IE11, but removable via [@ungap/degap](https://github.com/ungap/degap#readme), same way I've done it [here](./rollup/new.config.js), or [babel-plugin-remove-ungap](https://github.com/cfware/babel-plugin-remove-ungap#readme). The compressed final size difference is just around _~0.2K_ though.
+  * it's half the production size of _lighterhtml_, mostly because ...
+  * there are no 3rd party dependencies, except for [µparser](https://github.com/WebReflection/uparser#readme), [µdomdiff](https://github.com/WebReflection/udomdiff#readme), and for `@ungap/create-content`, needed only for IE11, but removable via [@ungap/degap](https://github.com/ungap/degap#readme), same way I've done it [here](./rollup/new.config.js), or [babel-plugin-remove-ungap](https://github.com/cfware/babel-plugin-remove-ungap#readme). The compressed final size difference is just around _~0.2K_ though.
 
   </div>
 </details>
@@ -396,7 +396,7 @@ Following a list of other points to consider when choosing _µhtml_ instead of _
   <summary><strong>µhtml library goals</strong></summary>
   <div>
 
-  * be an essential/ideal companion for [wickedElements](https://github.com/WebReflection/wicked-elements#readme), [hookedElements](https://github.com/WebReflection/hooked-elements#readme), or any third part that would like a _lighterhtml_ like API, without the extra weight
+  * be an essential/ideal companion for [wickedElements](https://github.com/WebReflection/wicked-elements#readme), [hookedElements](https://github.com/WebReflection/hooked-elements#readme), or any third party that would like a _lighterhtml_ like API, without the extra weight
   * keep it as simple as possible, but not simpler
   * see if there is room for improvements in _lighterhtml_ whenever _uhtml_ simplifications allow to be ported there
 
