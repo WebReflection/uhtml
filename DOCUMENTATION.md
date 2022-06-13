@@ -9,7 +9,7 @@ A _getting started_ guide with most common questions and answers, covered by liv
 
 ### A Brief Introduction
 
-While _µhtml_, on the surface, is a library that resemble some naive usage of [innerHTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML), it's actually far away from being an `innerHTML` replacement, as it's capable of handling events listeners, special and normal attributes, plus various kind of content, that will be properly parsed, normalized, and repeatedly updated at light speed, without trashing the previous content like `innerHTML` would do per each operation.
+While _µhtml_, on the surface, is a library that resemble some naive usage of [innerHTML](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML), it's actually far more than an `innerHTML` replacement, as it's capable of handling events listeners, special and normal attributes, plus various kinds of content that will be properly parsed, normalized, and repeatedly updated at light speed, without trashing the previous content like `innerHTML` would do per each operation.
 
 ```js
 render(element, html`
@@ -19,15 +19,15 @@ render(element, html`
 `);
 ```
 
-As summary: _µhtml_ is the tiniest declarative UI library of the Web, it's safe by default, and it's based on standard JS templates literals features.
+In summary: _µhtml_ is the web's tiniest declarative UI library, is safe by default, and is based on standard JS template literal features.
 
 
 
 ## Use Cases
 
-Every time you use "_vanilla JS_" to deal with the [DOM](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model), you inevitably end up repeating over and over quite verbose code, and always to obtain the same result.
+Every time you use "_vanilla JS_" to deal with the [DOM](https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model), you inevitably end up repeating verbose code over and over, and always to obtain the same result.
 
-Following a classic `<button>` element with a click handler and some state:
+Consider the following example of a classic `<button>` element with a click handler and some state:
 
 ```js
 const buttonState = {disabled: false, text: 'Click Me'};
@@ -43,11 +43,11 @@ button.addEventListener('click', () => log('clicked'));
 document.body.appendChild(button);
 ```
 
-If this code looks familiar to you, it is highly possible your files contain most common helpers all over the place, such as `const create = name => document.createElement(name)` or similar.
+If this code looks familiar to you, it's likely that your own files contain common helpers all over the place, such as `const create = name => document.createElement(name)` or similar.
 
 All those micro utilities are cool and tiny, but the question is: "_can they be declarative too?_"
 
-Following an example to obtain exact same result via _µhtml_, also [live on codepen](https://codepen.io/WebReflection/pen/jOPLBMm?editors=0010):
+Now consider another example to obtain the exact same result via _µhtml_ (also [live on codepen](https://codepen.io/WebReflection/pen/jOPLBMm?editors=0010)):
 
 ```js
 import {render, html} from '//unpkg.com/uhtml?module';
@@ -66,15 +66,15 @@ render(document.body, html`
 `);
 ```
 
-As you can see, with _µhtml_ you can declare UI in a similar way you would do with writing regular _HTML_, but with few extra essential features that makes it create DOM elements fun again:
+As you can see, with _µhtml_ you can declare UI in a similar way to what you would do with writing regular _HTML_, but with a few extra essential features that make it creating DOM elements fun again:
 
   * event listeners are automatically handled, so that passing even a new function each time is ok, as the previous one, if different, is always removed. No more duplicated listeners by accident 🎉
-  * attributes with a special meaning in the JS world, like `disabled`, which can be directly accessed as _getters_ or _setters_, like we did before via `button.disabled = value`, instead of using a non semantic `button.setAttribute("disabled", "")` to set it disabled, and `button.removeAttribute("disabled")` to enabled it back, can be prefixed with a `.`, as it's done in `.disabled=${value}`
+  * attributes with a special meaning in the JS world, like `disabled`, which can be directly accessed as _getters_ or _setters_, like we did before via `button.disabled = value`, instead of using a non-semantic `button.setAttribute("disabled", "")` to set it disabled, and `button.removeAttribute("disabled")` to enabled it back, can be prefixed with a `.` (e.g., `.disabled=${value}`)
   * any other regular attribute can be used too, abstracting away the tedious `el.setAttribute(...)` dance, with the ability to remove attributes by simply passing `null` or `undefined` instead of an actual value, so that you could write `disabled=${value || null}` if using the `.` prefix is not your cup of tea
   * attributes that start with `on...` will be set as listeners right away, removing any previous listener if different from the one passed along. In this case, the `onclick=${() => ...}` arrow function would be a new listener to re-add each time
   * the content is always safe to pass as _interpolation_ value, and there's no way to inject _HTML_ by accident
 
-Bear in mind, the content can also be another `html` chunk, repeatable in lists too, as the following example, also [live in codepen](https://codepen.io/WebReflection/pen/vYOJxpE?editors=0010) shows:
+The content can also be another `html` chunk, repeatable in lists too, as the following example demonstrates (also [live in codepen](https://codepen.io/WebReflection/pen/vYOJxpE?editors=0010)):
 
 ```js
 const items = [
@@ -91,12 +91,12 @@ render(document.body, html`
 `);
 ```
 
-As simple as it looks, you might wonder what kind of _magic_ is involved behind the scene, but the good news is that ...
+As simple as it looks, you might wonder what kind of _magic_ is involved behind the scenes?  The good news is that ...
 
 
 #### It's 100% JavaScript Standard: No Tooling Needed 🦄
 
-The only real _magic_ in _µhtml_ is provided by an ECMAScript 2015 feature, known as [Tagged Templates Literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates).
+The only real _magic_ in _µhtml_ is provided by an ECMAScript 2015 feature, known as [Tagged Template Literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#Tagged_templates).
 
 When you prefix any template literal string with a function, without needing to invoke such function, the JavaScript engine executes these simple, but extremely useful, steps:
 
@@ -116,7 +116,7 @@ tag`This is a ${'template literals'} tagged ${'test'}`;
 // Values: "template literals", "test"
 ```
 
-The *unique* part of the equation means that any template literal is always the same array, as long as it comes from the same scope, and the very same part of the script, example:
+The *unique* part of the equation means that any template literal is always the same array, as long as it comes from the same scope, and the very same part of the script. For example:
 
 ```js
 const set = new WeakSet;
@@ -139,7 +139,7 @@ scoped();   // known template
 tag`test`;  // new template
 ```
 
-This is the fundamental concept that enables _µhtml_ to be smart about never parsing more than once the exact same template, and it perfectly suits the "_components as callback_" pattern too:
+This is the fundamental concept that enables _µhtml_ to be smart about never parsing the exact same template more than once, and it perfectly suits the "_components as callback_" pattern too:
 
 ```js
 // an essential Button component example
@@ -157,9 +157,9 @@ render(document.body, html`
 ```
 
 
-#### How Does The Parsing Work ?
+#### How Does Parsing Work ?
 
-This part is extremely technical and likely irrelevant for a getting started page, but if you are curious to understand what happens behind the scene, you can find all steps in here.
+This part is extremely technical and likely irrelevant for a getting started page, but if you are curious to understand what happens behind the scenes, you can find all steps in here.
 
 <details>
   <summary><strong>Internal Parsing Steps</strong></summary>
@@ -193,7 +193,7 @@ Taking the essential `Button(text, className)` component example, this is how _�
   * per each update available for this part of the stack, pass each interpolated value along, so that _content_, _attributes_, or _text content_ previously mapped, can decide what to do with the new value
   * if the new value is the same as it was before, do nothing, otherwise update the attribute, text content, or generic content of the node, using in this latter case `<!--µhtml${index}-->` comment node reference, to keep updates confined _before_ that portion of the tree 
 
-As result, each `Button(text, className)` component will simply invoke just two callbacks, where the first one will update its `class` attribute, while the second one will update its `textContent` value, and in both cases, only if different from the previous call.
+As a result, each `Button(text, className)` component will simply invoke just two callbacks, where the first one will update its `class` attribute, while the second one will update its `textContent` value, and in both cases, only if different from the previous call.
 
 This might not look super useful for "_one-off_" created elements, but it's a performance game changer when the UI is frequently updated, as in lists, news feeds, chats, games, etc.
 
@@ -212,7 +212,7 @@ The module itself exports these three functions: `render`, `html`, and `svg`.
 
 ### The `render(where, what)` Utility
 
-This function purpose is to update the content of the _where_ DOM node, which could be a custom element, or any other node that can contain other nodes.
+This function's purpose is to update the content of the _where_ DOM node, which could be a custom element or any other node that can contain other nodes.
 
 ```js
 render(
@@ -232,21 +232,21 @@ class MyComponent extends HTMLElement {
 }
 ```
 
-If the value of _what_ is just a DOM node, and it's different from the one rendered before, it will clear the container and append it.
+If the value of _what_ is just a DOM node, and is different from the one rendered previously, it will clear the container and append it.
 
-If the value of _what_ is a callback, it will invoke it and use its result as content. Such result can be a _Node_, or the returning value of `html` or `svg` tags.
+If the value of _what_ is a callback, it will invoke it and use its result as the content. The result can be a _Node_ or the return value of `html` or `svg` tags.
 
 
 ### The `html` and `svg` Tags
 
-As the name would suggest, `html` is the tag to use when _HTML_ content is meant to be created, while `svg` should be used to created valid _SVG_ nodes.
+As the name suggests, `html` is the tag to use when _HTML_ content is meant to be created, while `svg` should be used to created valid _SVG_ nodes.
 
 Beside this essential difference, both tags work in the exact same way, and both tags provide extra tags, such as `.node` and `.for(ref[, id])`.
 
 
 #### The `.node` Tag
 
-Both `html.node` and `svg.node` tags create a fresh new version of that specified content and return it.
+Both `html.node` and `svg.node` tags create a new version of that specified content and return it.
 
 ```js
 // use node to generate new DOM content
@@ -271,7 +271,7 @@ document.body.appendChild(fragment);
 
 The only special feature of fragments created via `html.node` or `svg.node`, is that these will always return `fragment.firstChild` and `fragment.lastChild` nodes, even after being appended live, where native regular fragments would instead lose all their children.
 
-_µhtml_ fragments have also two special methods: `valueOf()`, that allow you to move all nodes initially assigned to the fragment somewhere else, or `remove()`, which would remove all nodes initially assigned in one shot.
+_µhtml_ fragments have also two special methods: `valueOf()`, that allows you to move all nodes initially assigned to the fragment somewhere else; or `remove()`, which would remove all nodes initially assigned in one shot.
 
 ```js
 // using the previous code example, then ...
@@ -281,13 +281,13 @@ document.body.removeChild(fragment.remove());
 setTimeout(() => document.body.appendChild(fragment.valueOf()));
 ```
 
-It is not super important to understand how to use fragments by hand, but these features are essential for the _µhtml_ DOM diffing engine called _[µdomdiff](https://github.com/WebReflection/udomdiff#readme)_, which is capable of updating, removing, or moving fragments around as needed.
+It is not important to understand how to use fragments by hand, but these features are essential for the _µhtml_ DOM diffing engine called _[µdomdiff](https://github.com/WebReflection/udomdiff#readme)_, which is capable of updating, removing, or moving fragments around as needed.
 
 
 
 #### The `.for(ref[, id])` Tag
 
-If you are familiar with the _keyed_ and _non-keyed_ rendering concepts, this method allows just that: you can reference a specific node, and its optional id, to any object. By default, _µhtml_ uses a rendering stack to provide automatically, to each interpolation, and "_always same index_" during updates.
+If you are familiar with the _keyed_ and _non-keyed_ rendering concepts, this method allows exactly that: you can reference a specific node, and its optional id, for any object. By default, _µhtml_ uses a rendering stack to provide automatically, to each interpolation, and "_always same index_" during updates.
 
 ```js
 // non-keyed rendered view
@@ -315,7 +315,7 @@ update(items);
 
 While most of the time it's OK to use _non-keyed_ renders, there could be side effects when, instead of simple nodes, you have Custom Elements in the list, or you have special mutation observers somehow attached to the inner nodes.
 
-In these cases, whenever the list changes, nodes that were previously there will simply be updated with new content, attributes, and the rest, but if the Custom Element had an `attributeChangedCallback`, as example, that does something expensive, such as fetching new data, as example, this callback will be inevitably called multiple times every time an article changes position in the list, or the list is sorted, it shrinks, or it expands.
+In these cases, whenever the list changes, nodes that were previously there will simply be updated with new content, attributes, and the rest, with the exception of Custom Elements that have an `attributeChangedCallback` (e.g., one that does something expensive, such as fetching new data, this callback will be inevitably called multiple times every time an article changes position in the list, or the list is sorted, shrinks, or expands).
 
 But fear not, it is possible to relate a specific node through the tag returned by `.for(...)`:
 
@@ -343,11 +343,11 @@ const items = [
 update(items);
 ```
 
-With latest example, [live in codepen](https://codepen.io/WebReflection/pen/NWqvmJg?editors=0010), you can follow nodes moving around without ever changing any of their attributes or content, and this is how, and why, _keyed_ renders can be very important.
+With the previous example ([live in codepen](https://codepen.io/WebReflection/pen/NWqvmJg?editors=0010)), you can follow nodes moving around without ever changing any of their attributes or content.  This shows how and why _keyed_ renders can be very important.
 
 ## API: Attributes
 
-Any element can have one or more attribute, either interpolated or not.
+Any element can have one or more attributes, either interpolated or not.
 
 ```js
 render(document.body, html`
@@ -365,18 +365,18 @@ render(document.body, html`
 
 These are the rules to follow for attributes:
 
-  * interpolated attributes don't require the usage of quotes, but these work either ways. `name=${value}` is OK, and so is `name="${value}"` or even `name='${value}'`
-  * you cannot have sparse attribute interpolations: always use one interpolation to define each attribute that needs one, but never write things like `style="top:${x};left:${y}"` as the parser will simply break with the error _bad template_. Use template literals within interpolations, if you want to obtain exact same result: ``style=${`top:${x};left:${y}`}``
-  * if the passed value is `null` or `undefined`, the attribute will be removed. If the value is something else, it will be set as is as value. If the attribute was previously removed, the same attribute will be placed back again. If the value is the same as it was before, nothing happens
-  * if the attribute name starts with `on`, as example, `onclick=${...}`, it will be set as listener. If the listener changes, the previous one will be automatically removed. If the listener is an `Array` like `[listener, {once:true}]`, the second entry of the array would be used as listener's options.
+  * interpolated attributes don't require the usage of quotes, but these work either way. `name=${value}` is OK, and so is `name="${value}"` or even `name='${value}'`
+  * you cannot have sparse attribute interpolations: always use one interpolation to define each attribute that needs one, but never write things like `style="top:${x};left:${y}"` as the parser will simply break with the error _bad template_. Use template literals within interpolations, if you want to obtain the exact same result: ``style=${`top:${x};left:${y}`}``
+  * if the passed value is `null` or `undefined`, the attribute will be removed. If the value is something else, it will be set as-is as the value. If the attribute was previously removed, the same attribute will be placed back again. If the value is the same as it was before, nothing happens
+  * if the attribute name starts with `on` (e.g., `onclick=${...}`) it will be set as a listener. If the listener changes, the previous one will be automatically removed. If the listener is an `Array`, like `[listener, {once:true}]`, the second entry of the array would be used as the listener's options.
   * if the attribute starts with a `.` dot, as in `.setter=${value}`, the value will be passed directly to the element per each update. If such value is a known setter, either native elements or defined via Custom Elements, the setter will be invoked per each update, even if the value is the same
-  * **new**: if the attribute starts with a `?` question mark, as in `?hidden=${value}`, the value will be toggled, accordingly with its *truthy*, or *falsy*, value.
-  * if the attribute name is `ref`, as in `ref=${object}`, the `object.current` property will be assigned to the node, once this is rendered, and per each update. If a callback is passed instead, the callback will receive the node right away, same way [React ref](https://reactjs.org/docs/refs-and-the-dom.html) does.
+  * **new**: if the attribute starts with a `?` (question mark), as in `?hidden=${value}`, the value will be toggled, accordingly to its *truthy* or *falsy*, value.
+  * if the attribute name is `ref`, as in `ref=${object}`, the `object.current` property will be assigned to the node, once this is rendered, and per each update. If a callback is passed instead, the callback will receive the node right away, similar to how [React ref](https://reactjs.org/docs/refs-and-the-dom.html) does.
   * if the attribute name is `aria`, as in `aria=${object}`, aria attributes are applied to the node, including the `role` one.
   * if the attribute name is `.dataset`, as in `.dataset=${object}`, the `node.dataset` gets populated with all values.
 
 
-Following an example of both `aria` and `.dataset` cases:
+The following is an example of both the `aria` and `.dataset` cases:
 
 ```js
 // the aria special case
@@ -402,7 +402,7 @@ render(document.body, html`
 `);
 ```
 
-There are only two exceptional nodes that do not allow sparse content within themselves: the `style` element, and the `textarea` one.
+There are only two exceptional nodes that do not allowed sparse content within themselves: the `style` and `textarea` elements.
 
 ```js
 // DON'T DO THIS
@@ -430,9 +430,9 @@ render(document.body, html`
 `);
 ```
 
-Beside nodes where the content will be inevitably just text, like it is for `style` or `textarea`, as example, every other interpolation can contain primitives, as strings, numbers, or even booleans, or the returned value of `html` or `svg`, plus regular DOM nodes.
+Beside nodes where the content will be inevitably just text, as is the case for `style` or `textarea`, every other interpolation can contain primitives as strings, numbers, booleans, or the returned value of `html` or `svg`, plus regular DOM nodes.
 
-The only special case are _Array_ of either primitives, or returned values from `html` or `svg`, and since *2.5* _Function_, invoked and resolved after invoke.
+The only special cases are _Array_ of either primitives, or returned values from `html` or `svg`, and since *2.5* _Function_, invoked and resolved after invoke.
 
 
 ```js
@@ -450,7 +450,7 @@ render(document.body, html`
 
 ## API: Rendering
 
-The second `what` argument of the `render(where, what)` signature can be either a function, which returning value will be used to populate the content, the result of `html` or `svg` tags, or a DOM node, so that it is possible to render within a render.
+The second `what` argument of the `render(where, what)` signature can be either a function, whose return value will be used to populate the content, or the result of `html` or `svg` tags, or a DOM node, so that it is possible to render within a render.
 
 
 ```js
