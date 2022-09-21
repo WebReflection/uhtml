@@ -39,7 +39,7 @@
     "@webreflection/uparser": "^0.2.4",
     "@webreflection/uwire": "^1.2.1",
     "async-tag": "^0.2.0",
-    "jsx2tag": "^0.3.0",
+    "jsx2tag": "^0.3.1",
     "udomdiff": "^1.1.0",
     "uhandlers": "^0.6.1"
   },
