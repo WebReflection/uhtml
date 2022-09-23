@@ -104,31 +104,25 @@ self.uhtml = (function (exports) {
     }
   };
 
+  const getValue = value => value == null ? value : value.valueOf();
+
   const attribute = (node, name) => {
     let oldValue, orphan = true;
     const attributeNode = document.createAttributeNS(null, name);
     return newValue => {
-      if (oldValue !== newValue) {
-        oldValue = newValue;
-        if (oldValue == null) {
+      const value = getValue(newValue);
+      if (oldValue !== value) {
+        if ((oldValue = value) == null) {
           if (!orphan) {
             node.removeAttributeNode(attributeNode);
             orphan = true;
           }
         }
         else {
-          const value = newValue;
-          if (value == null) {
-            if (!orphan)
-              node.removeAttributeNode(attributeNode);
-              orphan = true;
-          }
-          else {
-            attributeNode.value = value;
-            if (orphan) {
-              node.setAttributeNodeNS(attributeNode);
-              orphan = false;
-            }
+          attributeNode.value = value;
+          if (orphan) {
+            node.setAttributeNodeNS(attributeNode);
+            orphan = false;
           }
         }
       }
@@ -136,10 +130,11 @@ self.uhtml = (function (exports) {
   };
 
   const boolean = (node, key, oldValue) => newValue => {
-    if (oldValue !== !!newValue) {
+    const value = !!getValue(newValue);
+    if (oldValue !== value) {
       // when IE won't be around anymore ...
-      // node.toggleAttribute(key, oldValue = !!newValue);
-      if ((oldValue = !!newValue))
+      // node.toggleAttribute(key, oldValue = !!value);
+      if ((oldValue = value))
         node.setAttribute(key, '');
       else
         node.removeAttribute(key);
@@ -193,9 +188,10 @@ self.uhtml = (function (exports) {
   const text = node => {
     let oldValue;
     return newValue => {
-      if (oldValue != newValue) {
-        oldValue = newValue;
-        node.textContent = newValue == null ? '' : newValue;
+      const value = getValue(newValue);
+      if (oldValue != value) {
+        oldValue = value;
+        node.textContent = value == null ? '' : value;
       }
     };
   };
@@ -466,15 +462,22 @@ self.uhtml = (function (exports) {
           // if the node is a fragment, it's appended once via its childNodes
           // There is no `else` here, meaning if the content
           // is not expected one, nothing happens, as easy as that.
-          if (oldValue !== newValue && 'ELEMENT_NODE' in newValue) {
-            oldValue = newValue;
-            nodes = diff(
-              comment,
-              nodes,
-              newValue.nodeType === 11 ?
-                [...newValue.childNodes] :
-                [newValue]
-            );
+          if (oldValue !== newValue) {
+            if ('ELEMENT_NODE' in newValue) {
+              oldValue = newValue;
+              nodes = diff(
+                comment,
+                nodes,
+                newValue.nodeType === 11 ?
+                  [...newValue.childNodes] :
+                  [newValue]
+              );
+            }
+            else {
+              const value = newValue.valueOf();
+              if (value !== newValue)
+                anyContent(value);
+            }
           }
           break;
         case 'function':

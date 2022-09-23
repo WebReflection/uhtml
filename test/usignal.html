@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+  import {effect, signal} from 'https://unpkg.com/usignal';
+  import {render, html} from '../esm.js';
+
+  const count = signal(0);
+
+  const Button = (text, value) => html`
+    <button onclick=${() => { count.value += value }}>
+      ${text}
+    </button>
+  `;
+
+  effect(() => {
+    render(document.body, html`
+      ${Button('-', -1)}
+        <input type="number" disabled value=${count}>
+        ${count}
+      ${Button('+', 1)}
+    `);
+  });
+  </script>
+</head>
+<body>
+  
+</body>
+</html>

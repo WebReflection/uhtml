@@ -82,15 +82,22 @@ const handleAnything = comment => {
         // if the node is a fragment, it's appended once via its childNodes
         // There is no `else` here, meaning if the content
         // is not expected one, nothing happens, as easy as that.
-        if (oldValue !== newValue && 'ELEMENT_NODE' in newValue) {
-          oldValue = newValue;
-          nodes = diff(
-            comment,
-            nodes,
-            newValue.nodeType === 11 ?
-              [...newValue.childNodes] :
-              [newValue]
-          );
+        if (oldValue !== newValue) {
+          if ('ELEMENT_NODE' in newValue) {
+            oldValue = newValue;
+            nodes = diff(
+              comment,
+              nodes,
+              newValue.nodeType === 11 ?
+                [...newValue.childNodes] :
+                [newValue]
+            );
+          }
+          else {
+            const value = newValue.valueOf();
+            if (value !== newValue)
+              anyContent(value);
+          }
         }
         break;
       case 'function':
