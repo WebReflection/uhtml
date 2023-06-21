@@ -107,6 +107,19 @@ const handleAnything = comment => {
   return anyContent;
 };
 
+// this allows `.onclick=${[callback, 'preventDefault', 'stopPropagation']}`
+// specially useful for Worker based use cases (i.e. coincident)
+const handleEvent = (node, key) => value => {
+  if (isArray(value)) {
+    const [callback, ...methods] = value;
+    value = event => {
+      for (const method of methods) event[method]();
+      return callback.call(node, event);
+    };
+  }
+  node[key] = value;
+};
+
 // attributes can be:
 //  * ref=${...}      for hooks and other purposes
 //  * aria=${...}     for aria attributes
@@ -120,7 +133,9 @@ const handleAnything = comment => {
 const handleAttribute = (node, name/*, svg*/) => {
   switch (name[0]) {
     case '?': return boolean(node, name.slice(1), false);
-    case '.': return setter(node, name.slice(1));
+    case '.': return name.slice(1, 3) === 'on' ?
+                handleEvent(node, name.slice(1)) :
+                setter(node, name.slice(1));
     case '@': return event(node, 'on' + name.slice(1));
     case 'o': if (name[1] === 'n') return event(node, name);
   }
