@@ -10,8 +10,8 @@ const {
   createTextNode,
   createTreeWalker,
   importNode
-} = new Proxy(document, {
-  get: (target, method) => target[method].bind(target)
+} = new Proxy({}, {
+  get: (_, method) => document[method].bind(document)
 });
 
 export {createTextNode, createTreeWalker, importNode};
