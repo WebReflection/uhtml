@@ -53,7 +53,7 @@
       "default": "./cjs/index.js"
     },
     "./async": {
-      "types": "./index.d.ts",
+      "types": "./async.d.ts",
       "import": "./esm/async.js",
       "default": "./cjs/async.js"
     },
