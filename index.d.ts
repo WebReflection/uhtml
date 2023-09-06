@@ -21,7 +21,7 @@ export declare function render<T extends Node>(
  * Used for internal purposes, should be created using
  * the `html` or `svg` template tags.
  */
-export class Hole {
+export declare class Hole {
   constructor(type: string, template: TemplateStringsArray, values: any[]);
   readonly type: string;
   readonly template: TemplateStringsArray;

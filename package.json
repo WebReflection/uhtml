@@ -48,22 +48,27 @@
   "type": "module",
   "exports": {
     ".": {
+      "types": "./index.d.ts",
       "import": "./esm/index.js",
       "default": "./cjs/index.js"
     },
     "./async": {
+      "types": "./async.d.ts",
       "import": "./esm/async.js",
       "default": "./cjs/async.js"
     },
     "./init": {
+      "types": "./index.d.ts",
       "import": "./esm/init.js",
       "default": "./cjs/init.js"
     },
     "./json": {
+      "types": "./index.d.ts",
       "import": "./esm/json.js",
       "default": "./cjs/json.js"
     },
     "./jsx": {
+      "types": "./index.d.ts",
       "import": "./esm/x.js",
       "default": "./cjs/x.js"
     },
