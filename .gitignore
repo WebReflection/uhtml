@@ -1,4 +1,5 @@
 .nyc_output/
 coverage/
 node_modules/
-
+cjs/*
+!cjs/package.json

@@ -6,11 +6,11 @@
 
 <sup>**Social Media Photo by [Andrii Ganzevych](https://unsplash.com/@odya_kun) on [Unsplash](https://unsplash.com/)**</sup>
 
-_micro html_ is a _~2.5K_ [lighterhtml](https://github.com/WebReflection/lighterhtml#readme) subset to build declarative and reactive UI via template literals tags.
+_micro html_ is a [lighterhtml](https://github.com/WebReflection/lighterhtml#readme) subset to build declarative and reactive UI via template literals tags.
 
-### 📣 Community Announcement
+### 📣 uhtml v4 is out
 
-Please ask questions in the [dedicated discussions repository](https://github.com/WebReflection/discussions), to help the community around this project grow ♥
+Please check the [Release Notes](https://github.com/WebReflection/uhtml/pull/86) to know more about what improved, what changed or broke and what's not there yet (or anymore).
 
 ---
 

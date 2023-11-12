@@ -1,214 +1,71 @@
-import {WeakMapSet} from '@webreflection/mapset';
-import instrument from '@webreflection/uparser';
-import {persistent} from '@webreflection/uwire';
+import { cache } from './literals.js';
+import { empty, isArray } from './utils.js';
+import create from './creator.js';
+import parser from './parser.js';
 
-import {handlers} from './handlers.js';
-import {isArray, indexOf, createContent, createTreeWalker, importNode} from './utils.js';
+const parseHTML = create(parser(false));
+const parseSVG = create(parser(true));
 
-// from a fragment container, create an array of indexes
-// related to its child nodes, so that it's possible
-// to retrieve later on exact node via reducePath
-const createPath = node => {
-  const path = [];
-  let {parentNode} = node;
-  while (parentNode) {
-    path.push(indexOf.call(parentNode.childNodes, node));
-    node = parentNode;
-    ({parentNode} = node);
+/**
+ * @param {import("./literals.js").Cache} cache
+ * @param {Hole} hole
+ * @returns {Node}
+ */
+export const unroll = (cache, { s: stack, t: template, v: values }) => {
+  if (values.length && cache.s === empty) cache.s = [];
+  unrollValues(cache, values);
+  if (cache.t !== template) {
+    const { n: node, d: details } = (stack ? parseSVG : parseHTML)(template, values);
+    cache.t = template;
+    cache.n = node;
+    cache.d = details;
   }
-  return path;
-};
-
-// the prefix is used to identify either comments, attributes, or nodes
-// that contain the related unique id. In the attribute cases
-// isµX="attribute-name" will be used to map current X update to that
-// attribute name, while comments will be like <!--isµX-->, to map
-// the update to that specific comment node, hence its parent.
-// style and textarea will have <!--isµX--> text content, and are handled
-// directly through text-only updates.
-const prefix = 'isµ';
-
-// Template Literals are unique per scope and static, meaning a template
-// should be parsed once, and once only, as it will always represent the same
-// content, within the exact same amount of updates each time.
-// This cache relates each template to its unique content and updates.
-const cache = new WeakMapSet;
-
-// a RegExp that helps checking nodes that cannot contain comments
-const textOnly = /^(?:textarea|script|style|title|plaintext|xmp)$/;
-
-export const createCache = () => ({
-  stack: [],    // each template gets a stack for each interpolation "hole"
-
-  entry: null,  // each entry contains details, such as:
-                //  * the template that is representing
-                //  * the type of node it represents (html or svg)
-                //  * the content fragment with all nodes
-                //  * the list of updates per each node (template holes)
-                //  * the "wired" node or fragment that will get updates
-                // if the template or type are different from the previous one
-                // the entry gets re-created each time
-
-  wire: null    // each rendered node represent some wired content and
-                // this reference to the latest one. If different, the node
-                // will be cleaned up and the new "wire" will be appended
-});
-
-// the entry stored in the rendered node cache, and per each "hole"
-const createEntry = (type, template) => {
-  const {content, updates} = mapUpdates(type, template);
-  return {type, template, content, updates, wire: null};
-};
-
-// a template is instrumented to be able to retrieve where updates are needed.
-// Each unique template becomes a fragment, cloned once per each other
-// operation based on the same template, i.e. data => html`<p>${data}</p>`
-const mapTemplate = (type, template) => {
-  const svg = type === 'svg';
-  const text = instrument(template, prefix, svg);
-  const content = createContent(text, svg);
-  // once instrumented and reproduced as fragment, it's crawled
-  // to find out where each update is in the fragment tree
-  const tw = createTreeWalker(content, 1 | 128);
-  const nodes = [];
-  const length = template.length - 1;
-  let i = 0;
-  // updates are searched via unique names, linearly increased across the tree
-  // <div isµ0="attr" isµ1="other"><!--isµ2--><style><!--isµ3--</style></div>
-  let search = `${prefix}${i}`;
-  while (i < length) {
-    const node = tw.nextNode();
-    // if not all updates are bound but there's nothing else to crawl
-    // it means that there is something wrong with the template.
-    if (!node)
-      throw `bad template: ${text}`;
-    // if the current node is a comment, and it contains isµX
-    // it means the update should take care of any content
-    if (node.nodeType === 8) {
-      // The only comments to be considered are those
-      // which content is exactly the same as the searched one.
-      if (node.data === search) {
-        nodes.push({type: 'node', path: createPath(node)});
-        search = `${prefix}${++i}`;
-      }
-    }
-    else {
-      // if the node is not a comment, loop through all its attributes
-      // named isµX and relate attribute updates to this node and the
-      // attribute name, retrieved through node.getAttribute("isµX")
-      // the isµX attribute will be removed as irrelevant for the layout
-      // let svg = -1;
-      while (node.hasAttribute(search)) {
-        nodes.push({
-          type: 'attr',
-          path: createPath(node),
-          name: node.getAttribute(search)
-        });
-        node.removeAttribute(search);
-        search = `${prefix}${++i}`;
-      }
-      // if the node was a style, textarea, or others, check its content
-      // and if it is <!--isµX--> then update tex-only this node
-      if (
-        textOnly.test(node.localName) &&
-        node.textContent.trim() === `<!--${search}-->`
-      ){
-        node.textContent = '';
-        nodes.push({type: 'text', path: createPath(node)});
-        search = `${prefix}${++i}`;
+  else {
+    const { d: details } = cache;
+    for (let i = 0; i < details.length; i++) {
+      const detail = details[i];
+      const value = values[i];
+      const { v: previous } = detail;
+      if (value !== previous) {
+        const { u: update, t: target, n: name } = detail;
+        detail.v = update(target, value, name, previous);
       }
     }
   }
-  // once all nodes to update, or their attributes, are known, the content
-  // will be cloned in the future to represent the template, and all updates
-  // related to such content retrieved right away without needing to re-crawl
-  // the exact same template, and its content, more than once.
-  return {content, nodes};
+  return cache.n;
 };
 
-// if a template is unknown, perform the previous mapping, otherwise grab
-// its details such as the fragment with all nodes, and updates info.
-const mapUpdates = (type, template) => {
-  const {content, nodes} = (
-    cache.get(template) ||
-    cache.set(template, mapTemplate(type, template))
-  );
-  // clone deeply the fragment
-  const fragment = importNode(content, true);
-  // and relate an update handler per each node that needs one
-  const updates = nodes.map(handlers, fragment);
-  // return the fragment and all updates to use within its nodes
-  return {content: fragment, updates};
-};
-
-// as html and svg can be nested calls, but no parent node is known
-// until rendered somewhere, the unroll operation is needed to
-// discover what to do with each interpolation, which will result
-// into an update operation.
-export const unroll = (info, {type, template, values}) => {
-  // interpolations can contain holes and arrays, so these need
-  // to be recursively discovered
-  const length = unrollValues(info, values);
-  let {entry} = info;
-  // if the cache entry is either null or different from the template
-  // and the type this unroll should resolve, create a new entry
-  // assigning a new content fragment and the list of updates.
-  if (!entry || (entry.template !== template || entry.type !== type))
-    info.entry = (entry = createEntry(type, template));
-  const {content, updates, wire} = entry;
-  // even if the fragment and its nodes is not live yet,
-  // it is already possible to update via interpolations values.
-  for (let i = 0; i < length; i++)
-    updates[i](values[i]);
-  // if the entry was new, or representing a different template or type,
-  // create a new persistent entity to use during diffing.
-  // This is simply a DOM node, when the template has a single container,
-  // as in `<p></p>`, or a "wire" in `<p></p><p></p>` and similar cases.
-  return wire || (entry.wire = persistent(content));
-};
-
-// the stack retains, per each interpolation value, the cache
-// related to each interpolation value, or null, if the render
-// was conditional and the value is not special (Array or Hole)
-const unrollValues = ({stack}, values) => {
-  const {length} = values;
+/**
+ * @param {Cache} cache
+ * @param {any[]} values
+ * @returns {number}
+ */
+const unrollValues = ({ s: stack }, values) => {
+  const { length } = values;
   for (let i = 0; i < length; i++) {
     const hole = values[i];
-    // each Hole gets unrolled and re-assigned as value
-    // so that domdiff will deal with a node/wire, not with a hole
     if (hole instanceof Hole)
-      values[i] = unroll(
-        stack[i] || (stack[i] = createCache()),
-        hole
-      );
-    // arrays are recursively resolved so that each entry will contain
-    // also a DOM node or a wire, hence it can be diffed if/when needed
+      values[i] = unroll(stack[i] || (stack[i] = cache(empty)), hole);
     else if (isArray(hole))
-      unrollValues(stack[i] || (stack[i] = createCache()), hole);
-    // if the value is nothing special, the stack doesn't need to retain data
-    // this is useful also to cleanup previously retained data, if the value
-    // was a Hole, or an Array, but not anymore, i.e.:
-    // const update = content => html`<div>${content}</div>`;
-    // update(listOfItems); update(null); update(html`hole`)
+      unrollValues(stack[i] || (stack[i] = cache([])), hole);
     else
       stack[i] = null;
   }
-  if (length < stack.length)
-    stack.splice(length);
+  if (length < stack.length) stack.splice(length);
   return length;
 };
 
 /**
- * Holds all details wrappers needed to render the content further on.
+ * Holds all details needed to render the content on a render.
  * @constructor
- * @param {string} type The hole type, either `html` or `svg`.
- * @param {string[]} template The template literals used to the define the content.
- * @param {Array} values Zero, one, or more interpolated values to render.
+ * @param {boolean} svg The content type.
+ * @param {TemplateStringsArray} template The template literals used to the define the content.
+ * @param {any[]} values Zero, one, or more interpolated values to render.
  */
 export class Hole {
-  constructor(type, template, values) {
-    this.type = type;
-    this.template = template;
-    this.values = values;
+  constructor(svg, template, values) {
+    this.s = svg;
+    this.t = template;
+    this.v = values;
   }
 };

@@ -2,19 +2,15 @@
   "name": "uhtml",
   "version": "3.2.2",
   "description": "A micro HTML/SVG render",
-  "main": "cjs/index.js",
-  "types": "index.d.ts",
+  "main": "./cjs/index.js",
   "scripts": {
-    "build": "node pony.js && npm run cjs && npm run rollup:async && npm run rollup:es && npm run rollup:esm && npm run rollup:babel && npm run rollup:init && drop-babel-typeof ./index.js && npm run test && npm run size",
-    "cjs": "rm cjs/*.js && ascjs --no-default esm cjs",
-    "rollup:async": "rollup --config rollup/async.config.js && sed -i.bck 's/^var /self./' async.js && rm -rf async.js.bck",
-    "rollup:es": "rollup --config rollup/es.config.js && sed -i.bck 's/^var /self./' es.js && rm -rf es.js.bck",
-    "rollup:esm": "rollup --config rollup/esm.config.js",
-    "rollup:babel": "rollup --config rollup/babel.config.js && sed -i.bck 's/^var /self./' index.js && rm -rf index.js.bck",
-    "rollup:init": "rollup --config rollup/init.config.js && sed -i.bck 's/^var /self./' es.js && rm -rf es.js.bck",
-    "size": "cat es.js | brotli | wc -c && cat esm.js | brotli | wc -c && cat init.js | brotli | wc -c",
+    "build": "rm -rf cjs/* && npm run cjs && npm run rollup:es && rm -rf types && npm run ts && npm run size",
+    "cjs": "ascjs esm cjs",
+    "rollup:es": "rollup --config rollup/es.config.js",
+    "server": "npx static-handler .",
+    "size": "echo \"index $(cat index.js | brotli | wc -c)\";echo \"keyed $(cat keyed.js | brotli | wc -c)\";echo \"node  $(cat node.js | brotli | wc -c)\";",
     "test": "node test/coverage.init.js && c8 node test/coverage.js",
-    "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info"
+    "ts": "tsc -p ."
   },
   "keywords": [
     "micro",
@@ -22,65 +18,41 @@
     "render"
   ],
   "author": "Andrea Giammarchi",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
-    "@rollup/plugin-node-resolve": "^15.1.0",
-    "@rollup/plugin-terser": "^0.4.3",
-    "@ungap/degap": "^0.2.8",
-    "ascjs": "^5.0.1",
-    "c8": "^8.0.0",
-    "drop-babel-typeof": "^1.0.3",
-    "linkedom": "^0.14.26",
-    "rollup": "^3.25.1",
-    "rollup-plugin-includepaths": "^0.2.4",
-    "terser": "^5.18.1"
-  },
-  "dependencies": {
-    "@webreflection/mapset": "^1.0.1",
-    "@webreflection/uparser": "^0.2.4",
-    "@webreflection/uwire": "^1.2.1",
-    "async-tag": "^0.2.0",
-    "jsx2tag": "^0.3.1",
-    "udomdiff": "^1.1.0",
-    "uhandlers": "^0.7.0"
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "ascjs": "^6.0.3",
+    "c8": "^8.0.1",
+    "linkedom": "^0.16.1",
+    "rollup": "^4.4.0",
+    "typescript": "^5.2.2"
   },
   "module": "./esm/index.js",
   "type": "module",
   "exports": {
     ".": {
-      "types": "./index.d.ts",
+      "types": "./types/index.d.ts",
       "import": "./esm/index.js",
       "default": "./cjs/index.js"
     },
-    "./async": {
-      "types": "./async.d.ts",
-      "import": "./esm/async.js",
-      "default": "./cjs/async.js"
+    "./keyed": {
+      "types": "./types/keyed.d.ts",
+      "import": "./esm/keyed.js",
+      "default": "./cjs/keyed.js"
     },
-    "./init": {
-      "types": "./index.d.ts",
-      "import": "./esm/init.js",
-      "default": "./cjs/init.js"
-    },
-    "./json": {
-      "types": "./index.d.ts",
-      "import": "./esm/json.js",
-      "default": "./cjs/json.js"
-    },
-    "./jsx": {
-      "types": "./index.d.ts",
-      "import": "./esm/x.js",
-      "default": "./cjs/x.js"
+    "./node": {
+      "types": "./types/node.d.ts",
+      "import": "./esm/node.js",
+      "default": "./cjs/node.js"
     },
     "./package.json": "./package.json"
   },
-  "unpkg": "es.js",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/WebReflection/uhtml.git"
-  },
-  "bugs": {
-    "url": "https://github.com/WebReflection/uhtml/issues"
-  },
-  "homepage": "https://github.com/WebReflection/uhtml#readme"
+  "unpkg": "./keyed.js",
+  "dependencies": {
+    "@webreflection/uparser": "^0.3.3",
+    "custom-function": "^1.0.6",
+    "domconstants": "^1.1.6",
+    "udomdiff": "^1.1.0"
+  }
 }
