@@ -1,17 +1,35 @@
 import {nodeResolve} from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
 
-export default {
-  input: './esm/index.js',
-  plugins: [
-    nodeResolve(),
-    terser()
-  ],
-  output: {
-    esModule: false,
-    exports: 'named',
-    file: './es.js',
-    format: 'iife',
-    name: 'uhtml'
+const plugins = [
+  nodeResolve(),
+].concat(
+  process.env.NO_MIN ? [] : [terser()]
+);
+
+export default [
+  {
+    plugins,
+    input: './esm/index.js',
+    output: {
+      esModule: true,
+      file: './index.js',
+    },
+  },
+  {
+    plugins,
+    input: './esm/keyed.js',
+    output: {
+      esModule: true,
+      file: './keyed.js',
+    },
+  },
+  {
+    plugins,
+    input: './esm/node.js',
+    output: {
+      esModule: true,
+      file: './node.js',
+    },
   }
-};
+];

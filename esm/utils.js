@@ -1,35 +1,19 @@
-const {isArray, prototype} = Array;
-const {indexOf} = prototype;
+const { isArray } = Array;
+export { isArray };
 
-export {isArray, indexOf};
+export const empty = [];
 
-const {
-  createDocumentFragment,
-  createElement,
-  createElementNS,
-  createTextNode,
-  createTreeWalker,
-  importNode
-} = new Proxy({}, {
-  get: (_, method) => document[method].bind(document)
-});
+export const newRange = () => document.createRange();
 
-export {createTextNode, createTreeWalker, importNode};
-
-const createHTML = html => {
-  const template = createElement('template');
-  template.innerHTML = html;
-  return template.content;
+/**
+ * Set the `key` `value` pair to the *Map* or *WeakMap* and returns the `value`
+ * @template T
+ * @param {Map | WeakMap} map
+ * @param {any} key
+ * @param {T} value
+ * @returns {T}
+ */
+export const set = (map, key, value) => {
+  map.set(key, value);
+  return value;
 };
-
-let xml;
-const createSVG = svg => {
-  if (!xml) xml = createElementNS('http://www.w3.org/2000/svg', 'svg');
-  xml.innerHTML = svg;
-  const content = createDocumentFragment();
-  content.append(...xml.childNodes);
-  return content;
-};
-
-export const createContent = (text, svg) => svg ?
-                              createSVG(text) : createHTML(text);

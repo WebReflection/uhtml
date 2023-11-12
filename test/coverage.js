@@ -3,15 +3,17 @@ const {DOMParser, HTMLElement} = require('linkedom');
 const document = (new DOMParser).parseFromString('<html />', 'text/html');
 
 globalThis.document = document;
+globalThis.DocumentFragment = document.createDocumentFragment().constructor;
 
-const {render, html, svg} = require('../cjs');
+const {html: htmlNode} = require('../cjs/node.js');
+const {render, html, svg} = require('../cjs/index');
 
 const {Event} = document.defaultView;
 
 const {body} = document;
 
-const elementA = html.node`<div>foo</div>`;
-const elementB = html.node`
+const elementA = htmlNode`<div>foo</div>`;
+const elementB = htmlNode`
   <div>bar</div>
 `;
 
@@ -42,7 +44,7 @@ render(body, html`this is a ${1} ${2} ${3}`);
 render(body, html`this is a ${1}`);
 
 let div = document.createElement('div');
-render(div, html.node`this is a test`);
+render(div, htmlNode`this is a test`);
 render(div, html.for(body)`this is a test`);
 render(div, html.for(body, 1)`this is a test`);
 render(div, () => html.for(body)`this is a test`);

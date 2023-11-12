@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "module": "NodeNext",
+        "target": "esnext",
+        "moduleResolution": "nodenext",
+        "allowJs": true,
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "declarationDir": "types"
+    },
+    "include": [
+        "esm/index.js",
+        "esm/exports.js",
+        "esm/xworker.js"
+    ]
+}

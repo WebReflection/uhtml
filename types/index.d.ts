@@ -1,16 +1,8 @@
-/*! (c) Andrea Giammarchi - MIT */
-
+export type Value = import("./literals.js").Value;
 import { Hole } from './rabbit.js';
 import render from './render-hole.js';
-
-/** @typedef {import("./literals.js").Value} Value */
-
-const tag = svg => (template, ...values) => new Hole(svg, template, values);
-
 /** @type {(template: TemplateStringsArray, ...values:Value[]) => Hole} A tag to render HTML content. */
-const html = tag(false);
-
+export const html: (template: TemplateStringsArray, ...values: Value[]) => Hole;
 /** @type {(template: TemplateStringsArray, ...values:Value[]) => Hole} A tag to render SVG content. */
-const svg = tag(true);
-
-export { Hole, render, html, svg };
+export const svg: (template: TemplateStringsArray, ...values: Value[]) => Hole;
+export { Hole, render };
