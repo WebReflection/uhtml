@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>udom</title>
+  <script type="module">
+  const testUHTML = () => import('./uhtml.js').then(({ render, html }) => {
+    console.time('parse uhtml');
+    render(uhtml, html`<div class=${'test'}>${'content'}</div>`);
+    console.timeEnd('parse uhtml');
+  });
+
+  // testUHTML();
+
+  import('../keyed.js').then(async ({ render, html, svg, htmlFor }) => {
+    const { html: htmlNode } = await import('../node.js');
+    let i = 0;
+    const same = () => htmlFor(document, 'key')`<div class=${'test'} data=${{a: i}}>${'content ' + i}</div>`;
+    const diff = () => html`<div class=${'test'} data=${{a: i}}>${'content'}</div>`;
+    const node = () => htmlNode`<div class=${'test'} data=${{a: i}}>${'content'}</div>`;
+    const test = () => {
+      i++;
+      render(udomunderstand, html`
+        <div>
+          ${diff()}
+          ${[
+            same(),
+            diff(),
+            diff(),
+            node(),
+            diff(),
+            diff(),
+          ].concat(Math.random() < .5 ? [diff(), diff()] : [])}
+        </div>
+      `);
+    };
+    test();
+    render(uhtml, html`<button>a</button><button>b</button>`);
+    setInterval(test, 250);
+    console.assert(same() === same());
+    console.assert(diff() !== diff());
+  });
+  </script>
+</head>
+<body>
+  <div id="udomunderstand"></div>
+  <div id="uhtml"></div>
+</body>
+</html>

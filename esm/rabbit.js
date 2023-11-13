@@ -11,11 +11,11 @@ const parseSVG = create(parser(true));
  * @param {Hole} hole
  * @returns {Node}
  */
-export const unroll = (cache, { s: stack, t: template, v: values }) => {
+export const unroll = (cache, { s: svg, t: template, v: values }) => {
   if (values.length && cache.s === empty) cache.s = [];
   unrollValues(cache, values);
   if (cache.t !== template) {
-    const { n: node, d: details } = (stack ? parseSVG : parseHTML)(template, values);
+    const { n: node, d: details } = (svg ? parseSVG : parseHTML)(template, values);
     cache.t = template;
     cache.n = node;
     cache.d = details;

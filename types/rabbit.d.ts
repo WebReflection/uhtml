@@ -1,4 +1,4 @@
-export function unroll(cache: import("./literals.js").Cache, { s: stack, t: template, v: values }: Hole): Node;
+export function unroll(cache: import("./literals.js").Cache, { s: svg, t: template, v: values }: Hole): Node;
 /**
  * Holds all details needed to render the content on a render.
  * @constructor
