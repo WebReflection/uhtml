@@ -142,6 +142,14 @@ export const array = (node, value, _, prev) => {
   return empty;
 };
 
+export const attr = new Map([
+  ['aria', aria],
+  ['class', className],
+  ['data', data],
+  ['ref', ref],
+  ['style', style]
+]);
+
 /**
  * @param {Element} element
  * @param {string} name
@@ -152,16 +160,7 @@ export const attribute = (element, name) => {
     case '.': return dot;
     case '?': return toggle;
     case '@': return at;
-    default: {
-      switch (name) {
-        case 'aria': return aria;
-        case 'class': return className;
-        case 'data': return data;
-        case 'ref': return ref;
-        case 'style': return style;
-        default: return name in element ? direct : regular;
-      }
-    }
+    default: return attr.get(name) || (name in element ? direct : regular);
   }
 };
 

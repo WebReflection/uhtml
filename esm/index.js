@@ -1,6 +1,7 @@
 /*! (c) Andrea Giammarchi - MIT */
 
 import { Hole } from './rabbit.js';
+import { attr } from './handler.js';
 import render from './render-hole.js';
 
 /** @typedef {import("./literals.js").Value} Value */
@@ -13,4 +14,4 @@ const html = tag(false);
 /** @type {(template: TemplateStringsArray, ...values:Value[]) => Hole} A tag to render SVG content. */
 const svg = tag(true);
 
-export { Hole, render, html, svg };
+export { Hole, render, html, svg, attr };

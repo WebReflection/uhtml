@@ -4,6 +4,7 @@ import { cache } from './literals.js';
 import { Hole, unroll } from './rabbit.js';
 import { empty, set } from './utils.js';
 import { html, svg } from './index.js';
+import { attr } from './handler.js';
 import render from './render-any.js';
 
 /** @typedef {import("./literals.js").Cache} Cache */
@@ -36,4 +37,4 @@ const htmlFor = createRef(false);
 /** @type {Bound} Returns a bound tag to render SVG content. */
 const svgFor = createRef(true);
 
-export { Hole, render, html, svg, htmlFor, svgFor };
+export { Hole, render, html, svg, htmlFor, svgFor, attr };

@@ -5,4 +5,5 @@ import render from './render-hole.js';
 export const html: (template: TemplateStringsArray, ...values: Value[]) => Hole;
 /** @type {(template: TemplateStringsArray, ...values:Value[]) => Hole} A tag to render SVG content. */
 export const svg: (template: TemplateStringsArray, ...values: Value[]) => Hole;
-export { Hole, render };
+import { attr } from './handler.js';
+export { Hole, render, attr };
