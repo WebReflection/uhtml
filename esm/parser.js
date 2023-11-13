@@ -64,7 +64,7 @@ const resolve = (template, values, xml) => {
         while (node.hasAttribute(search)) {
           if (!path) path = createPath(node);
           const name = node.getAttribute(search);
-          entries.push(entry(ATTRIBUTE_NODE, path, attribute(node, name, xml), name));
+          entries.push(entry(ATTRIBUTE_NODE, path, attribute(node, name), name));
           node.removeAttribute(search);
           search = `${prefix}${i++}`;
         }
