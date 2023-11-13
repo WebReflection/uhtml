@@ -1,5 +1,3 @@
-/*! (c) Andrea Giammarchi - MIT */
-
 import { cache } from './literals.js';
 import { Hole, unroll } from './rabbit.js';
 import { empty, set } from './utils.js';
