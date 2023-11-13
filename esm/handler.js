@@ -153,14 +153,19 @@ export const attr = new Map([
 /**
  * @param {Element} element
  * @param {string} name
+ * @param {boolean} svg
  * @returns
  */
-export const attribute = (element, name) => {
+export const attribute = (element, name, svg) => {
   switch (name[0]) {
     case '.': return dot;
     case '?': return toggle;
     case '@': return at;
-    default: return attr.get(name) || (name in element ? direct : regular);
+    default: return (
+      svg ?
+        regular :
+        (attr.get(name) || (name in element ? direct : regular))
+    );
   }
 };
 

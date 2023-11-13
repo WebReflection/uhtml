@@ -19,5 +19,5 @@ export class hole<T> {
 }
 export function array<T>(node: Node, value: T, _: string, prev: Node[]): T;
 export const attr: Map<string, <T>(element: Element, value: T) => T>;
-export function attribute(element: Element, name: string): <T>(element: Element, value: T, name: string) => T;
+export function attribute(element: Element, name: string, svg: boolean): <T>(element: Element, value: T, name: string) => T;
 export function text<T>(element: Element, value: T): T;
