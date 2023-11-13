@@ -194,7 +194,9 @@ export function hole(node, value) {
     }
     case 'object':
     case 'undefined': {
-      n.replaceWith((this.n = value == null ? node : value.valueOf()));
+      if (value == null) (this.n = node).data = '';
+      else this.n = value.valueOf();
+      n.replaceWith(this.n);
       break;
     }
   }
