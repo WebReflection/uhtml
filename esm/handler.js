@@ -147,7 +147,7 @@ export const attr = new Map([
   ['class', className],
   ['data', data],
   ['ref', ref],
-  ['style', style]
+  ['style', style],
 ]);
 
 /**
