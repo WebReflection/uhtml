@@ -1,3 +1,4 @@
+.github/
 .nyc_output/
 coverage/
 node_modules/
@@ -9,3 +10,4 @@ LOGO.txt
 .travis.yml
 DOCUMENTATION.md
 V0.md
+tsconfig.json
