@@ -1,4 +1,6 @@
-*uhtml* (micro *µ* html) is one of the smallest, fastest, memory consumption friendly, yet zero-tools based, library to safely help creating or manipulating DOM content.
+![snow flake](./uhtml-head.jpg)
+
+*[uhtml](https://github.com/WebReflection/uhtml)* (micro *µ* html) is one of the smallest, fastest, memory consumption friendly, yet zero-tools based, library to safely help creating or manipulating DOM content.
 
 It is entirely Web standards based and it adds just the minimal amount of *spices* to the templates literals it's able to understand and optimized for either repeated updates or one-off operations.
 
@@ -380,6 +382,86 @@ By current TypeScript definition, a *hole* can be either:
   * `null` or `undefined` to signal that *hole* has currently no content whatsoever
   * an actual `instanceof Hole` exported class, which is what `html` or `svg` tags return once invoked
   * an *array* that contains a list of instances of *Hole* or DOM nodes to deal with
+
+  </div>
+</details>
+
+- - -
+
+## F.A.Q.
+
+<details>
+  <summary><strong>what problem does <em>uhtml</em> solve ?</strong></summary>
+  <div markdown=1>
+
+Beside the no tooling needed and standard based approach, so that you can trust this module will last for a very long time out there and very little changes will require your attention in the future, this is a honest list of things this library helps you with daily DOM based tasks:
+
+  * **safety**: unless you explicitly want to inject unsafe content, all attributes or nodes content handled by this library is XSS safe by design.
+  * **hassle-free**: you don't need to think about *SVG* vs *HTML* attributes and creation gotchas, you just need either `html` or `svg` primitives and all expectations would be automatically met. For any other operation with both attributes or content, you also don't need to think much about intended operations and results on the live page.
+  * **minimalism**: instead of repeating boring procedural *JS* operations, you can focus on logic and use this modules' template features to ultimately ship less code.
+  * **performance**: with its battle tested diffing logic that has been working just fine for years, you can be sure atomic updates per each attribute, node, or list of nodes, will be likely faster than any home-made solution you've created to date. On top of that, this module is able to scale to dozen thousand nodes without issues, whenever that's even needed.
+  * **memory**: while having ad-hoc and fine-tuned operations to perform DOM updates might be still an option you can hook into as well, this module uses all possible tricks to reduce the amount of needed RAM to the minimum, hence suitable from old *Desktop* to either legacy or modern *Mobile* phones, as well as *IoT* related browsers with memory constraints.
+  * **tool friendly**: you don't need any tool to write this module but it ill work great with any other tool you need daily, making an opt-in, rather than a lock-in, hence helping migrating from a legacy application to a blazing fast one with minimal bandwidth required.
+
+  </div>
+</details>
+
+<details>
+  <summary><strong>what makes a node unique ?</strong></summary>
+  <div markdown=1>
+
+The *tag* in template literals *tags* primitives make a node unique. This means that anywhere in your code there is a *tag* with a literal attached, that resulting node will be known, pre-parsed, cache-able, hence unique, in the whole rendering stack.
+
+```js
+// a tag receives a unique template + ...values
+// were values are known as tag's interpolations
+const tag = (template, ...values) => template;
+
+// a literal string passed as tag is always unique
+// but in this case the two literals are not the same!
+tag`a` === tag`a`; // this is false, despite the literal content
+
+// in real-world code though, tags are used via callbacks
+const a = () => tag`a`;
+
+// so now this assertion would be true instead
+a() === a(); // true!
+```
+
+If you are following this logic so far, you might as well realize that anything returning a tag also works well:
+
+```js
+// invokes the tag with always the same template
+// despite one of its interpolations has a different value
+[1, 2, 3].map(
+  index => tag`index ${index}`
+);
+```
+
+To dig a little further about tags and application usage, this example speaks thousand words!
+
+```js
+import { render, html } from 'uhtml';
+
+const App = (results) => {
+  return html`
+    <h1>With ${results.length} results:</h1>
+    <ul onclick=${({target}) => load(target.closest('li').id)}>
+      ${results.map(item => html`
+        <li id=${item.id}>${item.description}</li>
+      `)}
+    </ul>
+  `;
+};
+
+const be = await fetch('./db.php?list=options');
+
+render(document.body, App(await be.json()));
+```
+
+This example asks for some result and produces the page content based on such results, replacing the whole *body* with the requested list of options for that space.
+
+With this code the *App* returns a known template that can be reused with ease, among sub-templates for any `<li>` in the list that also benefits from this library performance and weak cache system.
 
   </div>
 </details>
