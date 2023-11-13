@@ -12,6 +12,8 @@ _micro html_ is a [lighterhtml](https://github.com/WebReflection/lighterhtml#rea
 
 Please check the [Release Notes](https://github.com/WebReflection/uhtml/pull/86) to know more about what improved, what changed or broke and what's not there yet (or anymore).
 
+Please **[read the latest user friendly docs](https://webreflection.github.io/uhtml/)** too if you're either new to this project or curious about how it works.
+
 ---
 
 ### V3.0 Update
