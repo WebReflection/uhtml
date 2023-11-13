@@ -13,7 +13,7 @@ const parseSVG = create(parser(true));
  */
 export const unroll = (cache, { s: svg, t: template, v: values }) => {
   if (values.length && cache.s === empty) cache.s = [];
-  unrollValues(cache, values);
+  const length = unrollValues(cache, values);
   if (cache.t !== template) {
     const { n: node, d: details } = (svg ? parseSVG : parseHTML)(template, values);
     cache.t = template;
@@ -22,9 +22,9 @@ export const unroll = (cache, { s: svg, t: template, v: values }) => {
   }
   else {
     const { d: details } = cache;
-    for (let i = 0; i < details.length; i++) {
-      const detail = details[i];
+    for (let i = 0; i < length; i++) {
       const value = values[i];
+      const detail = details[i];
       const { v: previous } = detail;
       if (value !== previous) {
         const { u: update, t: target, n: name } = detail;
