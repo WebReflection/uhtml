@@ -1,4 +1,4 @@
-*uhtml* (micro *µ* html) is one of the smallest, fastest, memory consumption friendly, yet zero-tools based, library to help creating or manipulating DOM content.
+*uhtml* (micro *µ* html) is one of the smallest, fastest, memory consumption friendly, yet zero-tools based, library to safely help creating or manipulating DOM content.
 
 It is entirely Web standards based and it adds just the minimal amount of *spices* to the templates literals it's able to understand and optimized for either repeated updates or one-off operations.
 
