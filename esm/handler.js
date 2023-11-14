@@ -163,7 +163,7 @@ export const attribute = (element, name, svg) => {
     case '@': return at;
     default: return (
       svg || ('ownerSVGElement' in element) ?
-        regular :
+        (name === 'ref' ? ref : regular) :
         (attr.get(name) || (name in element ? direct : regular))
     );
   }

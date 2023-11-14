@@ -417,8 +417,8 @@ The *tag* in template literals *tags* primitives make a node unique. This means 
 // were values are known as tag's interpolations
 const tag = (template, ...values) => template;
 
-// a literal string passed as tag is always unique
-// but in this case the two literals are not the same!
+// a literal string passed as tag is always unique and
+// indeed in this case the two literals are different!
 tag`a` === tag`a`; // this is false, despite the literal content
 
 // in real-world code though, tags are used via callbacks
@@ -462,6 +462,119 @@ render(document.body, App(await be.json()));
 This example asks for some result and produces the page content based on such results, replacing the whole *body* with the requested list of options for that space.
 
 With this code the *App* returns a known template that can be reused with ease, among sub-templates for any `<li>` in the list that also benefits from this library performance and weak cache system.
+
+  </div>
+</details>
+
+<details>
+  <summary><strong>how is this better than <code>innerHTML</code> ?</strong></summary>
+  <div markdown=1>
+
+With template literals tags what you see is not a string, rather a template with related values as interpolations that can be parsed and/or manipulated.
+
+Interpolations are never "*trashed*" as part of the *HTML* or *SVG* template content neither, there is a standard *TreeWalker* that finds "*holes*" in the template and associates specialized operations per each hole kind: attribute, generic content or a list.
+
+All operation that can also be inferred will be inferred only the first time the template is encountered and a map of updates per targeting node or attributes will be reused every other time.
+
+```js
+let i = 0;
+const callback = () => { console.log(i++); };
+const content = '<unsafe>content</unsafe>';
+
+const vanilla = target => {
+  target.innerHTML = `
+    <div onclick=${/* failing */ callback}>
+      ${/* unsafe */ content}
+    </div>
+  `;
+};
+
+const uhtml = target => {
+  render(target, html`
+    <div onclick=${/* working */ callback}>
+      ${/* safe */ content}
+    </div>
+  `);
+};
+
+// it fails expectations and intents
+vanilla(document.body);
+
+// it trashes the previous DOM every time
+vanilla(document.body);
+vanilla(document.body);
+
+// VS
+
+// it works as expected
+uhtml(document.body);
+
+// it doesn't change anything on the body
+// and it never trashes the previous content
+uhtml(document.body);
+uhtml(document.body);
+```
+
+  </div>
+</details>
+
+<details>
+  <summary><strong>can <em>HTML</em> content be highlighted like in <em>JSX</em> ?</strong></summary>
+  <div markdown=1>
+
+There are various VSCode/ium solutions to template literals highlights and these are just a few examples:
+
+  * [htmx-literals](https://marketplace.visualstudio.com/items?itemName=lehwark.htmx-literals)
+  * [literally-html](https://marketplace.visualstudio.com/items?itemName=webreflection.literally-html)
+  * [leet-html](https://marketplace.visualstudio.com/items?itemName=EldarGerfanov.leet-html)
+  * [lit-html](https://marketplace.visualstudio.com/items?itemName=bierner.lit-html)
+
+Some of these might work with *SVG* content too but I don't feel like recommending anyone over others in particular: just try then and chose one.
+
+  </div>
+</details>
+
+<details>
+  <summary><strong>what are custom attributes ?</strong></summary>
+  <div markdown=1>
+
+All module variants export an `attr` *Map* that contains special attribute cases for `aria`, `class`, `data`, `ref` and `style`.
+
+Due different nature of possible content, where *SVG* elements don't have `className` or other special accessors like *HTML* elements do, it is currently only possible to define custom attributes for *HTML* nodes.
+
+```js
+import { render, html, attr } from 'uhtml';
+
+if (!attr.has('custom')) {
+  attr.add('custom', (element, newValue, name, oldValue) => {
+    console.log(element);   // the div
+    console.log(newValue);  // 1
+    console.log(name);      // "custom"
+    console.log(oldValue);  // any previous value or undefined
+
+    // do something with the element and the "custom" attribute
+    element.setAttribute(name, newValue);
+
+    // return the value to retain for future updates
+    // in case the newValue is different from the oldValue
+    return newValue;
+  });
+}
+
+const update = i => {
+  render(document.body, html`
+    <div custom=${i} />
+  `);
+};
+
+update(1);
+
+// this does nothing as 1 === 1
+update(1);
+
+// this passes 2 as newValue and 1 as oldValue
+update(1);
+```
 
   </div>
 </details>
