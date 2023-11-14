@@ -410,7 +410,7 @@ Beside the no tooling needed and standard based approach, so that you can trust 
   <summary><strong>what makes a node unique ?</strong></summary>
   <div markdown=1>
 
-The *tag* in template literals *tags* primitives make a node unique. This means that anywhere in your code there is a *tag* with a literal attached, that resulting node will be known, pre-parsed, cache-able, hence unique, in the whole rendering stack.
+The *tag* in template literals *tags* primitives makes a node unique. This means that anywhere in your code there is a *tag* with a literal attached, that resulting node will be known, pre-parsed, cache-able, hence unique, in the whole rendering stack.
 
 ```js
 // a tag receives a unique template + ...values
@@ -529,7 +529,7 @@ There are various VSCode/ium solutions to template literals highlights and these
   * [leet-html](https://marketplace.visualstudio.com/items?itemName=EldarGerfanov.leet-html)
   * [lit-html](https://marketplace.visualstudio.com/items?itemName=bierner.lit-html)
 
-Some of these might work with *SVG* content too but I don't feel like recommending anyone over others in particular: just try then and chose one.
+Some of these might work with *SVG* content too but I don't feel like recommending any particular one over others: just try then and chose one 😉
 
   </div>
 </details>
@@ -573,7 +573,7 @@ update(1);
 update(1);
 
 // this passes 2 as newValue and 1 as oldValue
-update(1);
+update(2);
 ```
 
   </div>
