@@ -9,6 +9,16 @@ const plugins = [
 
 export default [
   {
+    plugins: [nodeResolve()],
+    input: './esm/keyed.js',
+    output: {
+      esModule: false,
+      file: './esm/init.js',
+      format: 'iife',
+      name: 'uhtml',
+    },
+  },
+  {
     plugins,
     input: './esm/index.js',
     output: {
@@ -31,5 +41,5 @@ export default [
       esModule: true,
       file: './node.js',
     },
-  }
+  },
 ];

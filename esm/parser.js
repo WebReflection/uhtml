@@ -42,8 +42,8 @@ const arrayComment = () => array;
  */
 const resolve = (template, values, xml) => {
   const content = createContent(parser(template, prefix, xml), xml);
-  let asArray = false, entries = empty;
   const { length } = template;
+  let asArray = false, entries = empty;
   if (length > 1) {
     const tw = document.createTreeWalker(content, 1 | 128);
     const replace = [];

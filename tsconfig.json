@@ -10,7 +10,8 @@
     },
     "include": [
         "esm/index.js",
-        "esm/exports.js",
-        "esm/xworker.js"
+        "esm/init.js",
+        "esm/keyed.js",
+        "esm/node.js",
     ]
 }

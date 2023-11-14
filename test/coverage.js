@@ -1,12 +1,18 @@
 const {DOMParser, HTMLElement} = require('linkedom');
 
 const document = (new DOMParser).parseFromString('<html />', 'text/html');
+const DocumentFragment = document.createDocumentFragment().constructor;
 
-globalThis.document = document;
-globalThis.DocumentFragment = document.createDocumentFragment().constructor;
+const { prototype } = document.createRange().constructor;
+const { selectNode } = prototype;
+prototype.selectNodeContents = selectNode;
 
-const {html: htmlNode} = require('../cjs/node.js');
-const {render, html, svg} = require('../cjs/index');
+const { render, html, svg, htmlFor } = require('../cjs/init.js').default({
+  document,
+  DocumentFragment
+});
+
+const htmlNode = (template, ...values) => htmlFor({})(template, ...values);
 
 const {Event} = document.defaultView;
 
@@ -45,13 +51,13 @@ render(body, html`this is a ${1}`);
 
 let div = document.createElement('div');
 render(div, htmlNode`this is a test`);
-render(div, html.for(body)`this is a test`);
-render(div, html.for(body, 1)`this is a test`);
-render(div, () => html.for(body)`this is a test`);
-render(div, () => html.for(body, 1)`this is a test`);
+render(div, htmlFor(body)`this is a test`);
+render(div, htmlFor(body, 1)`this is a test`);
+render(div, () => htmlFor(body)`this is a test`);
+render(div, () => htmlFor(body, 1)`this is a test`);
 (function twice(i) {
-  render(div, () => html.for(body)`this is a test`);
-  render(div, () => html.for(body, 1)`this is a test`);
+  render(div, () => htmlFor(body)`this is a test`);
+  render(div, () => htmlFor(body, 1)`this is a test`);
   if (i--) twice(i);
 }(1));
 
@@ -65,8 +71,12 @@ render(div, html`<div test="${123}" onclick=${() => { clicked = true; }} .disabl
 div.firstElementChild.dispatchEvent(new Event('click'));
 console.assert(clicked, 'onclick worked');
 
-render(document.createElement('div'), html`<textarea>${'test'}</textarea>`);
-render(document.createElement('div'), html`<style>${'test'}</style>`);
+const textArea = content => html`<textarea>${content}</textarea>`;
+const style = content => html`<style>${content}</style>`;
+render(document.createElement('div'), textArea('test'));
+render(document.createElement('div'), textArea(null));
+render(document.createElement('div'), style('test'));
+render(document.createElement('div'), style(void 0));
 
 const sameWire = content => html`<div>${content}</div>`;
 render(div, sameWire([fragment()]));
@@ -74,6 +84,7 @@ render(div, sameWire([]));
 render(div, sameWire([fragment()]));
 
 render(div, html`<style>${'text only'}</style>`);
+render(div, html`<br />`);
 
 render(div, variousContent([
   html`<p />`,
@@ -89,12 +100,15 @@ render(div, variousContent([
 ]));
 
 render(div, html`<style>${html`text only`}</style>`);
-render(div, variousContent('text'));
-render(div, variousContent(null));
-render(div, variousContent(void 0));
-render(div, variousContent([true]));
-render(div, variousContent([1]));
-render(div, variousContent(['one']));
+
+const oneHoleContent = content => html`${content}`;
+render(div, oneHoleContent(html`OK`));
+render(div, oneHoleContent('text'));
+console.assert(div.textContent === 'text');
+render(div, oneHoleContent(null));
+console.assert(div.textContent === '');
+render(div, oneHoleContent(void 0));
+console.assert(div.textContent === '');
 
 const reference = {};
 render(div, html`<div ref=${reference}>test</div>`);
@@ -140,9 +154,10 @@ try {
   console.assert(false, 'broken template is not breaking');
 } catch (OK) {}
 
-render(div, sameWire('test'));
-render(div, sameWire('test'));
-render(div, sameWire(document.createElement('p')));
+const otherWire = content => html`<div>${content}</div>`;
+render(div, otherWire('test'));
+render(div, otherWire('test'));
+render(div, otherWire(document.createElement('p')));
 
 const sameAttribute = value => html`<div test=${value} />`;
 render(body, sameAttribute(1));
@@ -176,9 +191,11 @@ render(body, variousContent([
 render(body, html`<div aria=${{role: 'button', labelledBy: 'id'}} />`);
 console.assert(body.firstElementChild.getAttribute('role') === 'button', 'aria=${role}');
 console.assert(body.firstElementChild.getAttribute('aria-labelledBy') === 'id', 'aria=${labelledBy}');
+render(body, html`<div aria=${{role: 'button', labelledBy: null}} />`);
 
-render(body, html`<div .dataset=${{labelledBy: 'id'}} />`);
+render(body, html`<div data=${{labelledBy: 'id'}} />`);
 console.assert(body.firstElementChild.dataset.labelledBy === 'id', '.dataset=${...}');
+render(body, html`<div data=${{labelledBy: null}} />`);
 
 render(body, html`<div ?thing=${1} />`);
 console.assert(body.firstElementChild.getAttribute('thing') === '', '?thing=${truthy}');
@@ -186,13 +203,19 @@ console.assert(body.firstElementChild.getAttribute('thing') === '', '?thing=${tr
 render(body, html`<div ?thing=${0} />`);
 console.assert(!body.firstElementChild.hasAttribute('thing'), '?thing=${falsy}');
 
-// cover importNode
-delete require.cache[require.resolve('../cjs/handlers.js')];
-delete require.cache[require.resolve('../cjs/rabbit.js')];
-delete require.cache[require.resolve('../cjs')];
-const importNode = document.importNode;
-document.importNode = function () {
-  return importNode.apply(this, arguments);
-};
-const uhtml = require('../cjs');
+const handler = () => {};
+const withComplexHandler = handler => html`<div @click=${handler} />`;
+render(body, withComplexHandler(handler));
+render(body, withComplexHandler(() => {}));
+render(body, withComplexHandler(null));
+render(body, withComplexHandler(void 0));
+render(body, withComplexHandler([handler, { once: true }]));
+render(body, withComplexHandler([() => {}, { once: true }]));
+render(body, withComplexHandler([null, { once: true }]));
+render(body, withComplexHandler([void 0, { once: true }]));
+
+const uhtml = require('../cjs/init.js').default({
+  document,
+  DocumentFragment
+});
 uhtml.render(body, uhtml.html`<last test=${123}>${456}</last>`);
