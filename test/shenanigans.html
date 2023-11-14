@@ -4,48 +4,49 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <script src="../index.js"></script>
-</head>
-<body>
-  <script>
+  <script type="module">
 
-const {render, html} = uhtml;
-
-function span(x, i) {
-  // return html`<span class="a">${x}</span>`;
-  return html.for(this, x)`<span class="a">${x}</span>`;
-}
-
-const div1 = {};
-const div2 = {};
-
-let first = 0;
-const renderDivs = (firstRow, secondRow) => html`
-  <div>
-    ${firstRow.map(span, div1)}
-  </div>
-  <hr>
-  <div>
-    ${secondRow.map(span, div2)}
-  </div>
-`;
-
-render(document.body, renderDivs([], ['a']));
-setTimeout(
-  () => {
-    render(document.body, renderDivs(['a'], []));
+    import { render, html, htmlFor } from "../keyed.js";
+    
+    function span(x, i) {
+      // return html`<span class="a">${x}</span>`;
+      const html = htmlFor(this, x);
+      return html`<span class="a">${x}</span>`;
+    }
+    
+    const div1 = {};
+    const div2 = {};
+    
+    let first = 0;
+    const renderDivs = (firstRow, secondRow) => html`
+      <div>
+        ${firstRow.map(span, div1)}
+      </div>
+      <hr>
+      <div>
+        ${secondRow.map(span, div2)}
+      </div>
+    `;
+    
+    render(document.body, renderDivs([], ['a']));
     setTimeout(
       () => {
-        render(document.body, renderDivs([1, 2, 3], ['a', 'b']));
+        render(document.body, renderDivs(['a'], []));
         setTimeout(
           () => {
-            render(document.body, renderDivs([1, 2], ['a', 'b', 'c']));
+            render(document.body, renderDivs([1, 2, 3], ['a', 'b']));
             setTimeout(
               () => {
-                render(document.body, renderDivs([1], ['b']));
+                render(document.body, renderDivs([1, 2], ['a', 'b', 'c']));
                 setTimeout(
                   () => {
-                    render(document.body, renderDivs([1, 2], ['a', 'b', 'c']));
+                    render(document.body, renderDivs([1], ['b']));
+                    setTimeout(
+                      () => {
+                        render(document.body, renderDivs([1, 2], ['a', 'b', 'c']));
+                      },
+                      1000
+                    );
                   },
                   1000
                 );
@@ -58,10 +59,6 @@ setTimeout(
       },
       1000
     );
-  },
-  1000
-);
-
-  </script>
-</body>
+    </script>
+</head>
 </html>

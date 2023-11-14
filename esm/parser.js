@@ -80,7 +80,13 @@ const resolve = (template, values, xml) => {
     for (i = 0; i < replace.length; i++)
       replace[i].replaceWith(document.createTextNode(''));
   }
-  return set(cache, template, cel(content, entries, content.childNodes.length));
+  const { childNodes } = content;
+  const l = childNodes.length;
+  return set(cache, template, cel(
+    content,
+    entries,
+    l === 1 && childNodes[0].nodeType === COMMENT_NODE ? 0 : l
+  ));
 };
 
 /** @type {WeakMap<TemplateStringsArray, Resolved>} */

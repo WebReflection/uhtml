@@ -1,6 +1,6 @@
-const require = (mame, es = '../esm/index.js') => import(
+const require = (name, es = '../index.js') => import(
   /^(?:localhost|[0-9.]+)$/.test(location.hostname) ?
-  es : `https://unpkg.com/${mame}?module`
+  es : `https://unpkg.com/${name}`
 );
 
 Promise.all([
