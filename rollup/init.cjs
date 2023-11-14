@@ -6,6 +6,7 @@ const uhtml = readFileSync(init).toString();
 
 writeFileSync(init, `
 // ⚠️ WARNING - THIS FILE IS AN ARTIFACT - DO NOT EDIT
+
 /**
  * @param {Document} document
  * @returns {import("./keyed.js")}

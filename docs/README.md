@@ -1,3 +1,5 @@
+[![Downloads](https://img.shields.io/npm/dm/uhtml.svg)](https://www.npmjs.com/package/uhtml) [![build status](https://github.com/WebReflection/uhtml/actions/workflows/node.js.yml/badge.svg)](https://github.com/WebReflection/uhtml/actions) [![Coverage Status](https://coveralls.io/repos/github/WebReflection/uhtml/badge.svg?branch=main)](https://coveralls.io/github/WebReflection/uhtml?branch=main) [![CSP strict](https://webreflection.github.io/csp/strict.svg)](https://webreflection.github.io/csp/#-csp-strict)
+
 ![snow flake](./uhtml-head.jpg)
 
 *[uhtml](https://github.com/WebReflection/uhtml)* (micro *µ* html) is one of the smallest, fastest, memory consumption friendly, yet zero-tools based, library to safely help creating or manipulating DOM content.
@@ -5,6 +7,11 @@
 It is entirely Web standards based and it adds just the minimal amount of *spices* to the templates literals it's able to understand and optimized for either repeated updates or one-off operations.
 
 This page describes, without going into too many details, all the features delivered via this module which is roughly 2.5K once minified and compressed, or even bundled within your project.
+
+### Content
+
+  * All *µhtml* features [in a nutshell](https://webreflection.github.io/uhtml/#in-a-nutshell)
+  * Some [Frequently Asked Question](https://webreflection.github.io/uhtml/#faq)
 
 - - -
 
@@ -59,15 +66,18 @@ render(document.body, html`
 To reveal template literal tags within a specific element we need a helper which goal is to understand if the
 content to render was already known but also, in case it's a *hole*, to orchestrate a "*smart dance*" to render such content.
 
-The `render` exported helper is a function that, given a place *where* to render such content, returns that very
-same place with all nodes in the right place, nodes returned by the *tag* used to render or, for convenience, after
-invoking the callback that will return *tags* returned content to render.
+The `render` exported helper is a function that, given a node *where* to render such content, returns that very
+same node with the content in the right place, content returned by the *tag* used to render.
 
 ```js
 import { render, html } from 'uhtml';
 
 const whom = 'World';
 
+// direct rendering
+render(document.body, html`Hello ${whom}!`);
+
+// using a function (implicitly invoked by render)
 render(document.body, () => html`Hello ${whom}!`);
 
 /** results into
@@ -291,12 +301,6 @@ Most of the time, the template defines just static parts of the content and this
 
 ```js
 import { render, html } from 'uhtml';
-
-const handler = {
-  handleEvent(event) {
-    console.log(event.type);
-  }
-};
 
 render(document.querySelector('#todos'), html`
   <ul>
@@ -598,6 +602,32 @@ effect(() => {
     </button>
   `);
 });
+```
+
+  </div>
+</details>
+
+<details>
+  <summary><strong>how to render unsafe content ?</strong></summary>
+  <div markdown=1>
+
+This question came up more than once and it's about fetching some data from a server, where such data contains valid HTML content to show directly on the page.
+
+As template literal tags are nothing more than functions, it is always possible to somehow bypass the need for a unique template and use an *array* instead.
+
+```js
+import { render, html, svg } from 'uhtml';
+
+const htmlUnsafe = str => html([str]);
+const svgUnsafe = str => svg([str]);
+
+render(document.body, htmlUnsafe('<h1>Hello HTML</h1>'));
+
+/** results into
+<body>
+  <h1>Hello HTML</h1>
+<body>
+ */
 ```
 
   </div>

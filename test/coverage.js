@@ -1,9 +1,10 @@
 const {DOMParser, HTMLElement} = require('linkedom');
 
-const document = (new DOMParser).parseFromString('<html />', 'text/html');
+const document = (new DOMParser).parseFromString('...', 'text/html');
 const { prototype } = document.createRange().constructor;
-const { selectNode } = prototype;
-prototype.selectNodeContents = selectNode;
+
+// TODO: fix LinkeDOM SVG story
+prototype.selectNodeContents = prototype.selectNode;
 
 const { render, html, svg, htmlFor } = require('../cjs/init.js')(document);
 
