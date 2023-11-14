@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script type="module">
-  // https://github.com/WebReflection/lighterhtml/issues/92
-  // ucdn --debug
-  import {render, html} from '../esm/index.js';
+  import {render, html, htmlFor} from '../keyed.js';
 
   let state = 0;
 
@@ -38,7 +36,7 @@
   const one = (name = 'one') => html`${box(() => html`one`)}`;
 
 
-  const two = (name = 'two', value = 'opt') => html`${box(() => html`
+  const two = (name = 'two', value = 'opt') => html`${box(() => htmlFor(two)`
       <label class="block px-3 mb-3">
         <input type="radio" class="form-radio" name=${name} value=${value}>
         <span>two</span>

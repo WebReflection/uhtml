@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="dbmonster.css">
     <script src="https://unpkg.com/perf-monitor@0.3.0/dist/umd/perf-monitor.js"></script>
-    <script src="../index.js"></script>
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {"use strict";
-
-      const {render, html} = uhtml;
+    <script type="module">
+      import { render, html } from '../index.js';
 
       const target = document.querySelector('#app');
 
@@ -71,8 +68,6 @@
       }
 
       update();
-
-    }, {once: true});
     </script>
   </head>
   <body>
