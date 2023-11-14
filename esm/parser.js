@@ -42,7 +42,7 @@ const arrayComment = () => array;
  */
 const resolve = (template, values, xml) => {
   const content = createContent(parser(template, prefix, xml), xml);
-  let entries = empty;
+  let comment = false, entries = empty;
   const { length } = template;
   if (length > 1) {
     const tw = document.createTreeWalker(content, 1 | 128);
@@ -55,6 +55,7 @@ const resolve = (template, values, xml) => {
         if (node.data === search) {
           let update = isArray(values[i - 1]) ? arrayComment : boundComment;
           if (update === boundComment) replace.push(node);
+          else comment = true;
           entries.push(entry(COMMENT_NODE, createPath(node), update));
           search = `${prefix}${i++}`;
         }
@@ -80,13 +81,8 @@ const resolve = (template, values, xml) => {
     for (i = 0; i < replace.length; i++)
       replace[i].replaceWith(document.createTextNode(''));
   }
-  const { childNodes } = content;
-  const l = childNodes.length;
-  return set(cache, template, cel(
-    content,
-    entries,
-    l === 1 && childNodes[0].nodeType === COMMENT_NODE ? 0 : l
-  ));
+  const l = content.childNodes.length;
+  return set(cache, template, cel(content, entries, l === 1 && comment ? 0 : l));
 };
 
 /** @type {WeakMap<TemplateStringsArray, Resolved>} */
