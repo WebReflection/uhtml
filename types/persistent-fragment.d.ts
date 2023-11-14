@@ -5,6 +5,7 @@ export class PersistentFragment extends DocumentFragment {
     get firstChild(): any;
     get lastChild(): any;
     get parentNode(): any;
+    remove(): void;
     replaceWith(node: any): void;
     valueOf(): this;
     #private;
