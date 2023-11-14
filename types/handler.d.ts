@@ -17,7 +17,7 @@ export class hole<T> {
     constructor(this: import("./literals.js").HoleDetails, node: Node, value: T);
     n: Object;
 }
-export function array<T>(node: Node, value: T, _: string, prev: Node[]): T;
+export function array(node: Node, value: Node[], _: string, prev: Node[]): Node[];
 export const attr: Map<string, <T>(element: Element, value: T) => T>;
 export function attribute(element: HTMLElement | SVGElement, name: string, svg: boolean): <T>(element: Element, value: T, name: string) => T;
 export function text<T>(element: Element, value: T): T;

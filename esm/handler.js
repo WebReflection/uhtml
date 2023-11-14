@@ -127,17 +127,16 @@ const toggle = (element, value, name) => {
 };
 
 /**
- * @template T
  * @param {Node} node
- * @param {T} value
+ * @param {Node[]} value
  * @param {string} _
  * @param {Node[]} prev
- * @returns {T}
+ * @returns {Node[]}
  */
 export const array = (node, value, _, prev) => {
   if (value.length)
     return udomdiff(node.parentNode, prev, value, diffFragment, node);
-  else if (prev.length)
+  if (prev.length)
     drop(prev[0], prev.at(-1), false);
   return empty;
 };
