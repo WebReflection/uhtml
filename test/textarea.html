@@ -15,10 +15,11 @@
   };
 
   const update = () => render(document.body, html`
-    <textarea oninput=${updateText} value=${text}/>
+    <textarea oninput=${updateText} value=${text} />
     <br>
     <button onclick=${clear}>clear</button>
     <div>Text: ${text}</div>
+    <textarea>${text || null}</textarea>
   `);
 
   update();

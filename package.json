@@ -11,6 +11,7 @@
     "server": "npx static-handler .",
     "size": "echo \"index $(cat index.js | brotli | wc -c)\";echo \"keyed $(cat keyed.js | brotli | wc -c)\";echo \"node  $(cat node.js | brotli | wc -c)\";",
     "test": "c8 node test/coverage.js",
+    "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
     "ts": "tsc -p ."
   },
   "keywords": [
