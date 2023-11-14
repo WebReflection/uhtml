@@ -176,7 +176,7 @@ export const attribute = (element, name, svg) => {
  * @returns {T}
  */
 export const text = (element, value) => {
-  element.texContent = value == null ? '' : value;
+  element.textContent = value == null ? '' : value;
   return value;
 };
 
