@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>uhtml Custom Element example</title>
+    <script type="module">
+      import { render, html } from '../index.js';
+      
+      class HelloShadow extends HTMLElement {
+        #count = 0;
+        constructor() {
+          super().attachShadow({ mode: 'open' });
+          this.render();
+        }
+        render() {
+          render(this.shadowRoot, html`
+            <strong>
+              Hello shadow my old friend!
+            </strong>
+            <button @click=${this}>
+              clicks ${this.#count}
+            </button>
+          `);
+          return this;
+        }
+        handleEvent() {
+          this.#count++;
+          this.render();
+        }
+      };
+
+      customElements.define('hello-shadow', HelloShadow);
+    </script>
+</head>
+<body>
+  <hello-shadow />
+</body>
+</html>

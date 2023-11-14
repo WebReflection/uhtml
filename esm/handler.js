@@ -33,10 +33,10 @@ const at = (element, value, name) => {
   if (!listeners) listeners = new WeakMap;
   const known = listeners.get(element) || set(listeners, element, {});
   let current = known[name];
-  if (current && current[0]) element.removeEventListener(...current);
+  if (current && current[0]) element.removeEventListener(name, ...current);
   current = isArray(value) ? value : [value, false];
   known[name] = current;
-  if (current[0]) element.addEventListener(...current);
+  if (current[0]) element.addEventListener(name, ...current);
   return value;
 };
 
