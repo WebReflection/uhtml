@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="../index.js"></script>
-  <script>
-  const {render, html} = uhtml;
+  <script type="module">
+  import {render, html, htmlFor} from '../keyed.js';
 
   const update = (items) => {
     const ref = document.querySelector('.list-items');
@@ -13,7 +12,7 @@
       <ul>
         ${items.map(
           ({id, name}) =>
-            html.for(ref, id)`<li data-id=${id}>${name}</li>`
+            htmlFor(ref, id)`<li data-id=${id}>${name}</li>`
         )}
       </ul>`
     );
@@ -25,23 +24,21 @@
     {id: 3, name: 'Article Z'},
   ];
 
-  this.onload = () => {
-    update(items);
-    let i = setInterval(
-      (randomly) => {
-        items.sort(randomly);
-        try {
-          update(items);
-        }
-        catch(error) {
-          clearInterval(i);
-          throw error;
-        }
-      },
-      100,
-      () => Math.random() - Math.random()
-    );
-  };
+  update(items);
+  let i = setInterval(
+    (randomly) => {
+      items.sort(randomly);
+      try {
+        update(items);
+      }
+      catch(error) {
+        clearInterval(i);
+        throw error;
+      }
+    },
+    100,
+    () => Math.random() - Math.random()
+  );
 
   </script>
 </head>

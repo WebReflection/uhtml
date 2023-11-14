@@ -578,3 +578,27 @@ update(2);
 
   </div>
 </details>
+
+<details>
+  <summary><strong>does this work with signals ?</strong></summary>
+  <div markdown=1>
+
+Absolutely! If a render is within an *effect* or a *computed* function and any of the signals changes after some event, everything just works as expected.
+
+```js
+import { effect, signal } from 'https://unpkg.com/usignal';
+import { render, html } from 'https://unpkg.com/uhtml';
+
+const count = signal(0);
+
+effect(() => {
+  render(document.body, html`
+    <button onclick=${() => { count.value++ }}>
+      ${count.value}
+    </button>
+  `);
+});
+```
+
+  </div>
+</details>

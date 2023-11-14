@@ -5,8 +5,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script type="module">
-  import {effect, signal} from 'https://unpkg.com/usignal';
-  import {render, html} from '../esm.js';
+  import { effect, signal } from 'https://unpkg.com/usignal';
+  import { render, html } from '../index.js';
 
   const count = signal(0);
 
@@ -19,14 +19,11 @@
   effect(() => {
     render(document.body, html`
       ${Button('-', -1)}
-        <input type="number" disabled value=${count}>
-        ${count}
+        <input type="number" disabled value=${count.value}>
+        ${count.value}
       ${Button('+', 1)}
     `);
   });
   </script>
 </head>
-<body>
-  
-</body>
 </html>

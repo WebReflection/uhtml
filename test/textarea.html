@@ -1,8 +1,6 @@
 <!DOCTYPE html>
-<script src="../index.js"></script>
-<script>
-this.onload = () => {
-  const {render, html} = uhtml;
+<script type="module">
+  import {render, html} from '../index.js';
 
   let text = '';
 
@@ -17,12 +15,11 @@ this.onload = () => {
   };
 
   const update = () => render(document.body, html`
-    <textarea oninput=${updateText} .value=${text}/>
+    <textarea oninput=${updateText} value=${text}/>
     <br>
     <button onclick=${clear}>clear</button>
     <div>Text: ${text}</div>
   `);
 
   update();
-};
 </script>

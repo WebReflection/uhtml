@@ -1,19 +1,16 @@
 <!doctype html>
 <!-- https://github.com/Polymer/lit-html/issues/1052 -->
-<script src="../index.js"></script>
-<script>
-const {render, html} = uhtml;
+<script type="module">
+import {render, html} from '../index.js';
 
 const someArray = ['a', 'b', 'c'];
 const selected = (Math.random() * someArray.length) | 0;
 
-this.onload = () => {
-  render(document.body, html`
-    <select>
-      ${someArray.map((value, i) => html`
-        <option .selected=${i === selected}>${value}</option>
-      `)}
-    </select>
-  `);
-};
+render(document.body, html`
+  <select>
+    ${someArray.map((value, i) => html`
+      <option selected=${i === selected}>${value}</option>
+    `)}
+  </select>
+`);
 </script>

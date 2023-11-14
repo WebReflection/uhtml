@@ -6,7 +6,7 @@
   <title>Document</title>
   <script type="module">
   // npx ucdn --debug
-  import {render, html, svg} from '../esm.js';
+  import {render, html, svg} from '../index.js';
 
   const dispatch = (id, detail) => () => {
     document.dispatchEvent(new CustomEvent(id, {detail}));
@@ -16,8 +16,8 @@
     <object
         height="100px"
         type="image/svg+xml"
-        data=${path}
         onload=${dispatch(id)}
+        .data=${path}
     />
   `;
 
