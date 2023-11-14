@@ -1,16 +1,11 @@
 const {DOMParser, HTMLElement} = require('linkedom');
 
 const document = (new DOMParser).parseFromString('<html />', 'text/html');
-const DocumentFragment = document.createDocumentFragment().constructor;
-
 const { prototype } = document.createRange().constructor;
 const { selectNode } = prototype;
 prototype.selectNodeContents = selectNode;
 
-const { render, html, svg, htmlFor } = require('../cjs/init.js').default({
-  document,
-  DocumentFragment
-});
+const { render, html, svg, htmlFor } = require('../cjs/init.js').default(document);
 
 const htmlNode = (template, ...values) => htmlFor({})(template, ...values);
 
@@ -214,8 +209,5 @@ render(body, withComplexHandler([() => {}, { once: true }]));
 render(body, withComplexHandler([null, { once: true }]));
 render(body, withComplexHandler([void 0, { once: true }]));
 
-const uhtml = require('../cjs/init.js').default({
-  document,
-  DocumentFragment
-});
+const uhtml = require('../cjs/init.js').default(document);
 uhtml.render(body, uhtml.html`<last test=${123}>${456}</last>`);

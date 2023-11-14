@@ -1,11 +1,13 @@
 
 // ⚠️ WARNING - THIS FILE IS AN ARTIFACT - DO NOT EDIT
 /**
- * @param {{document:Document, DocumentFragment:DocumentFragment}}
+ * @param {Document} document
  * @returns {import("./keyed.js")}
  */
-export default ({ document, DocumentFragment }) => (function (exports) {
+export default document => (function (exports) {
   'use strict';
+
+  const { constructor: DocumentFragment } = document.createDocumentFragment();
 
   const { isArray } = Array;
 

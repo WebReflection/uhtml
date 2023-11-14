@@ -13,3 +13,27 @@
 **[Documentation](https://webreflection.github.io/uhtml/)**
 
 **[Release Notes](https://github.com/WebReflection/uhtml/pull/86)**
+
+- - -
+
+### Exports
+
+  * `uhtml` as default `{ Hole, render, html, svg, attr }` with smart auto-keyed nodes - read [keyed or not keyed](https://webreflection.github.io/uhtml/#tag) to know more
+  * `uhtml/keyed` with extras `{ Hole, render, html, svg, htmlFor, svgFor, attr }`, providing keyed utilities - read [keyed or not keyed](https://webreflection.github.io/uhtml/#tag) to know more
+  * `uhtml/node` with *same default* exports but it's for *one-off* nodes creation only so that no cache or updates are available and it's just an easy way to hook *uhtml* into your existing project for DOM creation (not manipulation!)
+  * `uhtml/init` which returns a default `document => uhtml/keyed` utility that can be bootstrapped with [LinkeDOM](https://github.com/WebReflection/linkedom), [JSDOM](https://github.com/jsdom/jsdom), or *Workers* support
+
+**uhtml/init example**
+
+```js
+import init from 'uhtml/init';
+import mockedDocument from '...';
+
+const {
+  Hole,
+  render,
+  html, svg,
+  htmlFor, svgFor,
+  attr
+} = init(mockedDocument);
+```
