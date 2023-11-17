@@ -444,6 +444,14 @@ export default document => (function (exports) {
     /* c8 ignore stop */return b;
   };
 
+  const setAttribute = (element, name, value) => {
+    element.setAttribute(name, value);
+  };
+
+  const removeAttribute = (element, name) => {
+    element.removeAttribute(name);
+  };
+
   /**
    * @template T
    * @param {Element} element
@@ -454,11 +462,13 @@ export default document => (function (exports) {
     for (const key in value) {
       const $ = value[key];
       const name = key === 'role' ? key : `aria-${key}`;
-      if ($ == null) element.removeAttribute(name);
-      else element.setAttribute(name, $);
+      if ($ == null) removeAttribute(element, name);
+      else setAttribute(element, name, $);
     }
     return value;
   };
+
+  const arrayComment = () => array;
 
   let listeners;
 
@@ -483,11 +493,42 @@ export default document => (function (exports) {
 
   /**
    * @template T
+   * @this {import("./literals.js").HoleDetails}
+   * @param {Node} node
+   * @param {T} value
+   * @returns {T}
+   */
+  function hole(node, value) {
+    const n = this.n || (this.n = node);
+    switch (typeof value) {
+      case 'string':
+      case 'number':
+      case 'boolean': {
+        if (n !== node) n.replaceWith((this.n = node));
+        this.n.data = value;
+        break;
+      }
+      case 'object':
+      case 'undefined': {
+        if (value == null) (this.n = node).data = '';
+        else this.n = value.valueOf();
+        n.replaceWith(this.n);
+        break;
+      }
+    }
+    return value;
+  }
+  const boundComment = () => hole.bind(comment());
+
+  /**
+   * @template T
    * @param {Element} element
    * @param {T} value
    * @returns {T}
    */
-  const className = (element, value) => direct(element, value, 'className');
+  const className = (element, value) => maybeDirect(
+    element, value, value == null ? 'class' : 'className'
+  );
 
   /**
    * @template T
@@ -526,13 +567,26 @@ export default document => (function (exports) {
    * @template T
    * @param {Element} element
    * @param {T} value
+   * @param {string} name
    * @returns {T}
    */
-  const ref = (element, value) => {
-    if (typeof value === 'function') value(element);
-    else value.current = element;
-    return value;
-  };
+  const maybeDirect = (element, value, name) => (
+    value == null ?
+      (removeAttribute(element, name), value) :
+      direct(element, value, name)
+  );
+
+  /**
+   * @template T
+   * @param {Element} element
+   * @param {T} value
+   * @returns {T}
+   */
+  const ref = (element, value) => (
+    (typeof value === 'function' ?
+      value(element) : (value.current = element)),
+    value
+  );
 
   /**
    * @template T
@@ -541,11 +595,12 @@ export default document => (function (exports) {
    * @param {string} name
    * @returns {T}
    */
-  const regular = (element, value, name) => {
-    if (value == null) element.removeAttribute(name);
-    else element.setAttribute(name, value);
-    return value;
-  };
+  const regular = (element, value, name) => (
+    (value == null ?
+      removeAttribute(element, name) :
+      setAttribute(element, name, value)),
+    value
+  );
 
   /**
    * @template T
@@ -553,7 +608,11 @@ export default document => (function (exports) {
    * @param {T} value
    * @returns {T}
    */
-  const style = (element, value) => direct(element.style, value, 'cssText');
+  const style = (element, value) => (
+    value == null ?
+      maybeDirect(element, value, 'style') :
+      direct(element.style, value, 'cssText')
+  );
 
   /**
    * @template T
@@ -562,10 +621,10 @@ export default document => (function (exports) {
    * @param {string} name
    * @returns {T}
    */
-  const toggle = (element, value, name) => {
-    element.toggleAttribute(name.slice(1), value);
-    return value;
-  };
+  const toggle = (element, value, name) => (
+    element.toggleAttribute(name.slice(1), value),
+    value
+  );
 
   /**
    * @param {Node} node
@@ -574,13 +633,11 @@ export default document => (function (exports) {
    * @param {Node[]} prev
    * @returns {Node[]}
    */
-  const array = (node, value, _, prev) => {
-    if (value.length)
-      return udomdiff(node.parentNode, prev, value, diffFragment, node);
-    if (prev.length)
-      drop(prev[0], prev.at(-1), false);
-    return empty;
-  };
+  const array = (node, value, _, prev) => (
+    value.length ?
+      udomdiff(node.parentNode, prev, value, diffFragment, node) :
+      (drop(prev[0], prev.at(-1), false), empty)
+  );
 
   const attr = new Map([
     ['aria', aria],
@@ -604,7 +661,12 @@ export default document => (function (exports) {
       default: return (
         /* c8 ignore start */ svg || ('ownerSVGElement' in element) /* c8 ignore stop */ ?
           (name === 'ref' ? ref : regular) :
-          (attr.get(name) || (name in element ? direct : regular))
+          (attr.get(name) || (
+            name in element ?
+              (name.startsWith('on') ? direct : maybeDirect) :
+              regular
+            )
+          )
       );
     }
   };
@@ -615,38 +677,10 @@ export default document => (function (exports) {
    * @param {T} value
    * @returns {T}
    */
-  const text = (element, value) => {
-    element.textContent = value == null ? '' : value;
-    return value;
-  };
-
-  /**
-   * @template T
-   * @this {import("./literals.js").HoleDetails}
-   * @param {Node} node
-   * @param {T} value
-   * @returns {T}
-   */
-  function hole(node, value) {
-    const n = this.n || (this.n = node);
-    switch (typeof value) {
-      case 'string':
-      case 'number':
-      case 'boolean': {
-        if (n !== node) n.replaceWith((this.n = node));
-        this.n.data = value;
-        break;
-      }
-      case 'object':
-      case 'undefined': {
-        if (value == null) (this.n = node).data = '';
-        else this.n = value.valueOf();
-        n.replaceWith(this.n);
-        break;
-      }
-    }
-    return value;
-  }
+  const text = (element, value) => (
+    (element.textContent = value == null ? '' : value),
+    value
+  );
 
   let template = document.createElement('template'), svg$1, range;
 
@@ -694,9 +728,6 @@ export default document => (function (exports) {
     return path;
   };
 
-  const boundComment = () => hole.bind(comment());
-  const arrayComment = () => array;
-
   /**
    * @param {TemplateStringsArray} template
    * @param {boolean} xml
@@ -728,7 +759,7 @@ export default document => (function (exports) {
             if (!path) path = createPath(node);
             const name = node.getAttribute(search);
             entries.push(entry(ATTRIBUTE_NODE, path, attribute(node, name, xml), name));
-            node.removeAttribute(search);
+            removeAttribute(node, search);
             search = `${prefix}${i++}`;
           }
           if (

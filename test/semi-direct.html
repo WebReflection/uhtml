@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+    import { render, html } from '../index.js';
+
+    const div = (name, style) => html`<div class=${name} style=${style}>OK</div>`;
+    render(document.body, div('test', 'border:1px solid black'));
+    setTimeout(() => {
+      render(document.body, div(null));
+      setTimeout(() => {
+        render(document.body, div('other', ''));
+        setTimeout(video, 2000);
+      }, 2000);
+    }, 2000);
+
+    function video() {
+      const video = poster => html`<video poster=${poster} />`;
+      render(document.body, video('../docs/uhtml-head.jpg'));
+      setTimeout(() => {
+        render(document.body, video(null));
+        setTimeout(() => {
+          render(document.body, video(''));
+        }, 2000);
+    }, 2000);
+    }
+  </script>
+</head>
+</html>

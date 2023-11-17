@@ -114,7 +114,7 @@ const fnReference = node => { fnReference.node = node; };
 render(div, html`<div ref=${fnReference}>test</div>`);
 console.assert(fnReference.node === div.firstElementChild);
 
-const withHandler = handler => html`<div onClick=${handler} />`;
+const withHandler = handler => html`<div onclick=${handler} />`;
 render(div, withHandler(Object));
 render(div, withHandler(Object));
 render(div, withHandler(String));
@@ -150,9 +150,13 @@ try {
   console.assert(false, 'broken template is not breaking');
 } catch (OK) {}
 
-const otherWire = content => html`<div>${content}</div>`;
-render(div, otherWire('test'));
-render(div, otherWire('test'));
+const otherWire = (className, text, content) => html`<div class=${className} style=${text}>${content}</div>`;
+render(div, otherWire('some', 'border:1px solid black', 'test'));
+console.assert(div.firstElementChild.className === 'some', 'semiDirect set');
+render(div, otherWire(null, null, 'test'));
+console.assert(!div.firstElementChild.hasAttribute('class'), 'semiDirect null');
+render(div, otherWire('other', '', 'test'));
+console.assert(div.firstElementChild.className === 'other', 'semiDirect set again');
 render(div, otherWire(document.createElement('p')));
 
 const sameAttribute = value => html`<div test=${value} />`;

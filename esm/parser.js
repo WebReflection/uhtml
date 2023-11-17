@@ -3,9 +3,9 @@ import { TEXT_ELEMENTS } from 'domconstants/re';
 import parser from '@webreflection/uparser';
 
 import { empty, isArray, set } from './utils.js';
-import { cel, comment, entry } from './literals.js';
+import { cel, entry } from './literals.js';
 
-import { array, attribute, text, hole } from './handler.js';
+import { attribute, text, arrayComment, boundComment, removeAttribute } from './handler.js';
 import createContent from './create-content.js';
 
 /** @typedef {import("./literals.js").Entry} Entry */
@@ -31,9 +31,6 @@ const createPath = node => {
   }
   return path;
 };
-
-const boundComment = () => hole.bind(comment());
-const arrayComment = () => array;
 
 /**
  * @param {TemplateStringsArray} template
@@ -66,7 +63,7 @@ const resolve = (template, values, xml) => {
           if (!path) path = createPath(node);
           const name = node.getAttribute(search);
           entries.push(entry(ATTRIBUTE_NODE, path, attribute(node, name, xml), name));
-          node.removeAttribute(search);
+          removeAttribute(node, search);
           search = `${prefix}${i++}`;
         }
         if (
