@@ -200,12 +200,12 @@ Every attribute that doesn't have a specialized syntax prefix, such as `?`, `@` 
 
   * if the exported `attr` *Map* knows the attribute, a callback related to it will be used to update
     * `aria` attribute accepts and handle an object literal with `role` and other *aria* attributes
-    * `class` attribute handles a direct `element.className` assignment
+    * `class` attribute handles a direct `element.className` assignment or remove the attribute if the value is either `null` or `undefined`
     * `data` attribute accepts and handle an object literal with `dataset` names to directly set to the node
     * `ref` attribute handles *React* like *ref* property by updating the `ref.current` value to the current node, or invoking `ref(element)` when it's a callback
-    * `style` attribute handles a direct `element.style.cssText` assignment
+    * `style` attribute handles a direct `element.style.cssText` assignment or remove the attribute if the value is either `null` or `undefined`
     * it is possible to augment the `attr` *Map* with any custom attribute name that doesn't have an already known prefix and it's not part of the already known list (although one could override known attributes too). In this case, `attr.set("my-attr", (element, newValue, name, oldValue) => newValue)` is the expected signature to augment attributes in the wild, as the stack retains only the current value and it will invoke the callback only if the new value is different.
-  * if the attribute is unknown in the `attr` map, a `name in element` check is performed once (per template, not per element) and if that's `true`, a *direct* assignment will be used to update the value
+  * if the attribute is unknown in the `attr` map, a `name in element` check is performed once (per template, not per element) and if that's `true`, a *direct* assignment will be used to update the value, unless the value is either `null` or `undefined`, in which case the attribute is removed if it's *not a listener*, otherwise it drops the listener:
     * `"onclick" in element`, like any other native listener, will directly assign the callback via `element[name] = value`, when `value` is different, providing a way to simplify events handling in the wild
     * `"value" in input`, like any other understood accessor for the currently related node, will directly use `input[name] = value`, when `value` is different
     * `"hidden" in element`, as defined by standard, will also directly set `element[name] = value`, when `value` is different, somehow overlapping with the *boolean* feature
