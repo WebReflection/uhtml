@@ -27,8 +27,8 @@
     "ascjs": "^6.0.3",
     "c8": "^8.0.1",
     "linkedom": "^0.16.4",
-    "rollup": "^4.4.1",
-    "typescript": "^5.2.2"
+    "rollup": "^4.6.0",
+    "typescript": "^5.3.2"
   },
   "module": "./esm/index.js",
   "type": "module",

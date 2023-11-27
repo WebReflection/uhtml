@@ -197,7 +197,7 @@ export const toggle = (element, value, name) => (
 export const array = (node, value, _, prev) => (
   value.length ?
     udomdiff(node.parentNode, prev, value, diffFragment, node) :
-    (drop(prev[0], prev.at(-1), false), empty)
+    (prev.length && drop(prev[0], prev.at(-1), false), empty)
 );
 
 export const attr = new Map([
