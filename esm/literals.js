@@ -8,8 +8,8 @@ import { empty } from './utils.js';
 /** @typedef {import("./persistent-fragment.js").PersistentFragment} PersistentFragment */
 /** @typedef {import("./rabbit.js").Hole} Hole */
 
+/** @typedef {unknown} Value */
 /** @typedef {Node | Element | PersistentFragment} Target */
-/** @typedef {null | undefined | string | number | boolean | Hole | ((...args: unknown[]) => unknown)} Value */
 /** @typedef {null | undefined | string | number | boolean | Node | Element | PersistentFragment} DOMValue */
 
 /**
