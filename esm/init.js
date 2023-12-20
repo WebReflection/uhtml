@@ -38,7 +38,7 @@ export default document => (function (exports) {
   /** @typedef {import("./rabbit.js").Hole} Hole */
 
   /** @typedef {Node | Element | PersistentFragment} Target */
-  /** @typedef {null | undefined | string | number | boolean | Hole} Value */
+  /** @typedef {null | undefined | string | number | boolean | Hole | ((...args: unknown[]) => unknown)} Value */
   /** @typedef {null | undefined | string | number | boolean | Node | Element | PersistentFragment} DOMValue */
 
   /**
@@ -868,17 +868,17 @@ export default document => (function (exports) {
   /** @type {(template: TemplateStringsArray, ...values:Value[]) => Hole} A tag to render SVG content. */
   const svg = tag(true);
 
-  /** @type {WeakMap<Element | DocumentFragment, import("./literals.js").Cache>} */
+  /** @type {WeakMap<Element | DocumentFragment, import("../literals.js").Cache>} */
   const known = new WeakMap;
 
   /**
    * Render with smart updates within a generic container.
    * @template T
    * @param {T} where the DOM node where to render content
-   * @param {() => Hole | Hole} what the hole to render
+   * @param {(() => Hole) | Hole} what the hole to render
    * @returns
    */
-  var renderKeyed = (where, what) => {
+  var keyed$1 = (where, what) => {
     const info = known.get(where) || set(known, where, cache$1(empty));
     const hole = typeof what === 'function' ? what() : what;
     const { n } = info;
@@ -922,7 +922,7 @@ export default document => (function (exports) {
   exports.attr = attr;
   exports.html = html;
   exports.htmlFor = htmlFor;
-  exports.render = renderKeyed;
+  exports.render = keyed$1;
   exports.svg = svg;
   exports.svgFor = svgFor;
 

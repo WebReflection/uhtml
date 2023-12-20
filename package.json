@@ -26,9 +26,9 @@
     "@rollup/plugin-terser": "^0.4.4",
     "ascjs": "^6.0.3",
     "c8": "^8.0.1",
-    "linkedom": "^0.16.4",
-    "rollup": "^4.6.0",
-    "typescript": "^5.3.2"
+    "linkedom": "^0.16.5",
+    "rollup": "^4.9.1",
+    "typescript": "^5.3.3"
   },
   "module": "./esm/index.js",
   "type": "module",
@@ -61,5 +61,13 @@
     "custom-function": "^1.0.6",
     "domconstants": "^1.1.6",
     "udomdiff": "^1.1.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WebReflection/uhtml.git"
+  },
+  "bugs": {
+    "url": "https://github.com/WebReflection/uhtml/issues"
+  },
+  "homepage": "https://github.com/WebReflection/uhtml#readme"
 }

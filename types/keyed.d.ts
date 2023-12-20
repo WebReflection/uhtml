@@ -4,7 +4,7 @@ export type Value = import("./literals.js").Value;
 export type Bound = (ref: any, key: string | number) => Tag;
 export type Tag = (template: TemplateStringsArray, ...values: Value[]) => Target;
 import { Hole } from './rabbit.js';
-import render from './render-keyed.js';
+import render from './render/keyed.js';
 import { html } from './index.js';
 import { svg } from './index.js';
 /** @type {Bound} Returns a bound tag to render HTML content. */
