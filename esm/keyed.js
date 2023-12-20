@@ -3,7 +3,7 @@ import { Hole, unroll } from './rabbit.js';
 import { empty, set } from './utils.js';
 import { html, svg } from './index.js';
 import { attr } from './handler.js';
-import render from './render-keyed.js';
+import render from './render/keyed.js';
 
 /** @typedef {import("./literals.js").Cache} Cache */
 /** @typedef {import("./literals.js").Target} Target */

@@ -20,7 +20,7 @@ export type Type = ATTRIBUTE_NODE | TEXT_NODE | COMMENT_NODE;
 export type PersistentFragment = import("./persistent-fragment.js").PersistentFragment;
 export type Hole = import("./rabbit.js").Hole;
 export type Target = Node | Element | PersistentFragment;
-export type Value = null | undefined | string | number | boolean | Hole;
+export type Value = string | number | boolean | import("./rabbit.js").Hole | ((...args: unknown[]) => unknown);
 export type DOMValue = null | undefined | string | number | boolean | Node | Element | PersistentFragment;
 export type Entry = {
     type: Type;

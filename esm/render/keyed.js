@@ -1,15 +1,15 @@
-import { cache } from './literals.js';
-import { Hole, unroll } from './rabbit.js';
-import { empty, set } from './utils.js';
+import { cache } from '../literals.js';
+import { Hole, unroll } from '../rabbit.js';
+import { empty, set } from '../utils.js';
 
-/** @type {WeakMap<Element | DocumentFragment, import("./literals.js").Cache>} */
+/** @type {WeakMap<Element | DocumentFragment, import("../literals.js").Cache>} */
 const known = new WeakMap;
 
 /**
  * Render with smart updates within a generic container.
  * @template T
  * @param {T} where the DOM node where to render content
- * @param {() => Hole | Hole} what the hole to render
+ * @param {(() => Hole) | Hole} what the hole to render
  * @returns
  */
 export default (where, what) => {

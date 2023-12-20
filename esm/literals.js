@@ -9,7 +9,7 @@ import { empty } from './utils.js';
 /** @typedef {import("./rabbit.js").Hole} Hole */
 
 /** @typedef {Node | Element | PersistentFragment} Target */
-/** @typedef {null | undefined | string | number | boolean | Hole} Value */
+/** @typedef {null | undefined | string | number | boolean | Hole | ((...args: unknown[]) => unknown)} Value */
 /** @typedef {null | undefined | string | number | boolean | Node | Element | PersistentFragment} DOMValue */
 
 /**
