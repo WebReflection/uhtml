@@ -21,13 +21,16 @@
   * `uhtml` as default `{ Hole, render, html, svg, attr }` with smart auto-keyed nodes - read [keyed or not ?](https://webreflection.github.io/uhtml/#keyed-or-not-) paragraph to know more
   * `uhtml/keyed` with extras `{ Hole, render, html, svg, htmlFor, svgFor, attr }`, providing keyed utilities - read [keyed or not ?](https://webreflection.github.io/uhtml/#keyed-or-not-) paragraph to know more
   * `uhtml/node` with *same default* exports but it's for *one-off* nodes creation only so that no cache or updates are available and it's just an easy way to hook *uhtml* into your existing project for DOM creation (not manipulation!)
-  * `uhtml/init` which returns a `document => uhtml/keyed` utility that can be bootstrapped with [LinkeDOM](https://github.com/WebReflection/linkedom), [JSDOM](https://github.com/jsdom/jsdom), or *Workers* support
+  * `uhtml/init` which returns a `document => uhtml/keyed` utility that can be bootstrapped with `uhtml/dom`, [LinkeDOM](https://github.com/WebReflection/linkedom), [JSDOM](https://github.com/jsdom/jsdom) for either *SSR* or *Workers* support
+  * `uhtml/dom` which returns a specialized *uhtml* compliant DOM environment that can be passed to the `uhtml/init` export to have 100% same-thing running on both client or Web Worker / Server. This entry exports `{ Document, DOMParser }` where the former can be used to create a new *document* while the latter one can parse well formed HTML or SVG content and return the document out of the box.
 
 **uhtml/init example**
 
 ```js
 import init from 'uhtml/init';
-import mockedDocument from '...';
+import { Document } from 'uhtml/dom';
+
+const document = new Document;
 
 const {
   Hole,
@@ -35,5 +38,5 @@ const {
   html, svg,
   htmlFor, svgFor,
   attr
-} = init(mockedDocument);
+} = init(document);
 ```

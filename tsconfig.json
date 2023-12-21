@@ -13,5 +13,6 @@
         "esm/init.js",
         "esm/keyed.js",
         "esm/node.js",
+        "esm/dom/index.js",
     ]
 }

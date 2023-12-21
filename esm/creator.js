@@ -28,7 +28,7 @@ export default parse => (
       details[i] = detail(callback(node, values[i], name, empty), callback, node, name);
     }
     return parsed(
-      length === 1 ? root.firstChild : new PersistentFragment(root),
+      length === 1 ? (root.firstChild || current) : new PersistentFragment(root),
       details
     );
   }

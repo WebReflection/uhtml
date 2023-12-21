@@ -1,4 +1,4 @@
-import { newRange } from './utils.js';
+import { SVG_NAMESPACE, newRange } from './utils.js';
 
 let template = document.createElement('template'), svg, range;
 
@@ -10,7 +10,7 @@ let template = document.createElement('template'), svg, range;
 export default (text, xml) => {
   if (xml) {
     if (!svg) {
-      svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg = document.createElementNS(SVG_NAMESPACE, 'svg');
       range = newRange();
       range.selectNodeContents(svg);
     }
