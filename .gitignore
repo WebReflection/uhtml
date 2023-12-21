@@ -1,5 +1,11 @@
 .nyc_output/
 coverage/
 node_modules/
+types/
 cjs/*
 !cjs/package.json
+index.js
+keyed.js
+node.js
+init.js
+esm/init.js

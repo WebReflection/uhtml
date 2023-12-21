@@ -45,7 +45,7 @@ export class PersistentFragment extends custom(DocumentFragment) {
   }
   valueOf() {
     if (this.childNodes.length !== this.#length)
-      this.append(...this.#nodes);
+      this.replaceChildren(...this.#nodes);
     return this;
   }
 }
