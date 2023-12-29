@@ -1,16 +1,14 @@
 import udomdiff from 'udomdiff';
-import { empty, isArray, set } from './utils.js';
+import { empty, gPD, isArray, set } from './utils.js';
 import { diffFragment } from './persistent-fragment.js';
 import { comment } from './literals.js';
 import drop from './range.js';
 
-const setAttribute = (element, name, value) => {
+const setAttribute = (element, name, value) =>
   element.setAttribute(name, value);
-}
 
-export const removeAttribute = (element, name) => {
+export const removeAttribute = (element, name) =>
   element.removeAttribute(name);
-}
 
 /**
  * @template T
@@ -224,7 +222,10 @@ export const attribute = (element, name, svg) => {
         (name === 'ref' ? ref : regular) :
         (attr.get(name) || (
           name in element ?
-            (name.startsWith('on') ? direct : maybeDirect) :
+            (name.startsWith('on') ?
+              direct :
+              (gPD(element, name)?.set ? maybeDirect : regular)
+            ) :
             regular
           )
         )
