@@ -26,8 +26,8 @@
     "@rollup/plugin-terser": "^0.4.4",
     "ascjs": "^6.0.3",
     "c8": "^8.0.1",
-    "linkedom": "^0.16.5",
-    "rollup": "^4.9.1",
+    "linkedom": "^0.16.6",
+    "rollup": "^4.9.2",
     "typescript": "^5.3.3"
   },
   "module": "./esm/index.js",

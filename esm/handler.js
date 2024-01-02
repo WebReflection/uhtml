@@ -185,6 +185,15 @@ export const toggle = (element, value, name) => (
   value
 );
 
+const noDOMDiff = (node, value) => {
+  const nodes = [];
+  for (let i = 0; i < value.length; i++)
+    nodes.push(diffFragment(value[i], 1));
+  nodes.push(node);
+  node.replaceWith(...nodes);
+  return value;
+};
+
 /**
  * @param {Node} node
  * @param {Node[]} value
@@ -194,7 +203,10 @@ export const toggle = (element, value, name) => (
  */
 export const array = (node, value, _, prev) => (
   value.length ?
-    udomdiff(node.parentNode, prev, value, diffFragment, node) :
+    (prev === empty ?
+      noDOMDiff(node, value) :
+      udomdiff(node.parentNode, prev, value, diffFragment, node)
+    ) :
     (prev.length && drop(prev[0], prev.at(-1), false), empty)
 );
 

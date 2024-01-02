@@ -6,7 +6,7 @@
 
 It is entirely Web standards based and it adds just the minimal amount of *spices* to the templates literals it's able to understand and optimized for either repeated updates or one-off operations.
 
-This page describes, without going into too many details, all the features delivered via this module which is roughly 2.5K once minified and compressed, or even bundled within your project.
+This page describes, without going into too many details, all the features delivered via this module which is roughly 2.7K once minified and compressed, or even bundled within your project.
 
 ### Content
 
