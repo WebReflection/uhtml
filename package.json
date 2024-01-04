@@ -4,6 +4,8 @@
   "description": "A micro HTML/SVG render",
   "main": "./cjs/index.js",
   "scripts": {
+    "benchmark:w3c": "node test/benchmark/linkedom.js --w3c; node test/benchmark/linkedom-cached.js --w3c; node test/benchmark/dom.js --w3c",
+    "benchmark:dom": "node test/benchmark/linkedom.js --dom; node test/benchmark/linkedom-cached.js --dom; node test/benchmark/dom.js --dom",
     "build": "npm run rollup:es && node rollup/init.cjs && npm run rollup:init && rm -rf cjs/* && npm run cjs && rm -rf types && npm run ts && npm run test && npm run size",
     "cjs": "ascjs --no-default esm cjs",
     "rollup:es": "rollup --config rollup/es.config.js",
@@ -26,8 +28,7 @@
     "@rollup/plugin-terser": "^0.4.4",
     "ascjs": "^6.0.3",
     "c8": "^8.0.1",
-    "linkedom": "^0.16.5",
-    "rollup": "^4.9.1",
+    "rollup": "^4.9.2",
     "typescript": "^5.3.3"
   },
   "module": "./esm/index.js",
@@ -37,6 +38,11 @@
       "types": "./types/index.d.ts",
       "import": "./esm/index.js",
       "default": "./cjs/index.js"
+    },
+    "./dom": {
+      "types": "./types/dom/index.d.ts",
+      "import": "./esm/dom/index.js",
+      "default": "./cjs/dom/index.js"
     },
     "./init": {
       "types": "./types/init.d.ts",
@@ -60,6 +66,8 @@
     "@webreflection/uparser": "^0.3.3",
     "custom-function": "^1.0.6",
     "domconstants": "^1.1.6",
+    "html-escaper": "^3.0.3",
+    "htmlparser2": "^9.0.0",
     "udomdiff": "^1.1.0"
   },
   "repository": {

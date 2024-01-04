@@ -42,4 +42,12 @@ export default [
       file: './node.js',
     },
   },
+  {
+    plugins,
+    input: './esm/dom/index.js',
+    output: {
+      esModule: true,
+      file: './dom.js',
+    },
+  },
 ];

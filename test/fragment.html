@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+    import { render, html } from '../index.js';
+
+    const fragment = () => html`<p>1</p><p>2</p>`;
+    const wire1 = html`<p /><p />`;
+    const wire2 = html`<div /><div />`;
+    const wire = what => html`${what}`;
+
+    render(document.body, wire([wire1, fragment(), wire2]));
+    render(document.body, wire([wire2, fragment(), wire1]));
+  </script>
+</head>
+</html>

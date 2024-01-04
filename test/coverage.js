@@ -1,10 +1,12 @@
-const {DOMParser, HTMLElement} = require('linkedom');
+import('../esm/dom/index.js').then(({ DOMParser }) => {
 
 const document = (new DOMParser).parseFromString('...', 'text/html');
-const { prototype } = document.createRange().constructor;
-
-// TODO: fix LinkeDOM SVG story
-prototype.selectNodeContents = prototype.selectNode;
+const { constructor: HTMLElement } = document.createElement('e');
+Object.defineProperty(
+  HTMLElement.prototype,
+  'getOnly',
+  { get() { return 'OK' },
+});
 
 const { render, html, svg, htmlFor } = require('../cjs/init.js')(document);
 
@@ -80,7 +82,8 @@ render(div, sameWire([]));
 render(div, sameWire([fragment()]));
 
 render(div, html`<style>${'text only'}</style>`);
-render(div, html`<br />`);
+render(div, html`<br getOnly=${'yup'} />`);
+console.assert(div.firstChild.getAttribute('getOnly') === 'yup');
 
 render(div, variousContent([
   html`<p />`,
@@ -216,3 +219,9 @@ render(body, withComplexHandler([void 0, { once: true }]));
 
 const uhtml = require('../cjs/init.js')(document);
 uhtml.render(body, uhtml.html`<last test=${123}>${456}</last>`);
+
+for (const file of require('fs').readdirSync(`${__dirname}/dom`)) {
+  if (file.endsWith('.js')) import(`${__dirname}/dom/${file}`);
+}
+
+});
