@@ -17,3 +17,8 @@ node.js
 !esm/node.js
 !esm/dom/node.js
 !test/dom/node.js
+reactive.js
+!esm/reactive.js
+!esm/render/reactive.js
+preactive.js
+!test/preactive.js

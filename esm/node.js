@@ -1,9 +1,9 @@
 /*! (c) Andrea Giammarchi - MIT */
+import { attr } from './handler.js';
 
 import create from './creator.js';
 import parser from './parser.js';
 import render from './render/node.js';
-import { attr } from './handler.js';
 
 /** @typedef {import("./literals.js").DOMValue} DOMValue */
 /** @typedef {import("./literals.js").Target} Target */

@@ -11,7 +11,7 @@
     "rollup:es": "rollup --config rollup/es.config.js",
     "rollup:init": "rollup --config rollup/init.config.js",
     "server": "npx static-handler .",
-    "size": "echo \"index $(cat index.js | brotli | wc -c)\";echo \"keyed $(cat keyed.js | brotli | wc -c)\";echo \"node  $(cat node.js | brotli | wc -c)\";",
+    "size": "echo \"index $(cat index.js | brotli | wc -c)\";echo \"keyed $(cat keyed.js | brotli | wc -c)\";echo \"reactive $(cat reactive.js | brotli | wc -c)\";echo \"preactive $(cat preactive.js | brotli | wc -c)\";echo \"node  $(cat node.js | brotli | wc -c)\";",
     "test": "c8 node test/coverage.js",
     "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
     "ts": "tsc -p ."
@@ -59,6 +59,16 @@
       "import": "./esm/node.js",
       "default": "./cjs/node.js"
     },
+    "./reactive": {
+      "types": "./types/reactive.d.ts",
+      "import": "./esm/reactive.js",
+      "default": "./cjs/reactive.js"
+    },
+    "./preactive": {
+      "types": "./types/reactive/preact.d.ts",
+      "import": "./esm/reactive/preact.js",
+      "default": "./cjs/reactive/preact.js"
+    },
     "./package.json": "./package.json"
   },
   "unpkg": "./keyed.js",
@@ -66,6 +76,7 @@
     "@webreflection/uparser": "^0.3.3",
     "custom-function": "^1.0.6",
     "domconstants": "^1.1.6",
+    "gc-hook": "^0.3.0",
     "html-escaper": "^3.0.3",
     "htmlparser2": "^9.0.0",
     "udomdiff": "^1.1.0"
@@ -77,5 +88,8 @@
   "bugs": {
     "url": "https://github.com/WebReflection/uhtml/issues"
   },
-  "homepage": "https://github.com/WebReflection/uhtml#readme"
+  "homepage": "https://github.com/WebReflection/uhtml#readme",
+  "optionalDependencies": {
+    "@preact/signals-core": "^1.5.1"
+  }
 }
