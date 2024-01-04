@@ -30,6 +30,7 @@ You can skip to details directly via the following links:
   * [list](./#list) - to grow or shrink a list of nodes
   * [self closing](./#self-closing) - to simplify life
   * [hole](./#hole) - to represent generic content
+  * [reactivity](./#reactivity) - to understand *uhtml/reactive*
 
 ```
    ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ render
@@ -386,6 +387,100 @@ By current TypeScript definition, a *hole* can be either:
   * `null` or `undefined` to signal that *hole* has currently no content whatsoever
   * an actual `instanceof Hole` exported class, which is what `html` or `svg` tags return once invoked
   * an *array* that contains a list of instances of *Hole* or DOM nodes to deal with
+
+  </div>
+</details>
+
+
+### reactivity
+
+<details open>
+  <summary><strong>reactivity</strong></summary>
+  <div markdown=1>
+
+The [uhtml/reactive](https://cdn.jsdelivr.net/npm/uhtml/reactive.js) export is meant to bring signals to the features *uhtml* can easily handle.
+
+Signals are a primitive used to automatically react to changes, as opposite of remembering to deal manually with re-renders invokes which is all good but not ideal in terms of DX.
+
+To bring your own *signals* based library all you need is to provide an `effect` function which *MUST* return a way to dispose the signal, or bad things might happen if multiple `render(sameNode, () => ...)` are executed, as signals need to *unsubscribe* from the effect when this effect is not needed anymore.
+
+A few libraries out there handily provide out of the box such feature and [@preact/signal-core](https://www.npmjs.com/package/@preact/signals-core) is one of these, also one of the fastest and most battle-tested.
+
+In this example, I am choosing to use [Preact Signals](https://preactjs.com/guide/v10/signals/) to showcase how simple it is to have your own reactive *uhtml*:
+
+```js
+import { effect, signal } from '@preact/signals-core';
+import { reactive, html} from 'uhtml/reactive';
+
+// create the reactive render function
+const render = reactive(effect);
+
+// create signals or computed or ...
+const count = signal(0);
+
+// render in the body passing a () => html`...` callback
+render(document.body, () => html`
+  <button onclick=${() => { count.value++ }}>
+    Clicks: ${count.value}
+  </button>
+`);
+```
+
+You can see the result [live on CodePen](https://codepen.io/WebReflection/pen/RwdrYXZ?editors=0010) to play around with. You click the button, the counter increments, that's it.
+
+### constraints
+
+The *reactive* version of *uhtml* is a drop-in replacement for anything you've done to date and a 1:1 API with other variants, but if signals are meant to be used within a template then the `render` function needs to have a lazy invoke of its content because otherwise signals don't get a chance to subscribe to it.
+
+```js
+// ⚠️ DON'T DO THIS
+render(target, html`${signal.value}`)
+
+// ✔ DO THIS INSTEAD 👍
+render(target, () => html`${signal.value}`)
+```
+
+The refactoring is going to take this much `() =>` refactoring to make signals available to any of your renders and that's pretty much the end of the story.
+
+### about the effect callback
+
+Not really a caveat or constrain, rather a *MUST* have, the `effect` function should return a way to dispose (erase subscriptions, cancel reactions to that effect) the effect.
+
+This module is written well enough to deal with memory leaks and garbage collector all over, but if an effect cannot be dismissed somehow, this module won't work because it expects to be able to drop a previously used effect.
+
+The reason is simple: if your are rendering again, for whatever reason, the same container, previous effects can't suddenly re-invoke the previous render callback and its content, or big FOUC and other issues can easily happen unintentionally.
+
+In few words, if your *signals* library of choice doesn't return, within the `effect` function, a way to dispose it, you are in charge of wrapping such library in a way that the single `effect` callback passed to `reactive(effect)` returns a utility to dispose such effect.
+
+If such utility doesn't exist, I suggest you to change the *signals* based library you are using, as it's clearly a memory and error prone leak solution unless it already handles everything internally but it doesn't give any easy option to consumers.
+
+In other cases, I think you can provide good guards around most common libraries out there:
+
+#### SolidJS
+
+```js
+import { createEffect, createRoot, createSignal }from 'solid-js';
+import { reactive, html} from 'uhtml/reactive';
+
+const render = reactive(
+  callback => createRoot(
+    dispose => {
+      createEffect(callback);
+      return dispose;
+    }
+  )
+);
+
+const [count, update] = createSignal(0);
+
+render(document.body, () => html`
+  <button onclick=${() => { update(count() + 1) }}>
+    Clicks: ${count()}
+  </button>
+`);
+```
+
+This demo is also [live on CodePen](https://codepen.io/WebReflection/pen/QWoyZre?editors=0010).
 
   </div>
 </details>
