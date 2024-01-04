@@ -2,7 +2,6 @@ import udomdiff from 'udomdiff';
 import { empty, gPD, isArray, set } from './utils.js';
 import { diffFragment } from './persistent-fragment.js';
 import { comment } from './literals.js';
-import drop from './range.js';
 
 const setAttribute = (element, name, value) =>
   element.setAttribute(name, value);
@@ -192,10 +191,12 @@ export const toggle = (element, value, name) => (
  * @param {Node[]} prev
  * @returns {Node[]}
  */
-export const array = (node, value, _, prev) => (
-  value.length ?
-    udomdiff(node.parentNode, prev, value, diffFragment, node) :
-    (prev.length && drop(prev[0], prev.at(-1), false), empty)
+export const array = (node, value, _, prev) => udomdiff(
+  node.parentNode,
+  prev,
+  value.length ? value : empty,
+  diffFragment,
+  node
 );
 
 export const attr = new Map([

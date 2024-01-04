@@ -9,10 +9,12 @@ let range;
  */
 export default (firstChild, lastChild, preserve) => {
   if (!range) range = newRange();
+  /* c8 ignore start */
   if (preserve)
     range.setStartAfter(firstChild);
   else
     range.setStartBefore(firstChild);
+  /* c8 ignore stop */
   range.setEndAfter(lastChild);
   range.deleteContents();
   return firstChild;

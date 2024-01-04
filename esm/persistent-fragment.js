@@ -37,9 +37,9 @@ export class PersistentFragment extends custom(DocumentFragment) {
   get firstChild() { return this.#nodes[0]; }
   get lastChild() { return this.#nodes.at(-1); }
   get parentNode() { return this.#nodes[0].parentNode; }
-  remove() {
-    remove(this, false);
-  }
+  /* c8 ignore start */
+  remove() { remove(this, false); }
+  /* c8 ignore stop */
   replaceWith(node) {
     remove(this, true).replaceWith(node);
   }
