@@ -1,4 +1,3 @@
-/*! (c) Andrea Giammarchi - MIT */
 import { Hole, html, svg, htmlFor, svgFor, attr } from './keyed.js';
 
 import reactive from './render/reactive.js';
