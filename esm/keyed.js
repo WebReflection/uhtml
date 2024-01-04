@@ -1,8 +1,10 @@
-import { cache } from './literals.js';
+/*! (c) Andrea Giammarchi - MIT */
 import { Hole, unroll } from './rabbit.js';
+import { attr } from './handler.js';
+import { cache } from './literals.js';
 import { empty, set } from './utils.js';
 import { html, svg } from './index.js';
-import { attr } from './handler.js';
+
 import render from './render/keyed.js';
 
 /** @typedef {import("./literals.js").Cache} Cache */

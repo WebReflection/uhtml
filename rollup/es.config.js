@@ -44,6 +44,22 @@ export default [
   },
   {
     plugins,
+    input: './esm/reactive.js',
+    output: {
+      esModule: true,
+      file: './reactive.js',
+    },
+  },
+  {
+    plugins,
+    input: './esm/reactive/preact.js',
+    output: {
+      esModule: true,
+      file: './preactive.js',
+    },
+  },
+  {
+    plugins,
     input: './esm/dom/index.js',
     output: {
       esModule: true,

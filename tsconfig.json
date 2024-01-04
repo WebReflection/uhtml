@@ -13,6 +13,8 @@
         "esm/init.js",
         "esm/keyed.js",
         "esm/node.js",
+        "esm/reactive.js",
+        "esm/reactive/preact.js",
         "esm/dom/index.js",
     ]
 }

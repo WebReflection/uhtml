@@ -1,7 +1,7 @@
 /*! (c) Andrea Giammarchi - MIT */
-
 import { Hole } from './rabbit.js';
 import { attr } from './handler.js';
+
 import render from './render/hole.js';
 
 /** @typedef {import("./literals.js").Value} Value */

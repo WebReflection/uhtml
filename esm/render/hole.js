@@ -1,5 +1,5 @@
-import { cache } from '../literals.js';
 import { unroll } from '../rabbit.js';
+import { cache } from '../literals.js';
 import { empty, set } from '../utils.js';
 
 /** @typedef {import("../rabbit.js").Hole} Hole */
