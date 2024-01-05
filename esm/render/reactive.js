@@ -1,6 +1,8 @@
 import { create, drop } from 'gc-hook';
 
-import render from './keyed.js';
+import render from './shared.js';
+
+/** @typedef {import("../rabbit.js").Hole} Hole */
 
 /** @type {WeakMap<Element | DocumentFragment, Function>} */
 const effects = new WeakMap;
@@ -29,13 +31,13 @@ export default effect => {
     }
     if (typeof what === 'function') {
       const wr = new WeakRef(where);
-      dispose = effect(() => { render(wr.deref(), what) });
+      dispose = effect(() => { render(wr.deref(), what(), false) });
       effects.set(where, dispose);
       return create(dispose, onGC, { return: where });
     }
     else {
       effects.delete(where);
-      return render(where, what);
+      return render(where, what, false);
     }
   };
 };

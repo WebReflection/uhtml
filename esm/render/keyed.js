@@ -1,9 +1,6 @@
-import { Hole, unroll } from '../rabbit.js';
-import { cache } from '../literals.js';
-import { empty, set } from '../utils.js';
+import render from './shared.js';
 
-/** @type {WeakMap<Element | DocumentFragment, import("../literals.js").Cache>} */
-const known = new WeakMap;
+/** @typedef {import("../rabbit.js").Hole} Hole */
 
 /**
   * Render with smart updates within a generic container.
@@ -12,12 +9,4 @@ const known = new WeakMap;
   * @param {(() => Hole) | Hole} what the hole to render
   * @returns
   */
-export default (where, what) => {
-  const info = known.get(where) || set(known, where, cache(empty));
-  const hole = typeof what === 'function' ? what() : what;
-  const { n } = info;
-  const node = hole instanceof Hole ? unroll(info, hole) : hole;
-  if (n !== node)
-    where.replaceChildren((info.n = node));
-  return where;
-};
+export default (where, what) => render(where, what, true);
