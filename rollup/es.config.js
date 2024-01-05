@@ -60,6 +60,14 @@ export default [
   },
   {
     plugins,
+    input: './esm/reactive/signal.js',
+    output: {
+      esModule: true,
+      file: './signal.js',
+    },
+  },
+  {
+    plugins,
     input: './esm/dom/index.js',
     output: {
       esModule: true,

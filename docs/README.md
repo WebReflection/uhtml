@@ -428,21 +428,28 @@ render(document.body, () => html`
 
 You can see the result [live on CodePen](https://codepen.io/WebReflection/pen/RwdrYXZ?editors=0010) to play around with. You click the button, the counter increments, that's it.
 
-Alternatively, you can check [uhtml/preactive](https://codepen.io/WebReflection/pen/gOEPBxj?editors=0010) out of the box too, it basically bundles the same behind the scene.
+### pre bundled exports
+
+To simplify everyone life, I've pre-bundled some signals based library and published these in npm:
+
+  * **[uhtml/preactive](https://cdn.jsdelivr.net/npm/uhtml/preactive.js)** already contains `@preact/signals-core` and it's probably the most bullet proof, or battle tested, solution
+  * **[uhtml/signal](https://cdn.jsdelivr.net/npm/uhtml/signal.js)** already contains `@webreflection/signal` and it's surely the smallest bundle out there, with a total size of 3.3KB. The exports are very similar to the *Preact* one so either options are a drop-in replacement. Start small with this to experiment and feel free to switch to *preactive* any time later on
 
 ### constraints
 
 The *reactive* version of *uhtml* is a drop-in replacement for anything you've done to date and a 1:1 API with other variants, but if signals are meant to be used within a template then the `render` function needs to have a lazy invoke of its content because otherwise signals don't get a chance to subscribe to it.
 
 ```js
-// ⚠️ DON'T DO THIS
+// ⚠️ DOES NOT CREATE AN EFFECT
 render(target, html`${signal.value}`)
 
-// ✔ DO THIS INSTEAD 👍
+// ✔ CREATE AN EFFECT 👍
 render(target, () => html`${signal.value}`)
 ```
 
-The refactoring is going to take this much `() =>` refactoring to make signals available to any of your renders and that's pretty much the end of the story.
+The refactoring is going to take this much `() =>` time to make signals available to any of your renders and that's pretty much the end of the story.
+
+Please note that components that are meant to be rendered within other components, and not stand-alone, passing a non callback as second argument might be even desired so that only the outer top-most render would react to changes.
 
 ### about the effect callback
 

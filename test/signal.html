@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>uhtml/signal</title>
+  <script type="module">
+
+    import { render, html, signal } from '../signal.js';
+
+    const count = signal(0);
+
+    render(document.body, () => html`
+      <button onclick=${() => { count.value++ }}>
+        Clicks: ${count.value}
+      </button>
+    `);
+  </script>
+</head>
+</html>

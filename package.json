@@ -1,6 +1,6 @@
 {
   "name": "uhtml",
-  "version": "4.3.2",
+  "version": "4.3.3",
   "description": "A micro HTML/SVG render",
   "main": "./cjs/index.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "rollup:es": "rollup --config rollup/es.config.js",
     "rollup:init": "rollup --config rollup/init.config.js",
     "server": "npx static-handler .",
-    "size": "echo \"index $(cat index.js | brotli | wc -c)\";echo \"keyed $(cat keyed.js | brotli | wc -c)\";echo \"reactive $(cat reactive.js | brotli | wc -c)\";echo \"preactive $(cat preactive.js | brotli | wc -c)\";echo \"node  $(cat node.js | brotli | wc -c)\";",
+    "size": "echo \"index $(cat index.js | brotli | wc -c)\";echo \"keyed $(cat keyed.js | brotli | wc -c)\";echo \"reactive $(cat reactive.js | brotli | wc -c)\";echo \"preactive $(cat preactive.js | brotli | wc -c)\";echo \"signal $(cat signal.js | brotli | wc -c)\";echo \"node  $(cat node.js | brotli | wc -c)\";",
     "test": "c8 node test/coverage.js",
     "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
     "ts": "tsc -p ."
@@ -90,6 +90,7 @@
   },
   "homepage": "https://github.com/WebReflection/uhtml#readme",
   "optionalDependencies": {
-    "@preact/signals-core": "^1.5.1"
+    "@preact/signals-core": "^1.5.1",
+    "@webreflection/signal": "^2.0.0"
   }
 }
