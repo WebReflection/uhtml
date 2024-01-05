@@ -428,6 +428,8 @@ render(document.body, () => html`
 
 You can see the result [live on CodePen](https://codepen.io/WebReflection/pen/RwdrYXZ?editors=0010) to play around with. You click the button, the counter increments, that's it.
 
+Alternatively, you can check [uhtml/preactive](https://codepen.io/WebReflection/pen/gOEPBxj?editors=0010) out of the box too, it basically bundles the same behind the scene.
+
 ### constraints
 
 The *reactive* version of *uhtml* is a drop-in replacement for anything you've done to date and a 1:1 API with other variants, but if signals are meant to be used within a template then the `render` function needs to have a lazy invoke of its content because otherwise signals don't get a chance to subscribe to it.

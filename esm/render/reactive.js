@@ -25,9 +25,15 @@ export default effect => {
       drop(dispose);
       dispose();
     }
-    const wr = new WeakRef(where);
-    dispose = effect(() => { render(wr.deref(), what) });
-    effects.set(where, dispose);
-    return create(dispose, onGC, { return: where });
+    if (typeof what === 'function') {
+      const wr = new WeakRef(where);
+      dispose = effect(() => { render(wr.deref(), what) });
+      effects.set(where, dispose);
+      return create(dispose, onGC, { return: where });
+    }
+    else {
+      effects.delete(where);
+      return render(where, what);
+    }
   };
 };
