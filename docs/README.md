@@ -461,7 +461,7 @@ In other cases, I think you can provide good guards around most common libraries
 #### SolidJS
 
 ```js
-import { createEffect, createRoot, createSignal }from 'solid-js';
+import { createEffect, createRoot, createSignal } from 'solid-js';
 import { reactive, html} from 'uhtml/reactive';
 
 const render = reactive(

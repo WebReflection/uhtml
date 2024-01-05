@@ -14,9 +14,11 @@ const onGC = dispose => dispose();
 export default effect => {
   /**
    * Render with smart updates within a generic container.
+   * If the `what` is a function, it automatically create
+   * an effect for the render function.
    * @template T
    * @param {T} where the DOM node where to render content
-   * @param {() => Hole} what the hole to render
+   * @param {(() => Hole) | Hole} what the hole to render
    * @returns {T}
    */
   return (where, what) => {
