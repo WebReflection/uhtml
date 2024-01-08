@@ -46,6 +46,7 @@ element.className = 'element';
 console.assert(element.className === 'element');
 console.assert(document.getElementsByClassName('element').length === 1);
 console.assert(element.toString() === '<element id="element" class="element"></element>');
+console.assert(document.getElementById('element') === element);
 console.assert(JSON.stringify(element.getAttributeNames()) === '["id","class"]');
 br.id = 'br';
 console.assert(br.toString() === '<br id="br">');

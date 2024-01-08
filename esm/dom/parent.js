@@ -483,6 +483,14 @@ export default class Parent extends Node {
    * @param {string} tagName
    * @returns {import("./element.js").default[]}
    */
+  getElementById(id) {
+    return getElementById(this, new RegExp(`^${id}$`));
+  }
+
+  /**
+   * @param {string} tagName
+   * @returns {import("./element.js").default[]}
+   */
   getElementsByTagName(tagName) {
     return getElementsByTagName(this, new RegExp(`^${tagName}$`, 'i'));
   }
@@ -531,6 +539,18 @@ function withParent(node) {
     this,
   );
 }
+
+const getElementById = ({ [childNodes]: nodes }, re) => {
+  for (const node of nodes) {
+    if (node[nodeType] === ELEMENT_NODE) {
+      if (re.test(node.id))
+        return node;
+      const element = getElementById(node, re);
+      if (element) return element;
+    }
+  }
+  return null;
+};
 
 const getElementsByTagName = ({ [childNodes]: nodes }, re) => {
   const elements = [];
