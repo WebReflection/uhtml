@@ -3,19 +3,16 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="../index.js"></script>
-    <script>
-    this.onload = function () {
-      'use strict';
-      uhtml.render(
+    <script type="module">
+      import { render, html } from '../index.js';
+      render(
         document.body,
-        uhtml.html`
+        html`
           <div a=${'a'} b=${'b'}>
             test="${123}"
           </div>
         `
       );
-    };
     </script>
   </head>
   <body></body>
