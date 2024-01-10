@@ -44,7 +44,7 @@ export class PersistentFragment extends custom(DocumentFragment) {
     remove(this, true).replaceWith(node);
   }
   valueOf() {
-    if (this.childNodes.length !== this.#length)
+    if (this.childNodes.length < this.#length)
       this.replaceChildren(...this.#nodes);
     return this;
   }

@@ -1,7 +1,6 @@
 import udomdiff from 'udomdiff';
 import { empty, gPD, isArray, set } from './utils.js';
 import { diffFragment } from './persistent-fragment.js';
-import { comment } from './literals.js';
 import drop from './range.js';
 
 const setAttribute = (element, name, value) =>
@@ -26,8 +25,6 @@ export const aria = (element, value) => {
   return value;
 };
 
-export const arrayComment = () => array;
-
 let listeners;
 
 /**
@@ -49,35 +46,29 @@ export const at = (element, value, name) => {
   return value;
 };
 
+/** @type {WeakMap<Node, Element | import("./persistent-fragment.js").PersistentFragment>} */
+const holes = new WeakMap;
+
 /**
  * @template T
- * @this {import("./literals.js").HoleDetails}
  * @param {Node} node
  * @param {T} value
  * @returns {T}
  */
-function hole(node, value) {
-  const n = this.n || (this.n = node);
-  switch (typeof value) {
-    case 'string':
-    case 'number':
-    case 'boolean': {
-      if (n !== node) n.replaceWith((this.n = node));
-      this.n.data = value;
-      break;
-    }
-    case 'object':
-    case 'undefined': {
-      if (value == null) (this.n = node).data = '';
-      else this.n = value.valueOf();
-      n.replaceWith(this.n);
-      break;
-    }
+export const hole = (node, value) => {
+  const h = holes.get(node);
+  if (h) h.remove();
+  let nullish = value == null;
+  if (nullish || typeof value !== 'object') {
+    if (h) holes.delete(node);
   }
+  else {
+    nullish = true;
+    node.before(set(holes, node, value.valueOf()));
+  }
+  node.data = nullish ? '' : value;
   return value;
 };
-
-export const boundComment = () => hole.bind(comment());
 
 /**
  * @template T
@@ -196,21 +187,22 @@ export const array = (node, value, _, prev) => {
   // normal diff
   if (value.length)
     return udomdiff(node.parentNode, prev, value, diffFragment, node);
-  let { length } = prev;
-  // something to remove
-  if (length--) {
-    // lot to remove: grab first and last child nodes
-    if (length) {
-      const start = diffFragment(prev[0], 0);
-      const end = diffFragment(prev[length], -0);
-      drop(start, end, false);
-    }
-    /* c8 ignore start */
-    // just one node or fragment to remove
-    else
+  /* c8 ignore start */
+  const { length } = prev;
+  switch (length) {
+    case 1:
       prev[0].remove();
-    /* c8 ignore stop */
+    case 0:
+      break;
+    default:
+      drop(
+        diffFragment(prev[0], 0),
+        diffFragment(prev[length - 1], -0),
+        false
+      );
+      break;
   }
+  /* c8 ignore stop */
   return empty;
 };
 

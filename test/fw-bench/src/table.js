@@ -1,8 +1,8 @@
-import {html} from 'uhtml';
+import {htmlFor} from '../../../keyed.js';
 
 export default (state) => {
   const {data, selected, selectRow, removeRow} = state;
-  return html.for(state)`
+  return htmlFor(state)`
     <table class="table table-hover table-striped test-data" .state=${state}>
       <tbody>${
       data.map(({id, label, html}) => html`

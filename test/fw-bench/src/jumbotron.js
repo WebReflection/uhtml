@@ -1,4 +1,4 @@
-import {html} from 'uhtml';
+import {html} from '../../../keyed.js';
 
 export default ({run, runLots, add, update, clear, swapRows}) => html`
   <div class="jumbotron">

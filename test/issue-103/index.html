@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+import { html, render } from "../../index.js";
+import { data } from "./data.js";
+
+/**
+ * This tree is a very simplified version of my internal data structure
+ * @typedef {Object} TreeBase
+ * @property {string} className
+ * @property {Object} props
+ * @property {TreeBase[]} children
+ * @property {string} id
+ *
+ * @typedef {import("uhtml").Hole} Hole
+ */
+
+/**
+ * Wrap the code for a node into a component
+ * @param {TreeBase} node
+ * @param {Hole} body
+ * @returns {Hole}
+ */
+ function component(node, body) {
+  return html`<div class=${node.className} id=${node.id} style=${"border: 1px solid red; padding: 2px;"}>
+    ${[].concat(body)}
+  </div>`;
+}
+
+/**
+ * A Stack has mulitple children
+ * @param {TreeBase} node
+ * @returns {Hole}
+ */
+function Stack(node) {
+  return component(
+    node,
+    node.children.map((child) => html`<div>${content(child)}</div>`),
+  );
+}
+
+/**
+ * A Gap is simply a spacer
+ * @param {TreeBase} node
+ * @returns {Hole}
+ */
+function Gap(node) {
+  return component(node, html`<div />`);
+}
+
+/**
+ * Invoke the correct template for each node
+ * @param {Object} node
+ * @returns {Hole}
+ */
+function content(node) {
+  if (node.className == "Gap") return Gap(node);
+  else if (node.className == "Stack") return Stack(node);
+  throw new Error("should not happen");
+}
+
+// cycle through the trees
+
+let index = 0;
+let step = 1;
+
+function rep() {
+  console.log({ index });
+  try {
+    render(document.body, content(data[index]));
+  } catch (e) {
+    console.error(e);
+    clearInterval(timer);
+  }
+  index += step;
+  index = index % data.length;
+}
+const timer = setInterval(rep, 500);
+  </script>
+</head>
+</html>

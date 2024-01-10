@@ -11,15 +11,12 @@ import tokenList from './token-list.js';
 
 import { parseString } from './string-parser.js';
 import { cloned, setParentNode, withNewParent } from './utils.js';
-import { push, splice, unshift } from './array.js';
 
 import { attributes, name, value, localName, childNodes, nodeType, ownerDocument, ownerElement, parentNode } from './symbols.js';
 
 const getAttributes = element => (
   element[attributes] || (element[attributes] = new Map)
 );
-
-const map = (values, parent) => values.map(withNewParent, parent);
 
 /** @typedef {import("./attribute.js").Attribute} Attribute */
 
@@ -148,28 +145,6 @@ export default class Element extends Parent {
     if (deep && nodes.length)
       element[childNodes] = nodes.map(cloned, element);
     return element;
-  }
-
-  /**
-   * @param  {...import("./node.js").Child} values 
-   */
-  after(...values) {
-    const { [parentNode]: parent } = this;
-    const { [childNodes]: nodes } = parent;
-    const i = nodes.indexOf(this) + 1;
-    if (i === nodes.length) push(nodes, map(values, parent));
-    else if (i) splice(nodes, i - 1, 0, map(values, parent));
-  }
-
-  /**
-   * @param  {...import("./node.js").Child} values 
-   */
-  before(...values) {
-    const { [parentNode]: parent } = this;
-    const { [childNodes]: nodes } = parent;
-    const i = nodes.indexOf(this);
-    if (!i) unshift(nodes, map(values, parent));
-    else if (i > 0) splice(nodes, i, 0, map(values, parent));
   }
 
   /**

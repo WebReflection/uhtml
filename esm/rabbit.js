@@ -1,5 +1,6 @@
-import { cache } from './literals.js';
-import { empty, isArray } from './utils.js';
+import { array, hole, text } from './handler.js';
+import { cache as newCache } from './literals.js';
+import { empty } from './utils.js';
 import create from './creator.js';
 import parser from './parser.js';
 
@@ -11,26 +12,32 @@ const parseSVG = create(parser(true));
  * @param {Hole} hole
  * @returns {Node}
  */
-export const unroll = (cache, { s: svg, t: template, v: values }) => {
-  if (values.length && cache.s === empty) cache.s = [];
-  const length = unrollValues(cache, values);
-  if (cache.t !== template) {
-    const { n: node, d: details } = (svg ? parseSVG : parseHTML)(template, values);
-    cache.t = template;
-    cache.n = node;
-    cache.d = details;
+export const unroll = (cache, { s, t, v }) => {
+  let i = 0, { d: details, s: stack } = cache;
+  if (cache.t !== t) {
+    const { n, d } = (s ? parseSVG : parseHTML)(t, v);
+    cache.t = t;
+    cache.n = n;
+    cache.d = (details = d);
+    if (v.length) cache.s = (stack = []);
   }
-  else {
-    const { d: details } = cache;
-    for (let i = 0; i < length; i++) {
-      const value = values[i];
-      const detail = details[i];
-      const { v: previous } = detail;
-      if (value !== previous) {
-        const { u: update, t: target, n: name } = detail;
-        detail.v = update(target, value, name, previous);
-      }
-    }
+  for (; i < details.length; i++) {
+    const value = v[i];
+    const detail = details[i];
+    const { v: previous, u: update, t: target, n: name } = detail;
+    const asArray = update === array;
+    const asHole = !asArray && update === hole;
+    const cache = stack[i] || (
+      stack[i] = asArray ?
+        newCache([]) :
+        (asHole ? newCache(empty) : null)
+    );
+    const current = asArray ?
+      unrollValues(cache, value) :
+      (asHole ? (value instanceof Hole ? unroll(cache, value) : value) : value)
+    ;
+    if (asArray || (current !== previous))
+      detail.v = update(target, current, name, previous);
   }
   return cache.n;
 };
@@ -41,18 +48,15 @@ export const unroll = (cache, { s: svg, t: template, v: values }) => {
  * @returns {number}
  */
 const unrollValues = ({ s: stack }, values) => {
-  const { length } = values;
-  for (let i = 0; i < length; i++) {
-    const hole = values[i];
-    if (hole instanceof Hole)
-      values[i] = unroll(stack[i] || (stack[i] = cache(empty)), hole);
-    else if (isArray(hole))
-      unrollValues(stack[i] || (stack[i] = cache([])), hole);
-    else
-      stack[i] = null;
-  }
+  let i = 0, { length } = values;
   if (length < stack.length) stack.splice(length);
-  return length;
+  for (; i < length; i++) {
+    const value = values[i];
+    const asHole = value instanceof Hole;
+    const cache = stack[i] || (stack[i] = asHole ? newCache(empty) : null);
+    if (asHole) values[i] = unroll(cache, value);
+  }
+  return values;
 };
 
 /**

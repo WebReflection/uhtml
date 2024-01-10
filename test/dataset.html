@@ -6,9 +6,22 @@
   <script type="module">
   // https://github.com/WebReflection/lighterhtml/issues/92
   // ucdn --debug
-  import {render, html} from '../esm/index.js';
+  import {render, html} from '../index.js';
 
-  render(document.body, html`<div .dataset=${{a: 1, b: 2}} />`);
+  const div = document.body;
+
+  render(div, html`<style>${'text only'}</style>`);
+  console.log(div.outerHTML);
+
+  const oneHoleContent = content => html`${content}`;
+  const OK = html`OK`;
+
+  debugger;
+  render(div, oneHoleContent(OK));
+  console.log(div.outerHTML);
+
+  render(div, oneHoleContent('text'));
+  console.log(div.outerHTML);
   </script>
 </head>
 </html>
