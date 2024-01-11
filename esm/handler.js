@@ -2,6 +2,7 @@ import udomdiff from 'udomdiff';
 import { empty, gPD, isArray, set } from './utils.js';
 import { diffFragment } from './persistent-fragment.js';
 import { comment } from './literals.js';
+import drop from './range.js';
 
 const setAttribute = (element, name, value) =>
   element.setAttribute(name, value);
@@ -191,13 +192,27 @@ export const toggle = (element, value, name) => (
  * @param {Node[]} prev
  * @returns {Node[]}
  */
-export const array = (node, value, _, prev) => udomdiff(
-  node.parentNode,
-  prev,
-  value.length ? value : empty,
-  diffFragment,
-  node
-);
+export const array = (node, value, _, prev) => {
+  // normal diff
+  if (value.length)
+    return udomdiff(node.parentNode, prev, value, diffFragment, node);
+  let { length } = prev;
+  // something to remove
+  if (length--) {
+    // lot to remove: grab first and last child nodes
+    if (length) {
+      const start = diffFragment(prev[0], 0);
+      const end = diffFragment(prev[length], -0);
+      drop(start, end, false);
+    }
+    /* c8 ignore start */
+    // just one node or fragment to remove
+    else
+      prev[0].remove();
+    /* c8 ignore stop */
+  }
+  return empty;
+};
 
 export const attr = new Map([
   ['aria', aria],
