@@ -27,8 +27,8 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "ascjs": "^6.0.3",
-    "c8": "^8.0.1",
-    "rollup": "^4.9.2",
+    "c8": "^9.1.0",
+    "rollup": "^4.9.5",
     "typescript": "^5.3.3"
   },
   "module": "./esm/index.js",
@@ -78,7 +78,7 @@
     "domconstants": "^1.1.6",
     "gc-hook": "^0.3.0",
     "html-escaper": "^3.0.3",
-    "htmlparser2": "^9.0.0",
+    "htmlparser2": "^9.1.0",
     "udomdiff": "^1.1.0"
   },
   "repository": {

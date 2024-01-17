@@ -10,7 +10,10 @@
 			const [first, ...rest] = items
 			return html`
 				<div>${first}</div>
-				${rest.map(tpl)}
+				${
+					// html or null
+					rest.length > 0 ? tpl(rest) : null
+				}
 			`
 		}
 

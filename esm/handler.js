@@ -6,6 +6,11 @@ import drop from './range.js';
 const setAttribute = (element, name, value) =>
   element.setAttribute(name, value);
 
+/**
+ * @param {Element} element
+ * @param {string} name
+ * @returns {void}
+ */
 export const removeAttribute = (element, name) =>
   element.removeAttribute(name);
 
@@ -51,22 +56,29 @@ const holes = new WeakMap;
 
 /**
  * @template T
+ * @this {import("./literals.js").Detail}
  * @param {Node} node
  * @param {T} value
  * @returns {T}
  */
-export const hole = (node, value) => {
-  const h = holes.get(node);
-  if (h) h.remove();
-  let nullish = value == null;
-  if (nullish || typeof value !== 'object') {
-    if (h) holes.delete(node);
+export function hole(node, value) {
+  let { n: hole } = this, nullish = false;
+  switch (typeof value) {
+    case 'object':
+      if (value !== null) {
+        (hole || node).replaceWith((this.n = value.valueOf()));
+        break;
+      }
+    case 'undefined':
+      nullish = true;
+    default:
+      node.data = nullish ? '' : value;
+      if (hole) {
+        this.n = null;
+        hole.replaceWith(node);
+      }
+      break;
   }
-  else {
-    nullish = true;
-    node.before(set(holes, node, value.valueOf()));
-  }
-  node.data = nullish ? '' : value;
   return value;
 };
 
@@ -183,13 +195,14 @@ export const toggle = (element, value, name) => (
  * @param {Node[]} prev
  * @returns {Node[]}
  */
-export const array = (node, value, _, prev) => {
+export const array = (node, value, prev) => {
   // normal diff
-  if (value.length)
+  const { length } = value;
+  node.data = `[${length}]`;
+  if (length)
     return udomdiff(node.parentNode, prev, value, diffFragment, node);
   /* c8 ignore start */
-  const { length } = prev;
-  switch (length) {
+  switch (prev.length) {
     case 1:
       prev[0].remove();
     case 0:
@@ -197,7 +210,7 @@ export const array = (node, value, _, prev) => {
     default:
       drop(
         diffFragment(prev[0], 0),
-        diffFragment(prev[length - 1], -0),
+        diffFragment(prev.at(-1), -0),
         false
       );
       break;

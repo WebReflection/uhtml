@@ -23,11 +23,15 @@ div.addEventListener('click', listener);
 
 p.addEventListener('click', {
   handleEvent(event) {
+    console.assert(event.bubbles, 'bubbles once');
+    console.assert(event.cancelable, 'cancelable once');
     console.assert(!event.defaultPrevented);
   }
 }, { once: true });
 
-p.addEventListener('click', () => {
+p.addEventListener('click', event => {
+  console.assert(event.bubbles, 'bubbles');
+  console.assert(event.cancelable, 'cancelable');
   invoked = true;
 });
 
@@ -37,4 +41,4 @@ console.assert(invoked, 'invoked');
 
 p.removeEventListener('click', {});
 div.removeEventListener('click', listener);
-p.dispatchEvent(new Event('click'));
+p.dispatchEvent(new Event('click', { bubbles: true, cancelable: true }));

@@ -14,8 +14,8 @@ const childNodesIndex = (node, i) => node.childNodes[i];
 export default parse => (
   /** @param {(template: TemplateStringsArray, values: any[]) => import("./literals.js").Parsed} parse */
   (template, values) => {
-    const { c: content, e: entries, l: length } = parse(template, values);
-    const root = content.cloneNode(true);
+    const { f: fragment, e: entries, d: direct } = parse(template, values);
+    const root = fragment.cloneNode(true);
     let current, prev, details = entries === empty ? empty : [];
     for (let i = 0; i < entries.length; i++) {
       const { p: path, u: update, n: name } = entries[i];
@@ -23,7 +23,7 @@ export default parse => (
       details[i] = detail(empty, update, node, name);
     }
     return parsed(
-      length === 1 ? root.firstChild : new PersistentFragment(root),
+      direct ? root.firstChild : new PersistentFragment(root),
       details
     );
   }

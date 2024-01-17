@@ -15,12 +15,12 @@ import { empty } from './utils.js';
  */
 
 /**
- * @param {PersistentFragment} c content retrieved from the template
+ * @param {DocumentFragment} f content retrieved from the template
  * @param {Entry[]} e entries per each hole in the template
- * @param {number} l the length of content childNodes
+ * @param {boolean} d direct node to handle
  * @returns
  */
-export const cel = (c, e, l) => ({ c, e, l });
+export const cel = (f, e, d) => ({ f, e, d });
 
 /**
  * @typedef {Object} Detail
@@ -34,7 +34,7 @@ export const cel = (c, e, l) => ({ c, e, l });
  * @param {any} v the current value of the interpolation / hole
  * @param {function} u the callback to update the value
  * @param {Node} t the target comment node or element
- * @param {string} n the name of the attribute, if any
+ * @param {string?} n the attribute name, if any, or `null`
  * @returns {Detail}
  */
 export const detail = (v, u, t, n) => ({ v, u, t, n });
@@ -42,10 +42,10 @@ export const detail = (v, u, t, n) => ({ v, u, t, n });
 /**
  * @param {number[]} p the path to retrieve the node
  * @param {function} u the update function
- * @param {string} n the attribute name, if any
+ * @param {string?} n the attribute name, if any, or `null`
  * @returns {Entry}
  */
-export const entry = (p, u, n = '') => ({ p, u, n });
+export const entry = (p, u, n) => ({ p, u, n });
 
 /**
  * @typedef {Object} Cache

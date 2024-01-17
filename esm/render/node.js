@@ -8,6 +8,8 @@
  * @returns
  */
 export default (where, what) => {
-  where.replaceChildren(typeof what === 'function' ? what() : what);
+  where.replaceChildren(
+    (typeof what === 'function' ? what() : what).valueOf()
+  );
   return where;
 };

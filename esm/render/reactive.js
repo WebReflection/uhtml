@@ -31,13 +31,13 @@ export default effect => {
     }
     if (typeof what === 'function') {
       const wr = new WeakRef(where);
-      dispose = effect(() => { render(wr.deref(), what(), false) });
+      dispose = effect(() => { render(wr.deref(), what().valueOf(), false) });
       effects.set(where, dispose);
       return create(dispose, onGC, { return: where });
     }
     else {
       effects.delete(where);
-      return render(where, what, false);
+      return render(where, what.valueOf(), false);
     }
   };
 };

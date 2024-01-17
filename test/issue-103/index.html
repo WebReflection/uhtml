@@ -25,8 +25,8 @@ import { data } from "./data.js";
  * @returns {Hole}
  */
  function component(node, body) {
-  return html`<div class=${node.className} id=${node.id} style=${"border: 1px solid red; padding: 2px;"}>
-    ${[].concat(body)}
+  return html`<div class=${node.className} id=${node.id} style=${"border:1px solid red;padding: 1px;"}>
+    ${body}
   </div>`;
 }
 
@@ -38,7 +38,7 @@ import { data } from "./data.js";
 function Stack(node) {
   return component(
     node,
-    node.children.map((child) => html`<div>${content(child)}</div>`),
+    html`${node.children.map((child) => html`<div>${content(child)}</div>`)}`,
   );
 }
 
@@ -78,7 +78,7 @@ function rep() {
   index += step;
   index = index % data.length;
 }
-const timer = setInterval(rep, 500);
+const timer = setInterval(rep, 100);
   </script>
 </head>
 </html>

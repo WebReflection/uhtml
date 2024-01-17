@@ -7,6 +7,15 @@ import parser from './parser.js';
 const parseHTML = create(parser(false));
 const parseSVG = create(parser(true));
 
+const createCache = ({ u }) => (
+  u === array ?
+    newCache([]) : (
+      u === hole ?
+        newCache(empty) :
+        null
+  )
+);
+
 /**
  * @param {import("./literals.js").Cache} cache
  * @param {Hole} hole
@@ -19,25 +28,33 @@ export const unroll = (cache, { s, t, v }) => {
     cache.t = t;
     cache.n = n;
     cache.d = (details = d);
-    if (v.length) cache.s = (stack = []);
+    if (v.length) cache.s = (stack = d.map(createCache));
   }
   for (; i < details.length; i++) {
     const value = v[i];
     const detail = details[i];
     const { v: previous, u: update, t: target, n: name } = detail;
-    const asArray = update === array;
-    const asHole = !asArray && update === hole;
-    const cache = stack[i] || (
-      stack[i] = asArray ?
-        newCache([]) :
-        (asHole ? newCache(empty) : null)
-    );
-    const current = asArray ?
-      unrollValues(cache, value) :
-      (asHole ? (value instanceof Hole ? unroll(cache, value) : value) : value)
-    ;
-    if (asArray || (current !== previous))
-      detail.v = update(target, current, name, previous);
+    switch (update) {
+      case array:
+        detail.v = array(
+          target,
+          unrollValues(stack[i], value),
+          previous
+        );
+        break;
+      case hole:
+        const current = value instanceof Hole ?
+          unroll(stack[i], value) :
+          value
+        ;
+        if (current !== previous)
+          detail.v = hole.call(detail, target, current);
+        break;
+      default:
+        if (value !== previous)
+          detail.v = update(target, value, name, previous);
+        break;
+    }
   }
   return cache.n;
 };
