@@ -1,76 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="module">
-      import { html, render } from "../../index.js";
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+		import { html, render } from "../../index.js";
 
-      const tpl = (items) => {
-        const [first, ...rest] = items
-        return html`
-          <div>${first}</div>
-          ${
-            // html or null
-            rest.length > 0 ? tpl(rest) : null
-          }
-        `
-      }
+		const tpl = (items) => {
+			const [first, ...rest] = items
+			return html`
+				<div>${first}</div>
+				${
+					// html or null
+					rest.length > 0 ? tpl(rest) : null
+				}
+			`
+		}
 
-      const tpl2 = (items) => {
-        const [first, ...rest] = items
-        return html`
-          <div>${first}</div>
-          ${
-            // html or []
-            rest.length > 0 ? tpl2(rest) : []
-          }
-        `
-      }
+		const tpl2 = (items) => {
+			const [first, ...rest] = items
+			return html`
+				<div>${first}</div>
+				${rest.map(tpl2)}
+			`
+		}
 
-      const case1 = () => {
-        const update = (state) => render(root1, tpl(state))
+		const case1 = () => {
+			const update = (state) => render(root1, tpl(state))
 
-        update(["A", "B"])
-        update(["A", "B", "C", "D"])
-        debugger;
-        update(["X"])
-        // update(["X", "Y"]) // ERROR
-      }
-      // const case2 = () => {
-      //   const update = (state) => render(root2, tpl(state))
+			update(["A", "B"])
+			update(["A", "B", "C"])
+			update(["A", "B", "C", "D"])
+			update(["X", "Y"]) // ERROR
+		}
+		const case2 = () => {
+			const update = (state) => render(root2, tpl(state))
 
-      //   update(["A", "B"])
-      //   update(["A", "B", "C"])
-      //   // update(["A", "B", "C", "D"])
-      //   update(["X", "Y"]) // NO ERROR
-      // }
-      // const case3 = () => {
-      //   const update = (state) => render(root3, tpl(state))
+			update(["A", "B"])
+			update(["A", "B", "C"])
+			// update(["A", "B", "C", "D"])
+			update(["X", "Y"]) // NO ERROR
+		}
+		const case3 = () => {
+			const update = (state) => render(root3, tpl(state))
 
-      //   // update(["A", "B"])
-      //   // update(["A", "B", "C"])
-      //   update(["A", "B", "C", "D"])
-      //   update(["X", "Y"]) // NO ERROR
-      // }
-      // const case4 = () => {
-      //   // use tpl2
-      //   const update = (state) => render(root4, tpl2(state))
+			// update(["A", "B"])
+			// update(["A", "B", "C"])
+			update(["A", "B", "C", "D"])
+			update(["X", "Y"]) // NO ERROR
+		}
+		const case4 = () => {
+			// use tpl2
+			const update = (state) => render(root4, tpl2(state))
 
-      //   update(["A", "B"])
-      //   update(["A", "B", "C"])
-      //   update(["A", "B", "C", "D"])
-      //   update(["X", "Y"]) // NO ERROR, but it renders only X
-      // }
+			update(["A", "B"])
+			update(["A", "B", "C"])
+			update(["A", "B", "C", "D"])
+			update(["X", "Y"]) // NO ERROR, but it renders only X
+		}
 
-      for (const case_ of [case1]) {
-        try {
-          case_()
-        } catch (err) {
-          console.error(`[${case_.name} error]`, err)
-        }
-      }
-    </script>
+		for (const case_ of [case1, case2, case3, case4]) {
+			try {
+				case_()
+			} catch (err) {
+				console.error(`[${case_.name} error]`, err)
+			}
+		}
+  </script>
 </head>
 <body>
   <div id="root1"></div>

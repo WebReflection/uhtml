@@ -1,10 +1,5 @@
 import { empty } from './utils.js';
 
-/** @typedef {import("domconstants/constants").ATTRIBUTE_NODE} ATTRIBUTE_NODE */
-/** @typedef {import("domconstants/constants").TEXT_NODE} TEXT_NODE */
-/** @typedef {import("domconstants/constants").COMMENT_NODE} COMMENT_NODE */
-/** @typedef {ATTRIBUTE_NODE | TEXT_NODE | COMMENT_NODE} Type */
-
 /** @typedef {import("./persistent-fragment.js").PersistentFragment} PersistentFragment */
 /** @typedef {import("./rabbit.js").Hole} Hole */
 
@@ -14,27 +9,18 @@ import { empty } from './utils.js';
 
 /**
  * @typedef {Object} Entry
- * @property {Type} type
  * @property {number[]} path
  * @property {function} update
  * @property {string} name
  */
 
 /**
- * @param {PersistentFragment} c content retrieved from the template
+ * @param {DocumentFragment} f content retrieved from the template
  * @param {Entry[]} e entries per each hole in the template
- * @param {number} l the length of content childNodes
+ * @param {boolean} d direct node to handle
  * @returns
  */
-export const cel = (c, e, l) => ({ c, e, l });
-
-/**
- * @typedef {Object} HoleDetails
- * @property {null | Node | PersistentFragment} n the current live node, if any and not the `t` one
- */
-
-/** @type {() => HoleDetails} */
-export const comment = () => ({ n: null });
+export const cel = (f, e, d) => ({ f, e, d });
 
 /**
  * @typedef {Object} Detail
@@ -48,19 +34,18 @@ export const comment = () => ({ n: null });
  * @param {any} v the current value of the interpolation / hole
  * @param {function} u the callback to update the value
  * @param {Node} t the target comment node or element
- * @param {string} n the name of the attribute, if any
+ * @param {string?} n the attribute name, if any, or `null`
  * @returns {Detail}
  */
 export const detail = (v, u, t, n) => ({ v, u, t, n });
 
 /**
- * @param {Type} t the operation type
  * @param {number[]} p the path to retrieve the node
  * @param {function} u the update function
- * @param {string} n the attribute name, if any
+ * @param {string?} n the attribute name, if any, or `null`
  * @returns {Entry}
  */
-export const entry = (t, p, u, n = '') => ({ t, p, u, n });
+export const entry = (p, u, n) => ({ p, u, n });
 
 /**
  * @typedef {Object} Cache

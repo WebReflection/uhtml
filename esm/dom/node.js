@@ -9,9 +9,11 @@ import {
 
 import { childNodes, nodeType, ownerDocument, parentNode } from './symbols.js';
 import { changeParentNode, withNewParent } from './utils.js';
-import { splice } from './array.js';
+import { push, splice, unshift } from './array.js';
 
 /** @typedef {string | Node} Child */
+
+const map = (values, parent) => values.map(withNewParent, parent);
 
 export default class Node {
   static {
@@ -99,6 +101,28 @@ export default class Node {
   /** @type {Node[]} */
   get childNodes() {
     return [];
+  }
+
+  /**
+   * @param  {...import("./node.js").Child} values 
+   */
+  after(...values) {
+    const { [parentNode]: parent } = this;
+    const { [childNodes]: nodes } = parent;
+    const i = nodes.indexOf(this) + 1;
+    if (i === nodes.length) push(nodes, map(values, parent));
+    else if (i) splice(nodes, i - 1, 0, map(values, parent));
+  }
+
+  /**
+   * @param  {...import("./node.js").Child} values 
+   */
+  before(...values) {
+    const { [parentNode]: parent } = this;
+    const { [childNodes]: nodes } = parent;
+    const i = nodes.indexOf(this);
+    if (!i) unshift(nodes, map(values, parent));
+    else if (i > 0) splice(nodes, i, 0, map(values, parent));
   }
 
   remove() {

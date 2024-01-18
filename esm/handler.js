@@ -1,12 +1,16 @@
 import udomdiff from 'udomdiff';
 import { empty, gPD, isArray, set } from './utils.js';
 import { diffFragment } from './persistent-fragment.js';
-import { comment } from './literals.js';
 import drop from './range.js';
 
 const setAttribute = (element, name, value) =>
   element.setAttribute(name, value);
 
+/**
+ * @param {Element} element
+ * @param {string} name
+ * @returns {void}
+ */
 export const removeAttribute = (element, name) =>
   element.removeAttribute(name);
 
@@ -25,8 +29,6 @@ export const aria = (element, value) => {
   }
   return value;
 };
-
-export const arrayComment = () => array;
 
 let listeners;
 
@@ -49,35 +51,36 @@ export const at = (element, value, name) => {
   return value;
 };
 
+/** @type {WeakMap<Node, Element | import("./persistent-fragment.js").PersistentFragment>} */
+const holes = new WeakMap;
+
 /**
  * @template T
- * @this {import("./literals.js").HoleDetails}
+ * @this {import("./literals.js").Detail}
  * @param {Node} node
  * @param {T} value
  * @returns {T}
  */
-function hole(node, value) {
-  const n = this.n || (this.n = node);
+export function hole(node, value) {
+  let { n: hole } = this, nullish = false;
   switch (typeof value) {
-    case 'string':
-    case 'number':
-    case 'boolean': {
-      if (n !== node) n.replaceWith((this.n = node));
-      this.n.data = value;
-      break;
-    }
     case 'object':
-    case 'undefined': {
-      if (value == null) (this.n = node).data = '';
-      else this.n = value.valueOf();
-      n.replaceWith(this.n);
+      if (value !== null) {
+        (hole || node).replaceWith((this.n = value.valueOf()));
+        break;
+      }
+    case 'undefined':
+      nullish = true;
+    default:
+      node.data = nullish ? '' : value;
+      if (hole) {
+        this.n = null;
+        hole.replaceWith(node);
+      }
       break;
-    }
   }
   return value;
 };
-
-export const boundComment = () => hole.bind(comment());
 
 /**
  * @template T
@@ -192,25 +195,27 @@ export const toggle = (element, value, name) => (
  * @param {Node[]} prev
  * @returns {Node[]}
  */
-export const array = (node, value, _, prev) => {
+export const array = (node, value, prev) => {
   // normal diff
-  if (value.length)
+  const { length } = value;
+  node.data = `[${length}]`;
+  if (length)
     return udomdiff(node.parentNode, prev, value, diffFragment, node);
-  let { length } = prev;
-  // something to remove
-  if (length--) {
-    // lot to remove: grab first and last child nodes
-    if (length) {
-      const start = diffFragment(prev[0], 0);
-      const end = diffFragment(prev[length], -0);
-      drop(start, end, false);
-    }
-    /* c8 ignore start */
-    // just one node or fragment to remove
-    else
+  /* c8 ignore start */
+  switch (prev.length) {
+    case 1:
       prev[0].remove();
-    /* c8 ignore stop */
+    case 0:
+      break;
+    default:
+      drop(
+        diffFragment(prev[0], 0),
+        diffFragment(prev.at(-1), -0),
+        false
+      );
+      break;
   }
+  /* c8 ignore stop */
   return empty;
 };
 

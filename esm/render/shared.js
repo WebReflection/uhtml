@@ -18,6 +18,6 @@ export default (where, what, check) => {
   const { n } = info;
   const node = hole instanceof Hole ? unroll(info, hole) : hole;
   if (n !== node)
-    where.replaceChildren((info.n = node));
+    where.replaceChildren((info.n = node).valueOf());
   return where;
 };
