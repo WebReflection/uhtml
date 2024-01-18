@@ -6,7 +6,7 @@
   "scripts": {
     "benchmark:w3c": "node test/benchmark/linkedom.js --w3c; node test/benchmark/linkedom-cached.js --w3c; node test/benchmark/dom.js --w3c",
     "benchmark:dom": "node test/benchmark/linkedom.js --dom; node test/benchmark/linkedom-cached.js --dom; node test/benchmark/dom.js --dom",
-    "build": "npm run rollup:es && node rollup/init.cjs && npm run rollup:init && rm -rf cjs/* && npm run cjs && rm -rf types && npm run ts && npm run test && npm run size",
+    "build": "npm run rollup:es && node rollup/ssr.cjs && node rollup/init.cjs && npm run rollup:init && rm -rf cjs/* && npm run cjs && rm -rf types && npm run ts && npm run test && npm run size",
     "cjs": "ascjs --no-default esm cjs",
     "rollup:es": "rollup --config rollup/es.config.js",
     "rollup:init": "rollup --config rollup/init.config.js",

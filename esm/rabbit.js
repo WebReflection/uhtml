@@ -1,10 +1,10 @@
 import { array, hole } from './handler.js';
 import { cache } from './literals.js';
+import { parse } from './parser.js';
 import create from './creator.js';
-import parser from './parser.js';
 
-const parseHTML = create(parser(false));
-const parseSVG = create(parser(true));
+const createHTML = create(parse(false, false));
+const createSVG = create(parse(true, false));
 
 /**
  * @param {import("./literals.js").Cache} info
@@ -13,7 +13,7 @@ const parseSVG = create(parser(true));
  */
 const unroll = (info, { s, t, v }) => {
   if (info.a !== t) {
-    const { b, c } = (s ? parseSVG : parseHTML)(t, v);
+    const { b, c } = (s ? createSVG : createHTML)(t, v);
     info.a = t;
     info.b = b;
     info.c = c;

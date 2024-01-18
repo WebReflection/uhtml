@@ -33,15 +33,21 @@ const createPath = node => {
 
 const textNode = () => document.createTextNode('');
 
+const prefix = 'isµ';
+
 /**
  * @param {TemplateStringsArray} template
  * @param {boolean} xml
  * @returns {Resolved}
  */
-const resolve = (template, values, xml) => {
-  const content = createContent(parser(template, prefix, xml), xml);
+const resolve = (template, values, xml, holed) => {
+  let entries = empty, markup = parser(template, prefix, xml);
+  if (holed) markup = markup.replace(
+    new RegExp(`<!--${prefix}\\d+-->`, 'g'),
+    '<!--{}-->$&<!--{/}-->'
+  );
+  const content = createContent(markup, xml);
   const { length } = template;
-  let entries = empty;
   if (length > 1) {
     const replace = [];
     const tw = document.createTreeWalker(content, 1 | 128);
@@ -107,15 +113,19 @@ const resolve = (template, values, xml) => {
     len = 0;
   }
 
-  return set(cache, template, abc(content, entries, len === 1));
+  return abc(content, entries, len === 1);
 };
-
-/** @type {WeakMap<TemplateStringsArray, Resolved>} */
-const cache = new WeakMap;
-const prefix = 'isµ';
 
 /**
  * @param {boolean} xml
+ * @param {boolean} holed
  * @returns {(template: TemplateStringsArray, values: any[]) => Resolved}
  */
-export default xml => (template, values) => cache.get(template) || resolve(template, values, xml);
+export const parse = (xml, holed) => {
+  /** @type {WeakMap<TemplateStringsArray, Resolved>} */
+  const cache = new WeakMap;
+  return (template, values) => (
+    cache.get(template) ||
+    set(cache, template, resolve(template, values, xml, holed))
+  );
+};

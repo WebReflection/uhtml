@@ -28,6 +28,15 @@ const comment = value => document.createComment(value);
 
 /** @extends {DocumentFragment} */
 export class PersistentFragment extends custom(DocumentFragment) {
+  static adopt(content) {
+    const pf = new PersistentFragment(
+      document.createDocumentFragment()
+    );
+    pf.#firstChild = content.firstChild;
+    pf.#lastChild = content.lastChild;
+    pf.#nodes = [...content.childNodes];
+    return pf;
+  }
   #firstChild = comment('<>');
   #lastChild = comment('</>');
   #nodes = empty;
@@ -50,7 +59,7 @@ export class PersistentFragment extends custom(DocumentFragment) {
     remove(this, true).replaceWith(node);
   }
   valueOf() {
-    let { firstChild, lastChild, parentNode } = this;
+    const { parentNode } = this;
     if (parentNode === this) {
       if (this.#nodes === empty)
         this.#nodes = [...this.childNodes];
@@ -65,6 +74,7 @@ export class PersistentFragment extends custom(DocumentFragment) {
       // This is a render-only specific issue but it's tested and
       // it's worth fixing to me to have more consistent fragments.
       if (parentNode) {
+        let { firstChild, lastChild } = this;
         this.#nodes = [firstChild];
         while (firstChild !== lastChild)
           this.#nodes.push((firstChild = firstChild.nextSibling));

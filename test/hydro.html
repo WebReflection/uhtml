@@ -1,0 +1,46 @@
+<!DOCTYPE html><html><head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1.0">
+      <title>Hello Hydro</title>
+      <script type="module">        
+        await new Promise($ => setTimeout($, 2000));
+        import { render, html } from '../hydro.js';
+        function App(state) {
+          return html`
+            <div>
+              <input autofocus>
+              <button onclick=${() => {
+                state.count++;
+                this.update(state);
+              }}>
+                Clicked ${state.count} times
+              </button>
+            </div>
+          `;
+        }
+        const component = (target, Callback) => {
+          const effect = {
+            target,
+            update(...args) {
+              render(target, Callback.apply(effect, args));
+            }
+          };
+          return Callback.bind(effect);
+        };
+        const state = {
+          "title": "Hello Hydro",
+          "count": 0
+        };
+        const { body } = document;
+        const Body = component(body, App);
+        render(body, Body(state));
+      </script>
+    </head><body><div>
+      <input autofocus>
+      <button>
+        Clicked <!--{}-->0<!--{/}--> times
+      </button>
+    </div></body>
+    
+  </html>
+
