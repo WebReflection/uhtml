@@ -56,7 +56,6 @@ const resolve = (template, values, xml) => {
           // ⚠️ once array, always array!
           const update = isArray(values[i - 1]) ? array : hole;
           if (update === hole) replace.push(node);
-          else node.data = '[]';
           entries.push(entry(createPath(node), update, null));
           search = `${prefix}${i++}`;
         }
