@@ -8,13 +8,6 @@ import { empty } from './utils.js';
 /** @typedef {null | undefined | string | number | boolean | Node | Element | PersistentFragment} DOMValue */
 
 /**
- * @typedef {Object} Entry
- * @property {number[]} path
- * @property {function} update
- * @property {string} name
- */
-
-/**
  * @param {DocumentFragment} f content retrieved from the template
  * @param {Entry[]} e entries per each hole in the template
  * @param {boolean} d direct node to handle
@@ -27,22 +20,29 @@ export const cel = (f, e, d) => ({ f, e, d });
  * @property {any} v the current value of the interpolation / hole
  * @property {function} u the callback to update the value
  * @property {Node} t the target comment node or element
- * @property {string} n the name of the attribute, if any
+ * @property {string | null} n the attribute name, if any, or `null`
  */
 
 /**
  * @param {any} v the current value of the interpolation / hole
  * @param {function} u the callback to update the value
  * @param {Node} t the target comment node or element
- * @param {string?} n the attribute name, if any, or `null`
+ * @param {string | null} n the attribute name, if any, or `null`
  * @returns {Detail}
  */
 export const detail = (v, u, t, n) => ({ v, u, t, n });
 
 /**
+ * @typedef {Object} Entry
+ * @property {number[]} p the path to retrieve the node
+ * @property {function} u the update function
+ * @property {string | null} n the attribute name, if any, or `null`
+ */
+
+/**
  * @param {number[]} p the path to retrieve the node
  * @param {function} u the update function
- * @param {string?} n the attribute name, if any, or `null`
+ * @param {string | null} n the attribute name, if any, or `null`
  * @returns {Entry}
  */
 export const entry = (p, u, n) => ({ p, u, n });
