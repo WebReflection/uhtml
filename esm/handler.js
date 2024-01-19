@@ -56,17 +56,17 @@ const holes = new WeakMap;
 
 /**
  * @template T
- * @this {import("./literals.js").Detail}
- * @param {Node} node
+ * @param {import("./literals.js").Detail} detail
  * @param {T} value
  * @returns {T}
  */
-export function hole(node, value) {
-  let { n: hole } = this, nullish = false;
+export const hole = (detail, value) => {
+  const { t: node, n: hole } = detail;
+  let nullish = false;
   switch (typeof value) {
     case 'object':
       if (value !== null) {
-        (hole || node).replaceWith((this.n = value.valueOf()));
+        (hole || node).replaceWith((detail.n = value.valueOf()));
         break;
       }
     case 'undefined':
@@ -74,7 +74,7 @@ export function hole(node, value) {
     default:
       node.data = nullish ? '' : value;
       if (hole) {
-        this.n = null;
+        detail.n = null;
         hole.replaceWith(node);
       }
       break;

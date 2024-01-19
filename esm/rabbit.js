@@ -3,8 +3,6 @@ import { cache } from './literals.js';
 import create from './creator.js';
 import parser from './parser.js';
 
-const { assign } = Object;
-
 const parseHTML = create(parser(false));
 const parseSVG = create(parser(true));
 
@@ -14,18 +12,21 @@ const parseSVG = create(parser(true));
  * @returns {Node}
  */
 const unroll = (info, { s, t, v }) => {
-  if (info.a !== t)
-    assign(info, (s ? parseSVG : parseHTML)(t, v));
+  if (info.a !== t) {
+    const { b, c } = (s ? parseSVG : parseHTML)(t, v);
+    info.a = t;
+    info.b = b;
+    info.c = c;
+  }
   for (let { c } = info, i = 0; i < c.length; i++) {
     const value = v[i];
     const detail = c[i];
-    const { v: previous, u: update, t: target, n: name } = detail;
-    switch (update) {
+    switch (detail.u) {
       case array:
         detail.v = array(
-          target,
+          detail.t,
           unrollValues(detail.c, value),
-          previous
+          detail.v
         );
         break;
       case hole:
@@ -33,12 +34,12 @@ const unroll = (info, { s, t, v }) => {
           unroll(detail.c || (detail.c = cache()), value) :
           (detail.c = null, value)
         ;
-        if (current !== previous)
-          detail.v = hole.call(detail, target, current);
+        if (current !== detail.v)
+          detail.v = hole(detail, current);
         break;
       default:
-        if (value !== previous)
-          detail.v = update(target, value, name, previous);
+        if (value !== detail.v)
+          detail.v = detail.u(detail.t, value, detail.n, detail.v);
         break;
     }
   }

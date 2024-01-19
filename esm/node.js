@@ -5,7 +5,7 @@ import { attr } from './handler.js';
 /** @typedef {import("./literals.js").DOMValue} DOMValue */
 /** @typedef {import("./literals.js").Target} Target */
 
-const tag = svg => (template, ...values) => new Hole(svg, template, values).toDOM();
+const tag = svg => (template, ...values) => new Hole(svg, template, values).toDOM().valueOf();
 
 /** @type {(template: TemplateStringsArray, ...values:DOMValue[]) => Target} A tag to render HTML content. */
 const html = tag(false);
@@ -21,9 +21,7 @@ const svg = tag(true);
  * @returns
  */
 const render = (where, what) => {
-  where.replaceChildren(
-    (typeof what === 'function' ? what() : what).valueOf()
-  );
+  where.replaceChildren(typeof what === 'function' ? what() : what);
   return where;
 };
 
