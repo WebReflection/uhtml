@@ -2,7 +2,7 @@
 import { Hole } from './rabbit.js';
 import { attr } from './handler.js';
 import { cache } from './literals.js';
-import { empty, set } from './utils.js';
+import { set } from './utils.js';
 import { html, svg } from './index.js';
 
 import render from './render/keyed.js';
@@ -28,7 +28,7 @@ const createRef = svg => /** @type {Bound} */ (ref, key) => {
   }
 
   const memo = keyed.get(ref) || set(keyed, ref, new Map);
-  return memo.get(key) || set(memo, key, tag.bind(cache(empty)));
+  return memo.get(key) || set(memo, key, tag.bind(cache()));
 };
 
 /** @type {Bound} Returns a bound tag to render HTML content. */

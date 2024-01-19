@@ -1,6 +1,6 @@
 import { Hole } from '../rabbit.js';
 import { cache } from '../literals.js';
-import { empty, set } from '../utils.js';
+import { set } from '../utils.js';
 
 /** @type {WeakMap<Element | DocumentFragment, import("../literals.js").Cache>} */
 const known = new WeakMap;
@@ -13,7 +13,7 @@ const known = new WeakMap;
   * @returns
   */
 export default (where, what, check) => {
-  const info = known.get(where) || set(known, where, cache(empty));
+  const info = known.get(where) || set(known, where, cache());
   const hole = (check && typeof what === 'function') ? what() : what;
   const { n } = info;
   const node = hole instanceof Hole ? hole.toDOM(info) : hole;

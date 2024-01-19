@@ -1,5 +1,5 @@
 import { cache } from '../literals.js';
-import { empty, set } from '../utils.js';
+import { set } from '../utils.js';
 
 /** @typedef {import("../rabbit.js").Hole} Hole */
 
@@ -14,7 +14,7 @@ const known = new WeakMap;
  * @returns
  */
 export default (where, what) => {
-  const info = known.get(where) || set(known, where, cache(empty));
+  const info = known.get(where) || set(known, where, cache());
   if (info.n !== (typeof what === 'function' ? what() : what).toDOM(info))
     where.replaceChildren(info.n.valueOf());
   return where;

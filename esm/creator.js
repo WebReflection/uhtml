@@ -1,5 +1,5 @@
 import { PersistentFragment } from './persistent-fragment.js';
-import { detail } from './literals.js';
+import { detail, resolved } from './literals.js';
 import { array, hole } from './handler.js';
 import { empty } from './utils.js';
 import { cache } from './literals.js';
@@ -26,14 +26,14 @@ export default parse => (
         const { p: path, u: update, n: name } = entries[i];
         const node = path === prev ? current : (current = find(root, (prev = path)));
         details[i] = detail(empty, update, node, name);
-        stack[i] = update === array ? cache([]) : (update === hole ? cache(empty) : null);
+        stack[i] = update === array ? [] : (update === hole ? cache() : null);
       }
     }
-    return {
-      t: template,
-      n: direct ? root.firstChild : new PersistentFragment(root),
-      d: details,
-      s: stack,
-    };
+    return resolved(
+      template,
+      direct ? root.firstChild : new PersistentFragment(root),
+      details,
+      stack,
+    );
   }
 );

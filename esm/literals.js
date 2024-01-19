@@ -28,9 +28,10 @@ export const cel = (f, e, d) => ({ f, e, d });
  * @param {function} u the callback to update the value
  * @param {Node} t the target comment node or element
  * @param {string | null} n the attribute name, if any, or `null`
+ * @param {Cache | null} c the cache value for this detail
  * @returns {Detail}
  */
-export const detail = (v, u, t, n) => ({ v, u, t, n });
+export const detail = (v, u, t, n, c) => ({ v, u, t, n, c });
 
 /**
  * @typedef {Object} Entry
@@ -56,10 +57,18 @@ export const entry = (p, u, n) => ({ p, u, n });
  */
 
 /**
- * @param {Cache[]} s the cache stack
  * @returns {Cache}
  */
-export const cache = s => ({ t: null, n: null, d: empty, s });
+export const cache = () => resolved(null, null, empty, empty);
+
+/**
+ * @property {null | TemplateStringsArray} t the cached template
+ * @property {null | Node | PersistentFragment} n the node returned when parsing the template
+ * @property {Detail[]} d the list of updates to perform
+ * @property {Cache[]} s the stack of caches per each interpolation / hole
+ * @returns {Cache}
+ */
+export const resolved = (t, n, d, s) => ({ t, n, d, s });
 
 /**
  * @typedef {Object} Parsed
