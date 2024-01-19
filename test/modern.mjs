@@ -9,6 +9,7 @@ const assert = (real, expected, message = `expected ${expected} got ${real}`) =>
 if (typeof document === 'undefined') {
   globalThis.document = (new DOMParser).parseFromString('...', 'text/html');
   globalThis.HTMLElement = document.createElement('e').constructor;
+  globalThis.DocumentFragment = document.createDocumentFragment().constructor;
 }
 
 Object.defineProperty(
@@ -203,3 +204,11 @@ assert(
   document.body.outerHTML,
   '<body><!--<>-->ab<!--[2]--><!--</>--></body>'
 );
+
+import('../node.js').then(({ render, html }) => {
+  render(document.head, html`<style>${'body{font-family:sans-serif;}'}</style>`);
+  assert(
+    document.head.outerHTML,
+    '<head><style>body{font-family:sans-serif;}</style></head>'
+  );
+});
