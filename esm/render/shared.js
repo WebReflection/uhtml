@@ -14,10 +14,10 @@ const known = new WeakMap;
   */
 export default (where, what, check) => {
   const info = known.get(where) || set(known, where, cache());
+  const { b } = info;
   const hole = (check && typeof what === 'function') ? what() : what;
-  const { n } = info;
   const node = hole instanceof Hole ? hole.toDOM(info) : hole;
-  if (n !== node)
-    where.replaceChildren((info.n = node).valueOf());
+  if (b !== node)
+    where.replaceChildren((info.b = node).valueOf());
   return where;
 };

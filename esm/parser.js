@@ -3,7 +3,7 @@ import { TEXT_ELEMENTS } from 'domconstants/re';
 import parser from '@webreflection/uparser';
 
 import { empty, isArray, set } from './utils.js';
-import { cel, entry } from './literals.js';
+import { abc } from './literals.js';
 
 import { array, attribute, hole, text, removeAttribute } from './handler.js';
 import createContent from './create-content.js';
@@ -55,7 +55,7 @@ const resolve = (template, values, xml) => {
           // ⚠️ once array, always array!
           const update = isArray(values[i - 1]) ? array : hole;
           if (update === hole) replace.push(node);
-          entries.push(entry(createPath(node), update, null));
+          entries.push(abc(createPath(node), update, null));
           search = `${prefix}${i++}`;
         }
       }
@@ -65,7 +65,7 @@ const resolve = (template, values, xml) => {
         while (node.hasAttribute(search)) {
           if (!path) path = createPath(node);
           const name = node.getAttribute(search);
-          entries.push(entry(path, attribute(node, name, xml), name));
+          entries.push(abc(path, attribute(node, name, xml), name));
           removeAttribute(node, search);
           search = `${prefix}${i++}`;
         }
@@ -75,7 +75,7 @@ const resolve = (template, values, xml) => {
           TEXT_ELEMENTS.test(node.localName) &&
           node.textContent.trim() === `<!--${search}-->`
         ) {
-          entries.push(entry(path || createPath(node), text, null));
+          entries.push(abc(path || createPath(node), text, null));
           search = `${prefix}${i++}`;
         }
       }
@@ -107,7 +107,7 @@ const resolve = (template, values, xml) => {
     len = 0;
   }
 
-  return set(cache, template, cel(content, entries, len === 1));
+  return set(cache, template, abc(content, entries, len === 1));
 };
 
 /** @type {WeakMap<TemplateStringsArray, Resolved>} */

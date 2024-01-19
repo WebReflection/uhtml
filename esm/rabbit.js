@@ -14,24 +14,24 @@ const parseSVG = create(parser(true));
  * @returns {Node}
  */
 const unroll = (info, { s, t, v }) => {
-  if (info.t !== t)
+  if (info.a !== t)
     assign(info, (s ? parseSVG : parseHTML)(t, v));
-  for (let { d, s } = info, i = 0; i < d.length; i++) {
+  for (let { c } = info, i = 0; i < c.length; i++) {
     const value = v[i];
-    const detail = d[i];
+    const detail = c[i];
     const { v: previous, u: update, t: target, n: name } = detail;
     switch (update) {
       case array:
         detail.v = array(
           target,
-          unrollValues(s[i], value),
+          unrollValues(detail.c, value),
           previous
         );
         break;
       case hole:
         const current = value instanceof Hole ?
-          unroll(s[i] || (s[i] = cache()), value) :
-          (s[i] = null, value)
+          unroll(detail.c || (detail.c = cache()), value) :
+          (detail.c = null, value)
         ;
         if (current !== previous)
           detail.v = hole.call(detail, target, current);
@@ -42,7 +42,7 @@ const unroll = (info, { s, t, v }) => {
         break;
     }
   }
-  return info.n;
+  return info.b;
 };
 
 /**

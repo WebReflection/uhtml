@@ -15,7 +15,8 @@ const known = new WeakMap;
  */
 export default (where, what) => {
   const info = known.get(where) || set(known, where, cache());
-  if (info.n !== (typeof what === 'function' ? what() : what).toDOM(info))
-    where.replaceChildren(info.n.valueOf());
+  const { b } = info;
+  if (b !== (typeof what === 'function' ? what() : what).toDOM(info))
+    where.replaceChildren(info.b.valueOf());
   return where;
 };
