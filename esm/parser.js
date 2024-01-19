@@ -12,10 +12,9 @@ import createContent from './create-content.js';
 
 /**
  * @typedef {Object} Resolved
- * @property {DocumentFragment} content
- * @property {Entry[]} entries
- * @property {function[]} updates
- * @property {number} length
+ * @param {DocumentFragment} f content retrieved from the template
+ * @param {Entry[]} e entries per each hole in the template
+ * @param {boolean} d direct node to handle
  */
 
 /**

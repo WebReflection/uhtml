@@ -1,5 +1,5 @@
 /*! (c) Andrea Giammarchi - MIT */
-import { Hole, unroll } from './rabbit.js';
+import { Hole } from './rabbit.js';
 import { attr } from './handler.js';
 import { cache } from './literals.js';
 import { empty, set } from './utils.js';
@@ -24,7 +24,7 @@ const keyed = new WeakMap;
 const createRef = svg => /** @type {Bound} */ (ref, key) => {
   /** @type {Tag} */
   function tag(template, ...values) {
-    return unroll(this, new Hole(svg, template, values));
+    return new Hole(svg, template, values).toDOM(this);
   }
 
   const memo = keyed.get(ref) || set(keyed, ref, new Map);

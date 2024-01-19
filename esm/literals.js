@@ -49,27 +49,20 @@ export const entry = (p, u, n) => ({ p, u, n });
 
 /**
  * @typedef {Object} Cache
- * @property {Cache[]} s the stack of caches per each interpolation / hole
  * @property {null | TemplateStringsArray} t the cached template
  * @property {null | Node | PersistentFragment} n the node returned when parsing the template
  * @property {Detail[]} d the list of updates to perform
+ * @property {Cache[]} s the stack of caches per each interpolation / hole
  */
 
 /**
  * @param {Cache[]} s the cache stack
  * @returns {Cache}
  */
-export const cache = s => ({ s, t: null, n: null, d: empty});
+export const cache = s => ({ t: null, n: null, d: empty, s });
 
 /**
  * @typedef {Object} Parsed
  * @property {Node | PersistentFragment} n the returned node after parsing the template
  * @property {Detail[]} d the list of details to update the node
  */
-
-/**
- * @param {Node | PersistentFragment} n the returned node after parsing the template
- * @param {Detail[]} d the list of details to update the node
- * @returns {Parsed}
- */
-export const parsed = (n, d) => ({ n, d });

@@ -1,16 +1,11 @@
 /*! (c) Andrea Giammarchi - MIT */
-import { Hole, unroll } from './rabbit.js';
+import { Hole } from './rabbit.js';
 import { attr } from './handler.js';
-import { cache } from './literals.js';
-import { empty } from './utils.js';
 
 /** @typedef {import("./literals.js").DOMValue} DOMValue */
 /** @typedef {import("./literals.js").Target} Target */
 
-const tag = svg => (template, ...values) => unroll(
-  cache(empty),
-  new Hole(svg, template, values)
-);
+const tag = svg => (template, ...values) => new Hole(svg, template, values).toDOM();
 
 /** @type {(template: TemplateStringsArray, ...values:DOMValue[]) => Target} A tag to render HTML content. */
 const html = tag(false);

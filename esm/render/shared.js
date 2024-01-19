@@ -1,4 +1,4 @@
-import { Hole, unroll } from '../rabbit.js';
+import { Hole } from '../rabbit.js';
 import { cache } from '../literals.js';
 import { empty, set } from '../utils.js';
 
@@ -16,7 +16,7 @@ export default (where, what, check) => {
   const info = known.get(where) || set(known, where, cache(empty));
   const hole = (check && typeof what === 'function') ? what() : what;
   const { n } = info;
-  const node = hole instanceof Hole ? unroll(info, hole) : hole;
+  const node = hole instanceof Hole ? hole.toDOM(info) : hole;
   if (n !== node)
     where.replaceChildren((info.n = node).valueOf());
   return where;

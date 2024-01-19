@@ -1,4 +1,3 @@
-import { unroll } from '../rabbit.js';
 import { cache } from '../literals.js';
 import { empty, set } from '../utils.js';
 
@@ -16,7 +15,7 @@ const known = new WeakMap;
  */
 export default (where, what) => {
   const info = known.get(where) || set(known, where, cache(empty));
-  if (info.n !== unroll(info, typeof what === 'function' ? what() : what))
+  if (info.n !== (typeof what === 'function' ? what() : what).toDOM(info))
     where.replaceChildren(info.n.valueOf());
   return where;
 };
