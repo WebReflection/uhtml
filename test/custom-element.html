@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>uhtml</title>
+  <script type="module">
+    import { render, html } from '../index.js';
+
+    customElements.define('c-e', class extends HTMLElement {
+      #stuff;
+      get stuff() { return this.#stuff }
+      set stuff(value) { this.#stuff = value }
+      connectedCallback() {
+        this.textContent = this.#stuff;
+      }
+    });
+
+    render(document.body, html`<c-e .stuff=${'OK'} />`);
+  </script>
+</head>
+</html>

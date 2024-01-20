@@ -21,7 +21,7 @@ export default parse => (
    */
   (template, values) => {
     const { a: fragment, b: entries, c: direct } = parse(template, values);
-    const root = fragment.cloneNode(true);
+    const root = document.importNode(fragment, true);
     /** @type {import("./literals.js").Detail[]} */
     let details = empty;
     if (entries !== empty) {

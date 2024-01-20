@@ -115,6 +115,17 @@ export default class Document extends Parent {
     return new TreeWalker(parent, accept);
   }
 
+  /**
+   * Same as `document.importNode`
+   * @template T
+   * @param {T} externalNode
+   * @param {boolean} deep
+   * @returns {T}
+   */
+  importNode(externalNode, deep = false) {
+    return externalNode.cloneNode(deep);
+  }
+
   toString() {
     return this[childNodes].join('');
   }
