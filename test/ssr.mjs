@@ -11,7 +11,7 @@ const { document, render, html } = init(`
 
 render(document.getElementById('test'), html`
   <h1>
-    !!! ${'Hello SSR'} !!!
+    !!! ${[html`<a /><b />`, html`<c />`, html`<d />e`]} !!!
   </h1>
 `);
 

@@ -28,15 +28,6 @@ const comment = value => document.createComment(value);
 
 /** @extends {DocumentFragment} */
 export class PersistentFragment extends custom(DocumentFragment) {
-  static adopt(content) {
-    const pf = new PersistentFragment(
-      document.createDocumentFragment()
-    );
-    pf.#firstChild = content.firstChild;
-    pf.#lastChild = content.lastChild;
-    pf.#nodes = [...content.childNodes];
-    return pf;
-  }
   #firstChild = comment('<>');
   #lastChild = comment('</>');
   #nodes = empty;

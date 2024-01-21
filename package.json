@@ -11,7 +11,7 @@
     "rollup:es": "rollup --config rollup/es.config.js",
     "rollup:init": "rollup --config rollup/init.config.js",
     "server": "npx static-handler .",
-    "size": "echo \"index $(cat index.js | brotli | wc -c)\";echo \"keyed $(cat keyed.js | brotli | wc -c)\";echo \"reactive $(cat reactive.js | brotli | wc -c)\";echo \"preactive $(cat preactive.js | brotli | wc -c)\";echo \"signal $(cat signal.js | brotli | wc -c)\";echo \"node  $(cat node.js | brotli | wc -c)\";",
+    "size": "echo \"index $(cat index.js | brotli | wc -c)\";echo \"keyed $(cat keyed.js | brotli | wc -c)\";echo \"reactive $(cat reactive.js | brotli | wc -c)\";echo \"preactive $(cat preactive.js | brotli | wc -c)\";echo \"signal $(cat signal.js | brotli | wc -c)\";echo \"node  $(cat node.js | brotli | wc -c)\";echo \"hydro  $(cat hydro.js | brotli | wc -c)\";",
     "test": "c8 node test/coverage.js && node test/modern.mjs",
     "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
     "ts": "tsc -p ."

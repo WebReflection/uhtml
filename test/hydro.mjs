@@ -2,7 +2,9 @@ import init from '../esm/init-ssr.js';
 
 function App(state) {
   return html`
+    <h1>${state.title}</h1>
     <div>
+      <ul>${[]}</ul>
       <input autofocus>
       <button onclick=${() => {
         state.count++;

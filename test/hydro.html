@@ -7,7 +7,9 @@
         import { render, html } from '../hydro.js';
         function App(state) {
           return html`
+            <h1>${state.title}</h1>
             <div>
+              <ul>${[]}</ul>
               <input autofocus>
               <button onclick=${() => {
                 state.count++;
@@ -35,12 +37,14 @@
         const Body = component(body, App);
         render(body, Body(state));
       </script>
-    </head><body><div>
+    </head><body><!--<>--><h1><!--{-->Hello Hydro<!--}--></h1>
+    <div>
+      <ul><!--[]--><!--[0]--></ul>
       <input autofocus>
       <button>
-        Clicked <!--{}-->0<!--{/}--> times
+        Clicked <!--{-->0<!--}--> times
       </button>
-    </div></body>
-    
+    </div><!--</>--></body>
+    <!--#-->
   </html>
 

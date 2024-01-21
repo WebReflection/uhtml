@@ -7,5 +7,5 @@ const template = t => t;
 
 console.log(
   parser(template`a${1}b`, prefix, false)
-    .replace(re, '<!--{}-->$&<!--{/}-->')
+    .replace(re, '<!--{-->$&<!--}-->')
 );

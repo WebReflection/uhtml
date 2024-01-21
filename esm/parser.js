@@ -44,7 +44,7 @@ const resolve = (template, values, xml, holed) => {
   let entries = empty, markup = parser(template, prefix, xml);
   if (holed) markup = markup.replace(
     new RegExp(`<!--${prefix}\\d+-->`, 'g'),
-    '<!--{}-->$&<!--{/}-->'
+    '<!--{-->$&<!--}-->'
   );
   const content = createContent(markup, xml);
   const { length } = template;
@@ -54,16 +54,25 @@ const resolve = (template, values, xml, holed) => {
     let i = 0, search = `${prefix}${i++}`;
     entries = [];
     while (i < length) {
-      const node = tw.nextNode();
+      let node = tw.nextNode();
       // these are holes or arrays
       if (node.nodeType === COMMENT_NODE) {
         if (node.data === search) {
           // ⚠️ once array, always array!
           const update = isArray(values[i - 1]) ? array : hole;
           if (update === hole) replace.push(node);
+          else if (holed) {
+            // ⚠️ this operation works only with uhtml/dom
+            //    it would bail out native TreeWalker
+            const { previousSibling, nextSibling } = node;
+            previousSibling.data = '[]';
+            nextSibling.remove();
+          }
           entries.push(abc(createPath(node), update, null));
           search = `${prefix}${i++}`;
         }
+        // ⚠️ this operation works only with uhtml/dom
+        else if (holed && node.data === '#') node.remove();
       }
       else {
         let path;

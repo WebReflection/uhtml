@@ -3,7 +3,7 @@ import { TEXT_ELEMENTS } from 'domconstants/re';
 import { escape } from 'html-escaper';
 
 import CharacterData from './character-data.js';
-import { parentNode, localName, ownerDocument, value } from './symbols.js';
+import { parentNode, localName, ownerDocument, value, __chunks__ } from './symbols.js';
 
 export default class Text extends CharacterData {
   constructor(data = '', owner = null) {
@@ -17,6 +17,10 @@ export default class Text extends CharacterData {
   toString() {
     const { [parentNode]: parent, [value]: data } = this;
     return parent && TEXT_ELEMENTS.test(parent[localName]) ?
-            data : escape(data);
+            data :
+            (this[ownerDocument]?.[__chunks__] && this.previousSibling?.nodeType === TEXT_NODE ?
+              `<!--#-->${escape(data)}` :
+              escape(data)
+            );
   }
 }

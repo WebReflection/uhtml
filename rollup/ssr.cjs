@@ -6,7 +6,8 @@ const uhtml = readFileSync(init).toString();
 
 const content = [
   'const document = content ? new DOMParser().parseFromString(content, ...rest) : new Document;',
-  'const { constructor: DocumentFragment } = document.createDocumentFragment();'
+  'const { constructor: DocumentFragment } = document.createDocumentFragment();',
+  'document[__chunks__] = true;',
 ];
 
 writeFileSync(init, `
@@ -14,6 +15,7 @@ writeFileSync(init, `
 
 import Document from './dom/document.js';
 import DOMParser from './dom/dom-parser.js';
+import { __chunks__ } from './dom/symbols.js';
 
 /**
  * @param {Document} document
