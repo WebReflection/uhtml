@@ -47,7 +47,7 @@ const {
 ### uhtml/preactive example
 
 ```js
-import { render, html, signal } from 'uhtml/preactive';
+import { render, html, signal, detach } from 'uhtml/preactive';
 
 const count = signal(0);
 
@@ -56,4 +56,9 @@ render(document.body, () => html`
     Clicks: ${count.value}
   </button>
 `);
+
+// stop reacting to signals in the future
+setTimeout(() => {
+  detach(document.body);
+}, 10000);
 ```

@@ -13,7 +13,13 @@ const effects = new WeakMap;
  */
 const onGC = dispose => dispose();
 
-export default effect => {
+let remove = true;
+
+/**
+ * @param {Function} effect the reactive `effect` callback provided by a 3rd party library.
+ * @returns 
+ */
+export const attach = effect => {
   /**
    * Render with smart updates within a generic container.
    * If the `what` is a function, it automatically create
@@ -24,20 +30,28 @@ export default effect => {
    * @returns {T}
    */
   return (where, what) => {
-    let dispose = effects.get(where);
-    if (dispose) {
-      drop(dispose);
-      dispose();
-    }
-    if (typeof what === 'function') {
-      const wr = new WeakRef(where);
-      dispose = effect(() => { render(wr.deref(), what(), false) });
-      effects.set(where, dispose);
-      return create(dispose, onGC, { return: where });
-    }
-    else {
-      effects.delete(where);
-      return render(where, what, false);
-    }
+    remove = typeof what !== 'function';
+    detach(where);
+
+    if (remove) return render(where, what, false);
+    remove = true;
+
+    const wr = new WeakRef(where);
+    const dispose = effect(() => { render(wr.deref(), what(), false) });
+    effects.set(where, dispose);
+    return create(dispose, onGC, { return: where });
   };
+};
+
+/**
+ * Allow manual cleanup of subscribed signals.
+ * @param {Element} where a reference container previously used to render signals.
+ */
+export const detach = where => {
+  const dispose = effects.get(where);
+  if (dispose) {
+    if (remove) effects.delete(where);
+    drop(dispose);
+    dispose();
+  }
 };
