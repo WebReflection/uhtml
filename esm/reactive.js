@@ -1,5 +1,8 @@
 import { Hole, html, svg, htmlFor, svgFor, attr } from './keyed.js';
 
-import { detach, attach } from './render/reactive.js';
+import { attach, detach } from './render/reactive.js';
 
-export { Hole, detach, attach, html, svg, htmlFor, svgFor, attr };
+export { Hole, attach, detach, html, svg, htmlFor, svgFor, attr };
+
+// TODO: mostly backward compatibility ... should this change?
+export { attach as reactive };

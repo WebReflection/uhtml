@@ -28,7 +28,7 @@
     "@rollup/plugin-terser": "^0.4.4",
     "ascjs": "^6.0.3",
     "c8": "^9.1.0",
-    "rollup": "^4.9.5",
+    "rollup": "^4.10.0",
     "typescript": "^5.3.3"
   },
   "module": "./esm/index.js",
@@ -76,7 +76,7 @@
     "@webreflection/uparser": "^0.3.3",
     "custom-function": "^1.0.6",
     "domconstants": "^1.1.6",
-    "gc-hook": "^0.3.0",
+    "gc-hook": "^0.3.1",
     "html-escaper": "^3.0.3",
     "htmlparser2": "^9.1.0",
     "udomdiff": "^1.1.0"
