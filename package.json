@@ -69,6 +69,11 @@
       "import": "./esm/reactive/preact.js",
       "default": "./cjs/reactive/preact.js"
     },
+    "./signal": {
+      "types": "./types/reactive/WHERE?.d.ts",
+      "import": "./esm/reactive/signal.js",
+      "default": "./cjs/reactive/signal.js"
+    },
     "./package.json": "./package.json"
   },
   "unpkg": "./keyed.js",
