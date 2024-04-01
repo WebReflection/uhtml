@@ -14,6 +14,7 @@
         "esm/node.js",
         "esm/reactive.js",
         "esm/reactive/preact.js",
+        "esm/reactive/signal.js",
         "esm/dom/index.js",
     ]
 }

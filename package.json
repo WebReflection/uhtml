@@ -28,8 +28,8 @@
     "@rollup/plugin-terser": "^0.4.4",
     "ascjs": "^6.0.3",
     "c8": "^9.1.0",
-    "rollup": "^4.10.0",
-    "typescript": "^5.3.3"
+    "rollup": "^4.13.2",
+    "typescript": "^5.4.3"
   },
   "module": "./esm/index.js",
   "type": "module",
@@ -69,6 +69,11 @@
       "import": "./esm/reactive/preact.js",
       "default": "./cjs/reactive/preact.js"
     },
+    "./signal": {
+      "types": "./types/reactive/signal.d.ts",
+      "import": "./esm/reactive/signal.js",
+      "default": "./cjs/reactive/signal.js"
+    },
     "./package.json": "./package.json"
   },
   "unpkg": "./keyed.js",
@@ -90,7 +95,7 @@
   },
   "homepage": "https://github.com/WebReflection/uhtml#readme",
   "optionalDependencies": {
-    "@preact/signals-core": "^1.5.1",
-    "@webreflection/signal": "^2.0.0"
+    "@preact/signals-core": "^1.6.0",
+    "@webreflection/signal": "^2.1.1"
   }
 }
