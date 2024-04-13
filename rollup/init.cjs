@@ -20,4 +20,14 @@ export default document => ${
     .replace(/^(\s+)replaceWith\(([^}]+?)\}/m, '$1/* c8 ignore start */\n$1replaceWith($2}\n$1/* c8 ignore stop */')
     .replace(/^(\s+)(["'])use strict\2;/m, '$1$2use strict$2;\n\n$1const { constructor: DocumentFragment } = document.createDocumentFragment();')
     .replace(/^[^(]+/, '')
+    .replace(/\n  exports\.Hole = Hole;[\S\s]*return exports;/m, `
+  return {
+    Hole : Hole,
+    attr : attr,
+    html : html,
+    htmlFor : htmlFor,
+    render : keyed$1,
+    svg : svg,
+    svgFor : svgFor,
+  };`)
 }`);
