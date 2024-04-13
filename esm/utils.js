@@ -34,3 +34,13 @@ export const gPD = (ref, prop) => {
   while(!desc && (ref = getPrototypeOf(ref)));
   return desc;
 };
+
+/* c8 ignore start */
+/**
+ * @param {DocumentFragment} content
+ * @param {number[]} path
+ * @returns {Element}
+ */
+export const find = (content, path) => path.reduceRight(childNodesIndex, content);
+const childNodesIndex = (node, i) => node.childNodes[i];
+/* c8 ignore stop */

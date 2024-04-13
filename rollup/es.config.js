@@ -19,6 +19,16 @@ export default [
     },
   },
   {
+    plugins: [nodeResolve()],
+    input: './esm/ssr.js',
+    output: {
+      esModule: false,
+      file: './esm/init-ssr.js',
+      format: 'iife',
+      name: 'uhtml',
+    },
+  },
+  {
     plugins,
     input: './esm/index.js',
     output: {

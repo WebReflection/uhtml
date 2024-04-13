@@ -3,8 +3,8 @@ import { cache } from './literals.js';
 import create from './creator.js';
 import parser from './parser.js';
 
-const parseHTML = create(parser(false));
-const parseSVG = create(parser(true));
+const createHTML = create(parser(false));
+const createSVG = create(parser(true));
 
 /**
  * @param {import("./literals.js").Cache} info
@@ -13,7 +13,7 @@ const parseSVG = create(parser(true));
  */
 const unroll = (info, { s, t, v }) => {
   if (info.a !== t) {
-    const { b, c } = (s ? parseSVG : parseHTML)(t, v);
+    const { b, c } = (s ? createSVG : createHTML)(t, v);
     info.a = t;
     info.b = b;
     info.c = c;
