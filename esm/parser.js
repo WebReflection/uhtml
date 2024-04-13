@@ -33,31 +33,46 @@ const createPath = node => {
 
 const textNode = () => document.createTextNode('');
 
+const prefix = 'isµ';
+
 /**
  * @param {TemplateStringsArray} template
  * @param {boolean} xml
  * @returns {Resolved}
  */
-const resolve = (template, values, xml) => {
-  const content = createContent(parser(template, prefix, xml), xml);
+const resolve = (template, values, xml, holed) => {
+  let entries = empty, markup = parser(template, prefix, xml);
+  if (holed) markup = markup.replace(
+    new RegExp(`<!--${prefix}\\d+-->`, 'g'),
+    '<!--{-->$&<!--}-->'
+  );
+  const content = createContent(markup, xml);
   const { length } = template;
-  let entries = empty;
   if (length > 1) {
     const replace = [];
     const tw = document.createTreeWalker(content, 1 | 128);
     let i = 0, search = `${prefix}${i++}`;
     entries = [];
     while (i < length) {
-      const node = tw.nextNode();
+      let node = tw.nextNode();
       // these are holes or arrays
       if (node.nodeType === COMMENT_NODE) {
         if (node.data === search) {
           // ⚠️ once array, always array!
           const update = isArray(values[i - 1]) ? array : hole;
           if (update === hole) replace.push(node);
+          else if (holed) {
+            // ⚠️ this operation works only with uhtml/dom
+            //    it would bail out native TreeWalker
+            const { previousSibling, nextSibling } = node;
+            previousSibling.data = '[]';
+            nextSibling.remove();
+          }
           entries.push(abc(createPath(node), update, null));
           search = `${prefix}${i++}`;
         }
+        // ⚠️ this operation works only with uhtml/dom
+        else if (holed && node.data === '#') node.remove();
       }
       else {
         let path;
@@ -107,15 +122,19 @@ const resolve = (template, values, xml) => {
     len = 0;
   }
 
-  return set(cache, template, abc(content, entries, len === 1));
+  return abc(content, entries, len === 1);
 };
-
-/** @type {WeakMap<TemplateStringsArray, Resolved>} */
-const cache = new WeakMap;
-const prefix = 'isµ';
 
 /**
  * @param {boolean} xml
+ * @param {boolean} holed
  * @returns {(template: TemplateStringsArray, values: any[]) => Resolved}
  */
-export default xml => (template, values) => cache.get(template) || resolve(template, values, xml);
+export const parse = (xml, holed) => {
+  /** @type {WeakMap<TemplateStringsArray, Resolved>} */
+  const cache = new WeakMap;
+  return (template, values) => (
+    cache.get(template) ||
+    set(cache, template, resolve(template, values, xml, holed))
+  );
+};

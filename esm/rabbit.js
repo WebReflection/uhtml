@@ -1,10 +1,10 @@
 import { array, hole } from './handler.js';
 import { cache } from './literals.js';
+import { parse } from './parser.js';
 import create from './creator.js';
-import parser from './parser.js';
 
-const createHTML = create(parser(false));
-const createSVG = create(parser(true));
+const createHTML = create(parse(false, false));
+const createSVG = create(parse(true, false));
 
 /**
  * @param {import("./literals.js").Cache} info

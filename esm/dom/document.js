@@ -2,7 +2,7 @@ import { DOCUMENT_NODE } from 'domconstants/constants';
 
 import { setParentNode } from './utils.js';
 
-import { childNodes, documentElement, nodeName, ownerDocument } from './symbols.js';
+import { childNodes, documentElement, nodeName, ownerDocument, __chunks__ } from './symbols.js';
 
 import Attribute from './attribute.js';
 import Comment from './comment.js';
@@ -33,6 +33,7 @@ export default class Document extends Parent {
     this[doctype] = null;
     this[head] = null;
     this[body] = null;
+    this[__chunks__] = false;
     if (type === 'html') {
       const html = (this[documentElement] = new Element(type, this));
       this[childNodes] = [

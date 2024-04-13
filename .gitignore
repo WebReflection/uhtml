@@ -11,6 +11,9 @@ worker.js
 keyed.js
 !esm/keyed.js
 !esm/dom/keyed.js
+hydro.js
+!esm/hydro.js
+!esm/dom/hydro.js
 index.js
 !esm/index.js
 !esm/dom/index.js

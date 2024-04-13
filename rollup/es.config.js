@@ -30,6 +30,14 @@ export default [
   },
   {
     plugins,
+    input: './esm/hydro.js',
+    output: {
+      esModule: true,
+      file: './hydro.js',
+    },
+  },
+  {
+    plugins,
     input: './esm/index.js',
     output: {
       esModule: true,

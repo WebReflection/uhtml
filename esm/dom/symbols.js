@@ -9,3 +9,4 @@ export const parentNode = Symbol('parentNode');
 export const attributes = Symbol('attributes');
 export const name = Symbol('name');
 export const value = Symbol('value');
+export const __chunks__ = Symbol();
