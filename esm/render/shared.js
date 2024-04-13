@@ -10,6 +10,7 @@ const known = new WeakMap;
   * @template T
   * @param {T} where the DOM node where to render content
   * @param {(() => Hole) | Hole} what the hole to render
+  * @param {boolean} check does a `typeof` check (internal usage).
   * @returns
   */
 export default (where, what, check) => {

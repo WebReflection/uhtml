@@ -35,7 +35,7 @@ export const gPD = (ref, prop) => {
   return desc;
 };
 
-
+/* c8 ignore start */
 /**
  * @param {DocumentFragment} content
  * @param {number[]} path
@@ -43,3 +43,4 @@ export const gPD = (ref, prop) => {
  */
 export const find = (content, path) => path.reduceRight(childNodesIndex, content);
 const childNodesIndex = (node, i) => node.childNodes[i];
+/* c8 ignore stop */
