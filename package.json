@@ -6,15 +6,15 @@
   "scripts": {
     "benchmark:w3c": "node test/benchmark/linkedom.js --w3c; node test/benchmark/linkedom-cached.js --w3c; node test/benchmark/dom.js --w3c",
     "benchmark:dom": "node test/benchmark/linkedom.js --dom; node test/benchmark/linkedom-cached.js --dom; node test/benchmark/dom.js --dom",
-    "build": "npm run rollup:es && node rollup/init.cjs && npm run rollup:init && rm -rf cjs/* && npm run cjs && rm -rf types && npm run ts && npm run test && npm run size",
+    "build": "npm run rollup:es && node rollup/ssr.cjs && node rollup/init.cjs && npm run rollup:init  && npm run rollup:ssr && rm -rf cjs/* && npm run cjs && npm run test && npm run size",
     "cjs": "ascjs --no-default esm cjs",
     "rollup:es": "rollup --config rollup/es.config.js",
     "rollup:init": "rollup --config rollup/init.config.js",
+    "rollup:ssr": "rollup --config rollup/ssr.config.js && rm esm/init-ssr.js_ && terser --module esm/init-ssr.js -mc -o ./worker.js",
     "server": "npx static-handler .",
-    "size": "echo \"index $(cat index.js | brotli | wc -c)\";echo \"keyed $(cat keyed.js | brotli | wc -c)\";echo \"reactive $(cat reactive.js | brotli | wc -c)\";echo \"preactive $(cat preactive.js | brotli | wc -c)\";echo \"signal $(cat signal.js | brotli | wc -c)\";echo \"node  $(cat node.js | brotli | wc -c)\";",
+    "size": "echo \"index $(cat index.js | brotli | wc -c)\";echo \"keyed $(cat keyed.js | brotli | wc -c)\";echo \"reactive $(cat reactive.js | brotli | wc -c)\";echo \"preactive $(cat preactive.js | brotli | wc -c)\";echo \"signal $(cat signal.js | brotli | wc -c)\";echo \"node  $(cat node.js | brotli | wc -c)\";echo \"worker  $(cat worker.js | brotli | wc -c)\";",
     "test": "c8 node test/coverage.js && node test/modern.mjs",
-    "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
-    "ts": "tsc -p ."
+    "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info"
   },
   "keywords": [
     "micro",
@@ -28,51 +28,49 @@
     "@rollup/plugin-terser": "^0.4.4",
     "ascjs": "^6.0.3",
     "c8": "^9.1.0",
-    "rollup": "^4.13.2",
-    "typescript": "^5.4.3"
+    "rollup": "^4.14.2"
   },
   "module": "./esm/index.js",
   "type": "module",
   "exports": {
     ".": {
-      "types": "./types/index.d.ts",
       "import": "./esm/index.js",
       "default": "./cjs/index.js"
     },
     "./dom": {
-      "types": "./types/dom/index.d.ts",
       "import": "./esm/dom/index.js",
       "default": "./cjs/dom/index.js"
     },
     "./init": {
-      "types": "./types/init.d.ts",
       "import": "./esm/init.js",
       "default": "./cjs/init.js"
     },
     "./keyed": {
-      "types": "./types/keyed.d.ts",
       "import": "./esm/keyed.js",
       "default": "./cjs/keyed.js"
     },
     "./node": {
-      "types": "./types/node.d.ts",
       "import": "./esm/node.js",
       "default": "./cjs/node.js"
     },
     "./reactive": {
-      "types": "./types/reactive.d.ts",
       "import": "./esm/reactive.js",
       "default": "./cjs/reactive.js"
     },
     "./preactive": {
-      "types": "./types/reactive/preact.d.ts",
       "import": "./esm/reactive/preact.js",
       "default": "./cjs/reactive/preact.js"
     },
     "./signal": {
-      "types": "./types/reactive/signal.d.ts",
       "import": "./esm/reactive/signal.js",
       "default": "./cjs/reactive/signal.js"
+    },
+    "./ssr": {
+      "import": "./esm/init-ssr.js",
+      "default": "./cjs/init-ssr.js"
+    },
+    "./worker": {
+      "import": "./worker.js"
     },
     "./package.json": "./package.json"
   },

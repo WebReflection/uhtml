@@ -5,8 +5,9 @@ types/
 cjs/*
 !cjs/package.json
 dom.js
-esm/init.js
-init.js
+esm/init*.js
+init*.js
+worker.js
 keyed.js
 !esm/keyed.js
 !esm/dom/keyed.js

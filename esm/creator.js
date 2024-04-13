@@ -1,16 +1,8 @@
 import { PersistentFragment } from './persistent-fragment.js';
 import { bc, detail } from './literals.js';
 import { array, hole } from './handler.js';
-import { empty } from './utils.js';
+import { empty, find } from './utils.js';
 import { cache } from './literals.js';
-
-/**
- * @param {DocumentFragment} content
- * @param {number[]} path
- * @returns {Element}
- */
-const find = (content, path) => path.reduceRight(childNodesIndex, content);
-const childNodesIndex = (node, i) => node.childNodes[i];
 
 /** @param {(template: TemplateStringsArray, values: any[]) => import("./parser.js").Resolved} parse */
 export default parse => (
