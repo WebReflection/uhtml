@@ -5,8 +5,8 @@
         "moduleResolution": "nodenext",
         "allowJs": true,
         "declaration": true,
-        "emitDeclarationOnly": true,
-        "declarationDir": "types"
+        //"emitDeclarationOnly": true,
+        "noEmit": true,
     },
     "include": [
         "esm/index.js",
