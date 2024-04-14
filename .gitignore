@@ -1,7 +1,7 @@
 .nyc_output/
 coverage/
 node_modules/
-types/
+*.d.ts
 cjs/*
 !cjs/package.json
 dom.js
