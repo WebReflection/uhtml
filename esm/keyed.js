@@ -32,9 +32,9 @@ const createRef = svg => /** @type {Bound} */ (ref, key) => {
 };
 
 /** @type {Bound} Returns a bound tag to render HTML content. */
-const htmlFor = createRef(false);
+export const htmlFor = createRef(false);
 
 /** @type {Bound} Returns a bound tag to render SVG content. */
-const svgFor = createRef(true);
+export const svgFor = createRef(true);
 
-export { Hole, render, html, svg, htmlFor, svgFor, attr };
+export { Hole, render, html, svg, attr };
