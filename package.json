@@ -16,6 +16,7 @@
     "test": "c8 node test/coverage.js && node test/modern.mjs",
     "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
     "postbuild": "npx tsc -p tsconfig.json && npx tsc -p tsconfig.cjs.json",
+    "clean": "find ./ -type f -name '*.d.ts' -delete",
     "are-types-wrong": "npx attw --pack ."
   },
   "keywords": [
