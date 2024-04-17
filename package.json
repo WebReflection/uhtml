@@ -14,7 +14,8 @@
     "server": "npx static-handler .",
     "size": "echo \"index $(cat index.js | brotli | wc -c)\";echo \"keyed $(cat keyed.js | brotli | wc -c)\";echo \"reactive $(cat reactive.js | brotli | wc -c)\";echo \"preactive $(cat preactive.js | brotli | wc -c)\";echo \"signal $(cat signal.js | brotli | wc -c)\";echo \"node  $(cat node.js | brotli | wc -c)\";echo \"worker  $(cat worker.js | brotli | wc -c)\";",
     "test": "c8 node test/coverage.js && node test/modern.mjs",
-    "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info"
+    "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
+    "clean": "rm -rvf coverage ./*.js"
   },
   "keywords": [
     "micro",
@@ -36,42 +37,52 @@
   "exports": {
     ".": {
       "import": "./esm/index.js",
-      "default": "./cjs/index.js"
+      "default": "./cjs/index.js",
+      "types": "./esm/index.d.ts"
     },
     "./dom": {
       "import": "./esm/dom/index.js",
-      "default": "./cjs/dom/index.js"
+      "default": "./cjs/dom/index.js",
+      "types": "./esm/dom/index.d.ts"
     },
     "./init": {
       "import": "./esm/init.js",
-      "default": "./cjs/init.js"
+      "default": "./cjs/init.js",
+      "types": "./esm/keyed.d.ts"
     },
     "./keyed": {
       "import": "./esm/keyed.js",
-      "default": "./cjs/keyed.js"
+      "default": "./cjs/keyed.js",
+      "types": "./esm/keyed.d.ts"
     },
     "./node": {
       "import": "./esm/node.js",
-      "default": "./cjs/node.js"
+      "default": "./cjs/node.js",
+      "types": "./esm/node.d.ts"
     },
     "./reactive": {
       "import": "./esm/reactive.js",
-      "default": "./cjs/reactive.js"
+      "default": "./cjs/reactive.js",
+      "types": "./esm/reactive.d.ts"
     },
     "./preactive": {
       "import": "./esm/reactive/preact.js",
-      "default": "./cjs/reactive/preact.js"
+      "default": "./cjs/reactive/preact.js",
+      "types": "./esm/reactive/preact.d.ts"
     },
     "./signal": {
       "import": "./esm/reactive/signal.js",
-      "default": "./cjs/reactive/signal.js"
+      "default": "./cjs/reactive/signal.js",
+      "types": "./esm/reactive/signal.d.ts"
     },
     "./ssr": {
       "import": "./esm/init-ssr.js",
-      "default": "./cjs/init-ssr.js"
+      "default": "./cjs/init-ssr.js",
+      "types": "./esm/ssr.d.ts"
     },
     "./worker": {
-      "import": "./worker.js"
+      "import": "./worker.js",
+      "types": "./esm/ssr.d.ts"
     },
     "./package.json": "./package.json"
   },
