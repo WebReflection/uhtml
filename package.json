@@ -95,6 +95,6 @@
   "homepage": "https://github.com/WebReflection/uhtml#readme",
   "optionalDependencies": {
     "@preact/signals-core": "^1.6.0",
-    "@webreflection/signal": "^2.1.1"
+    "@webreflection/signal": "^2.1.2"
   }
 }
