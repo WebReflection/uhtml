@@ -6,7 +6,7 @@
   "scripts": {
     "benchmark:w3c": "node test/benchmark/linkedom.js --w3c; node test/benchmark/linkedom-cached.js --w3c; node test/benchmark/dom.js --w3c",
     "benchmark:dom": "node test/benchmark/linkedom.js --dom; node test/benchmark/linkedom-cached.js --dom; node test/benchmark/dom.js --dom",
-    "build": "npm run rollup:es && node rollup/ssr.cjs && node rollup/init.cjs && npm run rollup:init  && npm run rollup:ssr && rm -rf cjs/* && npm run cjs && npm run build:types && npm run test && npm run size",
+    "build": "npm run rollup:es && node rollup/ssr.cjs && node rollup/init.cjs && npm run rollup:init && npm run rollup:ssr && rm -rf cjs/* && npm run cjs && npm run build:types && npm run test && npm run size",
     "cjs": "ascjs --no-default esm cjs",
     "rollup:es": "rollup --config rollup/es.config.js",
     "rollup:init": "rollup --config rollup/init.config.js",
@@ -15,9 +15,9 @@
     "size": "echo \"index $(cat index.js | brotli | wc -c)\";echo \"keyed $(cat keyed.js | brotli | wc -c)\";echo \"reactive $(cat reactive.js | brotli | wc -c)\";echo \"preactive $(cat preactive.js | brotli | wc -c)\";echo \"signal $(cat signal.js | brotli | wc -c)\";echo \"node  $(cat node.js | brotli | wc -c)\";echo \"worker  $(cat worker.js | brotli | wc -c)\";",
     "test": "c8 node test/coverage.js && node test/modern.mjs",
     "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
-    "clean": "rm -rvf coverage ./*.js cjs/**/*.js cjs/*.js types",
+    "clean": "rm -rf coverage ./*.js cjs/**/*.js cjs/*.js types",
     "check:types": "npx attw --pack .",
-    "build:types": "rm -rvf types && npx tsc -p tsconfig.json"
+    "build:types": "rm -rf types && npx tsc -p tsconfig.json"
   },
   "keywords": [
     "micro",
@@ -92,8 +92,12 @@
   },
   "unpkg": "./keyed.js",
   "dependencies": {
+    "@types/estree": "^1.0.5",
+    "@types/istanbul-lib-coverage": "^2.0.6",
+    "@types/resolve": "^1.20.6",
     "@webreflection/uparser": "^0.3.3",
     "custom-function": "^1.0.6",
+    "dev": "^0.1.3",
     "domconstants": "^1.1.6",
     "gc-hook": "^0.3.1",
     "html-escaper": "^3.0.3",
