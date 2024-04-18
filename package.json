@@ -3,6 +3,7 @@
   "version": "4.5.4",
   "description": "A micro HTML/SVG render",
   "main": "./cjs/index.js",
+  "types": "./types/index.d.ts",
   "scripts": {
     "benchmark:w3c": "node test/benchmark/linkedom.js --w3c; node test/benchmark/linkedom-cached.js --w3c; node test/benchmark/dom.js --w3c",
     "benchmark:dom": "node test/benchmark/linkedom.js --dom; node test/benchmark/linkedom-cached.js --dom; node test/benchmark/dom.js --dom",
