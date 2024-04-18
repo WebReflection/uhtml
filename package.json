@@ -18,7 +18,7 @@
     "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
     "clean": "rm -rf coverage ./*.js cjs/**/*.js cjs/*.js types",
     "check:types": "npx attw --pack .",
-    "build:types": "rm -rf types && npx tsc -p tsconfig.json"
+    "build:types": "rm -rf types && npx tsc -p tsconfig.json && node build-utils/fix-types.js"
   },
   "keywords": [
     "micro",
@@ -36,6 +36,7 @@
     "@types/resolve": "^1.20.6",
     "ascjs": "^6.0.3",
     "c8": "^9.1.0",
+    "fast-glob": "^3.3.2",
     "rollup": "^4.14.3",
     "terser": "^5.30.3",
     "typescript": "^5.4.5"
@@ -44,53 +45,83 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./esm/index.js",
-      "default": "./cjs/index.js",
-      "types": "./types/index.d.ts"
+      "types": {
+        "default":"./types/index.d.mts",
+        "require":"./types-cjs/index.d.cts"
+      },
+      "default": "./esm/index.js",
+      "require": "./cjs/index.js"
     },
     "./dom": {
-      "import": "./esm/dom/index.js",
-      "default": "./cjs/dom/index.js",
-      "types": "./types/dom/index.d.ts"
+      "types": {
+        "default": "./types/dom/index.d.mts",
+        "require": "./types/dom/index.d.cts"
+      },
+      "default": "./esm/dom/index.js",
+      "require": "./cjs/dom/index.js"
     },
     "./init": {
-      "import": "./esm/init.js",
-      "default": "./cjs/init.js",
-      "types": "./types/keyed.d.ts"
+      "types": {
+        "default": "./types/keyed.d.mts",
+        "require": "./types/keyed.d.cts"
+      },
+      "default": "./esm/init.js",
+      "require": "./cjs/init.js"
     },
     "./keyed": {
-      "import": "./esm/keyed.js",
-      "default": "./cjs/keyed.js",
-      "types": "./types/keyed.d.ts"
+      "types": {
+        "default": "./types/keyed.d.mts",
+        "require": "./types/keyed.d.cts"
+      },
+      "default": "./esm/keyed.js",
+      "require": "./cjs/keyed.js"
     },
     "./node": {
-      "import": "./esm/node.js",
-      "default": "./cjs/node.js",
-      "types": "./types/node.d.ts"
+      "types": {
+        "default": "./types/node.d.mts",
+        "require": "./types/node.d.cts"
+      },
+      "default": "./esm/node.js",
+      "require": "./cjs/node.js"
     },
     "./reactive": {
-      "import": "./esm/reactive.js",
-      "default": "./cjs/reactive.js",
-      "types": "./types/reactive.d.ts"
+      "types": {
+        "default": "./types/reactive.d.mts",
+        "require": "./types/reactive.d.cts"
+      },
+      "default": "./esm/reactive.js",
+      "require": "./cjs/reactive.js"
     },
     "./preactive": {
-      "import": "./esm/reactive/preact.js",
-      "default": "./cjs/reactive/preact.js",
-      "types": "./types/reactive/preact.d.ts"
+      "types": {
+        "default":"./types/reactive/preact.d.mts",
+        "require": "./types/reactive/preact.d.cts"
+      },
+      "default": "./esm/reactive/preact.js",
+      "require": "./cjs/reactive/preact.js"
     },
     "./signal": {
-      "import": "./esm/reactive/signal.js",
-      "default": "./cjs/reactive/signal.js",
-      "types": "./types/reactive/signal.d.ts"
+      "types": {
+        "default":"./types/reactive/signal.d.mts",
+        "require":"./types-cjs/reactive/signal.d.cts"
+      },
+      "default": "./esm/reactive/signal.js",
+      "require": "./cjs/reactive/signal.js"
     },
     "./ssr": {
-      "import": "./esm/init-ssr.js",
-      "default": "./cjs/init-ssr.js",
-      "types": "./types/ssr.d.ts"
+      "types": {
+        "default":"./types/ssr.d.mts",
+        "require":"./types-cjs/ssr.d.cts"
+      },
+      "default": "./esm/init-ssr.js",
+      "require": "./cjs/init-ssr.js"
     },
     "./worker": {
-      "import": "./worker.js",
-      "types": "./types/ssr.d.ts"
+      "types": {
+        "default":"./types/ssr.d.mts",
+        "require":"./types-cjs/ssr.d.cts"
+      },
+      "default": "./worker.js"
     },
     "./package.json": "./package.json"
   },
