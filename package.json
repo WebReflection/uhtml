@@ -18,7 +18,7 @@
     "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
     "clean": "rm -rf coverage ./*.js cjs/**/*.js cjs/*.js types",
     "check:types": "npx attw --pack .",
-    "build:types": "rm -rf types && npx tsc -p tsconfig.json"
+    "build:types": "rm -rf types && npx tsc -p tsconfig.json && node rollup/ts.fix.js"
   },
   "keywords": [
     "micro",
@@ -36,6 +36,7 @@
     "@types/resolve": "^1.20.6",
     "ascjs": "^6.0.3",
     "c8": "^9.1.0",
+    "fast-glob": "^3.3.2",
     "rollup": "^4.14.3",
     "terser": "^5.30.3",
     "typescript": "^5.4.5"
@@ -46,51 +47,81 @@
     ".": {
       "import": "./esm/index.js",
       "default": "./cjs/index.js",
-      "types": "./types/index.d.ts"
+      "types": {
+        "default":"./types/index.d.mts",
+        "require":"./types/index.d.cts"
+      }
     },
     "./dom": {
       "import": "./esm/dom/index.js",
       "default": "./cjs/dom/index.js",
-      "types": "./types/dom/index.d.ts"
+      "types": {
+        "default":"./types/dom/index.d.mts",
+        "require":"./types/dom/index.d.cts"
+      }
     },
     "./init": {
       "import": "./esm/init.js",
       "default": "./cjs/init.js",
-      "types": "./types/keyed.d.ts"
+      "types": {
+        "default":"./types/init.d.mts",
+        "require":"./types/init.d.cts"
+      }
     },
     "./keyed": {
       "import": "./esm/keyed.js",
       "default": "./cjs/keyed.js",
-      "types": "./types/keyed.d.ts"
+      "types": {
+        "default":"./types/keyed.d.mts",
+        "require":"./types/keyed.d.cts"
+      }
     },
     "./node": {
       "import": "./esm/node.js",
       "default": "./cjs/node.js",
-      "types": "./types/node.d.ts"
+      "types": {
+        "default":"./types/node.d.mts",
+        "require":"./types/node.d.cts"
+      }
     },
     "./reactive": {
       "import": "./esm/reactive.js",
       "default": "./cjs/reactive.js",
-      "types": "./types/reactive.d.ts"
+      "types": {
+        "default":"./types/reactive.d.mts",
+        "require":"./types/reactive.d.cts"
+      }
     },
     "./preactive": {
       "import": "./esm/reactive/preact.js",
       "default": "./cjs/reactive/preact.js",
-      "types": "./types/reactive/preact.d.ts"
+      "types": {
+        "default":"./types/reactive/preact.d.mts",
+        "require":"./types/reactive/preact.d.cts"
+      }
     },
     "./signal": {
       "import": "./esm/reactive/signal.js",
       "default": "./cjs/reactive/signal.js",
-      "types": "./types/reactive/signal.d.ts"
+      "types": {
+        "default":"./types/reactive/signal.d.mts",
+        "require":"./types/reactive/signal.d.cts"
+      }
     },
     "./ssr": {
       "import": "./esm/init-ssr.js",
       "default": "./cjs/init-ssr.js",
-      "types": "./types/ssr.d.ts"
+      "types": {
+        "default":"./types/init-ssr.d.mts",
+        "require":"./types/init-ssr.d.cts"
+      }
     },
     "./worker": {
       "import": "./worker.js",
-      "types": "./types/ssr.d.ts"
+      "types": {
+        "default":"./types/init-ssr.d.mts",
+        "require":"./types/init-ssr.d.cts"
+      }
     },
     "./package.json": "./package.json"
   },
