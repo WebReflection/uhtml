@@ -29,10 +29,7 @@ Comment.prototype.toString = function toString() {
   }
 };
 
-/**
- * @param {Document} document
- * @returns {import("./keyed.js")}
- */
+/** @type {(content:string?, ...rest:string[]) => import("./keyed.js")} */
 export default (content, ...rest) => ${
   // tested via integration
   fixExports(
