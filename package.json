@@ -1,6 +1,6 @@
 {
   "name": "uhtml",
-  "version": "4.5.5",
+  "version": "4.5.6",
   "description": "A micro HTML/SVG render",
   "main": "./cjs/index.js",
   "types": "./types/index.d.ts",
@@ -48,79 +48,79 @@
       "import": "./esm/index.js",
       "default": "./cjs/index.js",
       "types": {
-        "default":"./types/index.d.mts",
-        "require":"./types/index.d.cts"
+        "default": "./types/index.d.mts",
+        "require": "./types/index.d.cts"
       }
     },
     "./dom": {
       "import": "./esm/dom/index.js",
       "default": "./cjs/dom/index.js",
       "types": {
-        "default":"./types/dom/index.d.mts",
-        "require":"./types/dom/index.d.cts"
+        "default": "./types/dom/index.d.mts",
+        "require": "./types/dom/index.d.cts"
       }
     },
     "./init": {
       "import": "./esm/init.js",
       "default": "./cjs/init.js",
       "types": {
-        "default":"./types/init.d.mts",
-        "require":"./types/init.d.cts"
+        "default": "./types/init.d.mts",
+        "require": "./types/init.d.cts"
       }
     },
     "./keyed": {
       "import": "./esm/keyed.js",
       "default": "./cjs/keyed.js",
       "types": {
-        "default":"./types/keyed.d.mts",
-        "require":"./types/keyed.d.cts"
+        "default": "./types/keyed.d.mts",
+        "require": "./types/keyed.d.cts"
       }
     },
     "./node": {
       "import": "./esm/node.js",
       "default": "./cjs/node.js",
       "types": {
-        "default":"./types/node.d.mts",
-        "require":"./types/node.d.cts"
+        "default": "./types/node.d.mts",
+        "require": "./types/node.d.cts"
       }
     },
     "./reactive": {
       "import": "./esm/reactive.js",
       "default": "./cjs/reactive.js",
       "types": {
-        "default":"./types/reactive.d.mts",
-        "require":"./types/reactive.d.cts"
+        "default": "./types/reactive.d.mts",
+        "require": "./types/reactive.d.cts"
       }
     },
     "./preactive": {
       "import": "./esm/reactive/preact.js",
       "default": "./cjs/reactive/preact.js",
       "types": {
-        "default":"./types/reactive/preact.d.mts",
-        "require":"./types/reactive/preact.d.cts"
+        "default": "./types/reactive/preact.d.mts",
+        "require": "./types/reactive/preact.d.cts"
       }
     },
     "./signal": {
       "import": "./esm/reactive/signal.js",
       "default": "./cjs/reactive/signal.js",
       "types": {
-        "default":"./types/reactive/signal.d.mts",
-        "require":"./types/reactive/signal.d.cts"
+        "default": "./types/reactive/signal.d.mts",
+        "require": "./types/reactive/signal.d.cts"
       }
     },
     "./ssr": {
       "import": "./esm/init-ssr.js",
       "default": "./cjs/init-ssr.js",
       "types": {
-        "default":"./types/init-ssr.d.mts",
-        "require":"./types/init-ssr.d.cts"
+        "default": "./types/init-ssr.d.mts",
+        "require": "./types/init-ssr.d.cts"
       }
     },
     "./worker": {
       "import": "./worker.js",
       "types": {
-        "default":"./types/init-ssr.d.mts",
-        "require":"./types/init-ssr.d.cts"
+        "default": "./types/init-ssr.d.mts",
+        "require": "./types/init-ssr.d.cts"
       }
     },
     "./package.json": "./package.json"
