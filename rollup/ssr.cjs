@@ -6,7 +6,7 @@ const init = join(__dirname, '..', 'esm', 'init-ssr.js');
 const uhtml = readFileSync(init).toString();
 
 const content = [
-  'const document = content ? new DOMParser().parseFromString(content, ...rest) : new Document;',
+  'const document = content ? new DOMParser().parseFromString(content, mimeType || \'text/html\') : new Document;',
   'const { constructor: DocumentFragment } = document.createDocumentFragment();',
 ];
 
@@ -29,8 +29,8 @@ Comment.prototype.toString = function toString() {
   }
 };
 
-/** @type {(content:string?, ...rest:string[]) => import("./keyed.js")} */
-export default (content, ...rest) => ${
+/** @type {(content?: string, mimeType?: string) => import("./keyed.js")} */
+export default (content, mimeType) => ${
   // tested via integration
   fixExports(
     uhtml
