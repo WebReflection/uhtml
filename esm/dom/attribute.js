@@ -51,6 +51,6 @@ export default class Attribute extends Node {
 
   toString() {
     const { [name]: key, [value]: val } = this;
-    return val === '' ? key : `${key}="${escape(val)}"`;
+    return `${key}="${escape(val)}"`;
   }
 }
