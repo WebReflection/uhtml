@@ -1,4 +1,5 @@
 import { ELEMENT_NODE } from 'domconstants/constants';
+import { escape } from 'html-escaper';
 
 import Attribute from './attribute.js';
 import Element from './element.js';
@@ -43,8 +44,8 @@ export default class SVGElement extends Element {
     const { [localName]: name, [childNodes]: nodes, [attributes]: attrs } = this;
     const svg = ['<', name];
     if (attrs?.size) {
-      for (const attribute of attrs.values())
-        svg.push(' ', attribute);
+      for (const { name, value } of attrs.values())
+        svg.push(' ', name, '="', escape(value), '"');
     }
     if (nodes.length || isSVG(name))
       svg.push('>', ...nodes, '</', name, '>');
