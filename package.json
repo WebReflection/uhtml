@@ -1,6 +1,6 @@
 {
   "name": "uhtml",
-  "version": "4.5.9",
+  "version": "4.5.10",
   "description": "A micro HTML/SVG render",
   "main": "./cjs/index.js",
   "types": "./types/index.d.ts",
@@ -35,11 +35,11 @@
     "@types/istanbul-lib-coverage": "^2.0.6",
     "@types/resolve": "^1.20.6",
     "ascjs": "^6.0.3",
-    "c8": "^9.1.0",
+    "c8": "^10.1.2",
     "fast-glob": "^3.3.2",
-    "rollup": "^4.18.0",
-    "terser": "^5.31.0",
-    "typescript": "^5.4.5"
+    "rollup": "^4.21.1",
+    "terser": "^5.31.6",
+    "typescript": "^5.5.4"
   },
   "module": "./esm/index.js",
   "type": "module",
@@ -130,7 +130,7 @@
     "@webreflection/uparser": "^0.3.3",
     "custom-function": "^1.0.6",
     "domconstants": "^1.1.6",
-    "gc-hook": "^0.3.1",
+    "gc-hook": "^0.4.1",
     "html-escaper": "^3.0.3",
     "htmlparser2": "^9.1.0",
     "udomdiff": "^1.1.0"
@@ -144,7 +144,7 @@
   },
   "homepage": "https://github.com/WebReflection/uhtml#readme",
   "optionalDependencies": {
-    "@preact/signals-core": "^1.6.0",
+    "@preact/signals-core": "^1.8.0",
     "@webreflection/signal": "^2.1.2"
   }
 }
