@@ -46,81 +46,81 @@
   "exports": {
     ".": {
       "import": "./esm/index.js",
-      "default": "./cjs/index.js",
       "types": {
-        "default": "./types/index.d.mts",
-        "require": "./types/index.d.cts"
-      }
+        "require": "./types/index.d.cts",
+        "default": "./types/index.d.mts"
+      },
+      "default": "./cjs/index.js"
     },
     "./dom": {
       "import": "./esm/dom/index.js",
-      "default": "./cjs/dom/index.js",
       "types": {
-        "default": "./types/dom/index.d.mts",
-        "require": "./types/dom/index.d.cts"
-      }
+        "require": "./types/dom/index.d.cts",
+        "default": "./types/dom/index.d.mts"
+      },
+      "default": "./cjs/dom/index.js"
     },
     "./init": {
       "import": "./esm/init.js",
-      "default": "./cjs/init.js",
       "types": {
-        "default": "./types/init.d.mts",
-        "require": "./types/init.d.cts"
-      }
+        "require": "./types/init.d.cts",
+        "default": "./types/init.d.mts"
+      },
+      "default": "./cjs/init.js"
     },
     "./keyed": {
       "import": "./esm/keyed.js",
-      "default": "./cjs/keyed.js",
       "types": {
-        "default": "./types/keyed.d.mts",
-        "require": "./types/keyed.d.cts"
-      }
+        "require": "./types/keyed.d.cts",
+        "default": "./types/keyed.d.mts"
+      },
+      "default": "./cjs/keyed.js"
     },
     "./node": {
       "import": "./esm/node.js",
-      "default": "./cjs/node.js",
       "types": {
-        "default": "./types/node.d.mts",
-        "require": "./types/node.d.cts"
-      }
+        "require": "./types/node.d.cts",
+        "default": "./types/node.d.mts"
+      },
+      "default": "./cjs/node.js"
     },
     "./reactive": {
       "import": "./esm/reactive.js",
-      "default": "./cjs/reactive.js",
       "types": {
-        "default": "./types/reactive.d.mts",
-        "require": "./types/reactive.d.cts"
-      }
+        "require": "./types/reactive.d.cts",
+        "default": "./types/reactive.d.mts"
+      },
+      "default": "./cjs/reactive.js"
     },
     "./preactive": {
       "import": "./esm/reactive/preact.js",
-      "default": "./cjs/reactive/preact.js",
       "types": {
-        "default": "./types/reactive/preact.d.mts",
-        "require": "./types/reactive/preact.d.cts"
-      }
+        "require": "./types/reactive/preact.d.cts",
+        "default": "./types/reactive/preact.d.mts"
+      },
+      "default": "./cjs/reactive/preact.js"
     },
     "./signal": {
       "import": "./esm/reactive/signal.js",
-      "default": "./cjs/reactive/signal.js",
       "types": {
-        "default": "./types/reactive/signal.d.mts",
-        "require": "./types/reactive/signal.d.cts"
-      }
+        "require": "./types/reactive/signal.d.cts",
+        "default": "./types/reactive/signal.d.mts"
+      },
+      "default": "./cjs/reactive/signal.js"
     },
     "./ssr": {
       "import": "./esm/init-ssr.js",
-      "default": "./cjs/init-ssr.js",
       "types": {
-        "default": "./types/init-ssr.d.mts",
-        "require": "./types/init-ssr.d.cts"
-      }
+        "require": "./types/init-ssr.d.cts",
+        "default": "./types/init-ssr.d.mts"
+      },
+      "default": "./cjs/init-ssr.js"
     },
     "./worker": {
       "import": "./worker.js",
       "types": {
-        "default": "./types/init-ssr.d.mts",
-        "require": "./types/init-ssr.d.cts"
+        "require": "./types/init-ssr.d.cts",
+        "default": "./types/init-ssr.d.mts"
       }
     },
     "./package.json": "./package.json"
