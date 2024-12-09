@@ -4,6 +4,9 @@ import { childNodes, nodeType, parentNode } from './symbols.js';
 
 import { empty } from '../utils.js';
 
+/**
+ * @param {{ [k in typeof nodeType]: number }}
+ */
 export const asElement = ({ [nodeType]: type }) => type === ELEMENT_NODE;
 
 export const changeParentNode = (node, parent) => {
