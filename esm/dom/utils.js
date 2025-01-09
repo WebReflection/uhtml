@@ -4,7 +4,7 @@ import { childNodes, nodeType, parentNode } from './symbols.js';
 
 import { empty } from '../utils.js';
 
-export const asElement = ({ [nodeType]: type }) => type === ELEMENT_NODE;
+export const asElement = (obj) => obj[nodeType] === ELEMENT_NODE;
 
 export const changeParentNode = (node, parent) => {
   if (node[nodeType] === DOCUMENT_FRAGMENT_NODE)
