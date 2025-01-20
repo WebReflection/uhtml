@@ -18,7 +18,9 @@
     "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
     "clean": "rm -rf coverage ./*.js cjs/**/*.js cjs/*.js types",
     "check:types": "npx attw --pack .",
-    "build:types": "rm -rf types && npx tsc -p tsconfig.json && node rollup/ts.fix.js"
+    "build:types": "rm -rf types && npx tsc -p tsconfig.json && node rollup/ts.fix.js",
+    "are-the-types-wrong": "npx attw $(npm pack)",
+    "publint-package": "npx publint ."
   },
   "keywords": [
     "micro",
@@ -28,7 +30,8 @@
   "author": "Andrea Giammarchi",
   "license": "MIT",
   "devDependencies": {
-    "@arethetypeswrong/cli": "~0.15.3",
+    "@arethetypeswrong/cli": "~0.17.3",
+    "publint": "~0.3.2",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-terser": "^0.4.4",
     "@types/estree": "^1.0.6",
@@ -45,83 +48,83 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./esm/index.js",
       "types": {
         "require": "./types/index.d.cts",
         "default": "./types/index.d.mts"
       },
+      "import": "./esm/index.js",
       "default": "./cjs/index.js"
     },
     "./dom": {
-      "import": "./esm/dom/index.js",
       "types": {
         "require": "./types/dom/index.d.cts",
         "default": "./types/dom/index.d.mts"
       },
+      "import": "./esm/dom/index.js",
       "default": "./cjs/dom/index.js"
     },
     "./init": {
-      "import": "./esm/init.js",
       "types": {
         "require": "./types/init.d.cts",
         "default": "./types/init.d.mts"
       },
+      "import": "./esm/init.js",
       "default": "./cjs/init.js"
     },
     "./keyed": {
-      "import": "./esm/keyed.js",
       "types": {
         "require": "./types/keyed.d.cts",
         "default": "./types/keyed.d.mts"
       },
+      "import": "./esm/keyed.js",
       "default": "./cjs/keyed.js"
     },
     "./node": {
-      "import": "./esm/node.js",
       "types": {
         "require": "./types/node.d.cts",
         "default": "./types/node.d.mts"
       },
+      "import": "./esm/node.js",
       "default": "./cjs/node.js"
     },
     "./reactive": {
-      "import": "./esm/reactive.js",
       "types": {
         "require": "./types/reactive.d.cts",
         "default": "./types/reactive.d.mts"
       },
+      "import": "./esm/reactive.js",
       "default": "./cjs/reactive.js"
     },
     "./preactive": {
-      "import": "./esm/reactive/preact.js",
       "types": {
         "require": "./types/reactive/preact.d.cts",
         "default": "./types/reactive/preact.d.mts"
       },
+      "import": "./esm/reactive/preact.js",
       "default": "./cjs/reactive/preact.js"
     },
     "./signal": {
-      "import": "./esm/reactive/signal.js",
       "types": {
         "require": "./types/reactive/signal.d.cts",
         "default": "./types/reactive/signal.d.mts"
       },
+      "import": "./esm/reactive/signal.js",
       "default": "./cjs/reactive/signal.js"
     },
     "./ssr": {
-      "import": "./esm/init-ssr.js",
       "types": {
         "require": "./types/init-ssr.d.cts",
         "default": "./types/init-ssr.d.mts"
       },
+      "import": "./esm/init-ssr.js",
       "default": "./cjs/init-ssr.js"
     },
     "./worker": {
-      "import": "./worker.js",
       "types": {
         "require": "./types/init-ssr.d.cts",
         "default": "./types/init-ssr.d.mts"
-      }
+      },
+      "import": "./worker.js"
     },
     "./package.json": "./package.json"
   },
