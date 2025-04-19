@@ -369,7 +369,7 @@ Please note this is an *optional* feature, not a mandatory one: you don't need t
 Technically speaking, in the template literal tags world all values part of the template are called *interpolations*.
 
 ```js
-const tag = (template, interpolations) => {
+const tag = (template, ...interpolations) => {
   console.log(template.join());
   // logs "this is , and this is ,"
   console.log(interpolations);
