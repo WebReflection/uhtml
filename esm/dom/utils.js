@@ -6,7 +6,7 @@ import { empty } from '../utils.js';
 
 
 /**
- * @param {{ [k in typeof nodeType]: number }}
+ * @param {import("./element.js").default} element
  * @returns {boolean}
  */
 export const asElement = ({ [nodeType]: type }) => type === ELEMENT_NODE;
