@@ -7,7 +7,7 @@
   "scripts": {
     "benchmark:w3c": "node test/benchmark/linkedom.js --w3c; node test/benchmark/linkedom-cached.js --w3c; node test/benchmark/dom.js --w3c",
     "benchmark:dom": "node test/benchmark/linkedom.js --dom; node test/benchmark/linkedom-cached.js --dom; node test/benchmark/dom.js --dom",
-    "build": "npm run rollup:es && node rollup/ssr.cjs && node rollup/init.cjs && npm run rollup:init && npm run rollup:ssr && rm -rf cjs/* && npm run cjs && npm run build:types && npm run test && npm run size",
+    "build": "npm run rollup:es && node rollup/ssr.cjs && node rollup/init.cjs && npm run rollup:init && npm run rollup:ssr && rm -rf cjs/* && npm run cjs && npm run build:types && npm run test && npm run size && npm run publint",
     "cjs": "ascjs --no-default esm cjs",
     "rollup:es": "rollup --config rollup/es.config.js",
     "rollup:init": "rollup --config rollup/init.config.js",
@@ -17,10 +17,9 @@
     "test": "c8 node test/coverage.js && node test/modern.mjs && node test/svg.mjs",
     "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
     "clean": "rm -rf coverage ./*.js cjs/**/*.js cjs/*.js types",
-    "check:types": "npx attw --pack .",
+    "check:types": "npx attw $(npm pack) --profile esm-only",
     "build:types": "rm -rf types && npx tsc -p tsconfig.json && node rollup/ts.fix.js",
-    "are-the-types-wrong": "npx attw $(npm pack)",
-    "publint-package": "npx publint ."
+    "publint": "npx publint ."
   },
   "keywords": [
     "micro",
@@ -30,8 +29,8 @@
   "author": "Andrea Giammarchi",
   "license": "MIT",
   "devDependencies": {
-    "@arethetypeswrong/cli": "~0.17.3",
-    "publint": "~0.3.2",
+    "@arethetypeswrong/cli": "~0.17.4",
+    "publint": "~0.3.12",
     "@rollup/plugin-node-resolve": "^15.3.0",
     "@rollup/plugin-terser": "^0.4.4",
     "@types/estree": "^1.0.6",
