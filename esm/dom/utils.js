@@ -4,6 +4,11 @@ import { childNodes, nodeType, parentNode } from './symbols.js';
 
 import { empty } from '../utils.js';
 
+
+/**
+ * @param {import("./element.js").default} element
+ * @returns {boolean}
+ */
 export const asElement = ({ [nodeType]: type }) => type === ELEMENT_NODE;
 
 export const changeParentNode = (node, parent) => {
