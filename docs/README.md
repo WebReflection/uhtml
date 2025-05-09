@@ -28,11 +28,13 @@ You can skip to details directly via the following links:
   * [direct](./#direct) - to assign properties
   * [listener](./#listener) - to add listeners
   * [list](./#list) - to grow or shrink a list of nodes
+  * [ref](./#ref) - to keep references to DOM nodes
   * [self closing](./#self-closing) - to simplify life
   * [hole](./#hole) - to represent generic content
   * [reactivity](./#reactivity) - to understand *uhtml/reactive*
 
 ```
+let el = {}
    ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ render
    ┃                    ┏━━━━━━━━━━━━━━━━━━━ tag
 render(document.body, html`
@@ -46,7 +48,8 @@ render(document.body, html`
         ┗━━━━━━┳━━━━━┛
                ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━ list
     </ul>
-    <my-element /> ━━━━━━━━━━━━━━━━━━━━━━━━━ self closing
+                 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━ ref
+    <my-element ref=${el} /> ━━━━━━━━━━━━━━━ self closing
     <p>
       ${show ? `${order} results` : null}
        ┗━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┛
