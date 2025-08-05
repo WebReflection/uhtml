@@ -28,6 +28,9 @@ A minimalistic library to create fast and reactive Web pages.
   * simplified accessibility via `aria` attribute and easy *dataset* handling via `data`
   * developers enhanced mode runtime debugging sessions
 
+
+<sub>see [codepen](https://codepen.io/WebReflection/pen/VYvbddv?editors=0010)</sub>
+
 ```js
 import { html, signal } from 'https://esm.run/uhtml';
 
@@ -54,7 +57,7 @@ If you are familiar with *JSX* you will find *uhtml* syntax very similar:
 
   * self closing tags, such as `<p />`
   * self closing elements, such as `<custom-element>...</>`
-  * object spread operation via `<${Component} ...=${{any: 'prop'}} />`
+  * object spread operation via `<${Component} ...${{any: 'prop'}} />`
   * `key` attribute to ensure *same DOM node* within a list of nodes
   * `ref` attribute to retrieve the element via effects or by any other mean
 
@@ -76,7 +79,7 @@ On top of *JSX* like features, there are other attributes with a special meaning
   * `aria` attribute to simplify *a11y*, such as `<button aria=${{role: 'button', labelledBy: 'id'}} />`
   * `data` attribute to simplify *dataset* handling, such as `<div data=${{any: 'data'}} />`
   * `@event` attribute for generic events handling, accepting an array when *options* are meant to be passed, such as `<button @click=${[event => {}, { once: true }]} />`
-  * `on...` prefixed direct events, such as `<button onclick=${listener} />`
+  * `on...` prefixed, case insensitive, direct events, such as `<button onclick=${listener} />`
   * `.direct` properties access, such as `<input .value=${content} />`, `<button .textContent=${value} />` or `<div .className=${value} />`
   * `?toggle` boolean attributes, such as `<div ?hidden=${isHidden} />`
 
