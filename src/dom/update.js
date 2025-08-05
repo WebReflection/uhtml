@@ -9,6 +9,7 @@ import {
   children,
 } from './ish.js';
 
+import { Signal } from './signals.js';
 import { Unsafe, assign, entries, isArray } from '../utils.js';
 import { PersistentFragment, diffFragment, nodes } from './persistent-fragment.js';
 import creator from './creator.js';
@@ -70,6 +71,10 @@ const comment_hole = (node, value) => {
 
 const comment_unsafe = xml => (node, value) => {
   comment_hole(node, PersistentFragment(fragment(value, xml)));
+};
+
+const comment_signal = (node, value) => {
+  comment_hole(node, value instanceof Signal ? value.value : value);
 };
 
 const data = ({ dataset }, values) => {
@@ -135,7 +140,7 @@ export const update = (node, type, path, name, hint) => {
       if (isArray(hint)) return [path, comment_array, COMMENT_ARRAY];
       return hint instanceof Unsafe ?
         [path, comment_unsafe(node.xml), UNSAFE] :
-        [path, comment_hole, COMMENT]
+        [path, hint instanceof Signal ? comment_signal : comment_hole, COMMENT]
       ;
     }
     case TEMPLATE_TEXT: return [path, directFor('textContent'), TEXT];
