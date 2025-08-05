@@ -1,5 +1,5 @@
 {
-  "name": "@webreflection/uhtml",
+  "name": "uhtml",
   "version": "5.0.0",
   "type": "module",
   "scripts": {
