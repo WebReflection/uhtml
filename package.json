@@ -1,14 +1,17 @@
 {
   "name": "@webreflection/uhtml",
-  "version": "4.7.1",
+  "version": "5.0.0",
   "type": "module",
   "scripts": {
-    "build": "npm run types && npm test && npm run build:prod && npm run build:dev && npm run size",
+    "build": "npm run types && npm run build:js",
+    "build:js": "npm test && npm run build:prod && npm run build:dev && npm run size",
     "build:dev": "sed -i 's/false/true/' src/debug.js && rollup -c build/dev.js",
     "build:prod": "sed -i 's/true/false/' src/debug.js && rollup -c build/prod.js",
     "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
     "size": "echo \"dom\t\t$(cat dist/prod/dom.js | brotli | wc -c)\"; echo \"json\t\t$(cat dist/prod/json.js | brotli | wc -c)\"; echo \"parser\t\t$(cat dist/prod/parser.js | brotli | wc -c)\"",
-    "test": "node test/json.js && c8 node test/parser.js",
+    "test": "c8 node test/parser.js",
+    "test:json": "node test/json.js",
+    "test:all": "npm run test:json && npm run test",
     "types": "tsc --allowJs --checkJs --lib dom,esnext --moduleResolution nodenext --module NodeNext --target esnext -d --emitDeclarationOnly --outDir ./types ./src/*.js ./src/*/*.js"
   },
   "files": [

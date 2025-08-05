@@ -78,6 +78,14 @@ On top of *JSX* like features, there are other attributes with a special meaning
 
 All other attributes will be handled via standard `setAttribute` or `removeAttribute` when the passed value is either `null` or `undefined`.
 
+### Special Elements
+
+Elements that contain *data* such as `<script>` or `<style>`, or those that contains text such as `<textarea>` require *explicit closing tag* to avoid having in between templates able to break the layout.
+
+This is nothing new to learn, it's just how the Web works, so that one cannot have `</script>` within a `<script>` tag content and the same applies in here.
+
+In *debugging* mode, an error telling you which template is malformed will be triggered in these cases.
+
 ### About Comments
 
 Useful for developers but never really relevant for end users, *comments* are ignored by default in *uhtml* except for those flagged as "*very important*".

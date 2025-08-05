@@ -1,0 +1,13 @@
+export const ARIA: 0;
+export const ATTRIBUTE: 1;
+export const COMMENT: 2;
+export function comment(node: any, value: any): void;
+export const COMPONENT: 3;
+export const DATA: 4;
+export const DIRECT: 5;
+export const DOTS: 6;
+export const EVENT: 7;
+export const KEY: 8;
+export const TEXT: 9;
+export const TOGGLE: 10;
+export function update(node: any, type: any, path: any, name: any): any[];

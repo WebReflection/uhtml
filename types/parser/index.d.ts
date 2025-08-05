@@ -1,0 +1,25 @@
+declare function _default({ Comment, DocumentType, Text, Fragment, Element, Component, update, }: {
+    Comment?: typeof DOMComment;
+    DocumentType?: typeof DOMDocumentType;
+    Text?: typeof DOMText;
+    Fragment?: typeof DOMFragment;
+    Element?: typeof DOMElement;
+    Component?: typeof DOMComponent;
+    update?: update;
+}): (template: TemplateStringsArray | string[], holes: unknown[], xml: boolean) => [Node, unknown[]];
+export default _default;
+export type Node = import("../dom/ish.js").Node;
+export type Element = import("../dom/ish.js").Element;
+export type Component = import("../dom/ish.js").Component;
+export type update = (node: import("../dom/ish.js").Node, type: typeof ATTRIBUTE | typeof TEXT | typeof COMMENT | typeof COMPONENT, path: number[], name: string, hint: unknown) => unknown;
+export type Container = Element | Component;
+import { Comment as DOMComment } from '../dom/ish.js';
+import { DocumentType as DOMDocumentType } from '../dom/ish.js';
+import { Text as DOMText } from '../dom/ish.js';
+import { Fragment as DOMFragment } from '../dom/ish.js';
+import { Element as DOMElement } from '../dom/ish.js';
+import { Component as DOMComponent } from '../dom/ish.js';
+import { ATTRIBUTE } from '../dom/ish.js';
+import { TEXT } from '../dom/ish.js';
+import { COMMENT } from '../dom/ish.js';
+import { COMPONENT } from '../dom/ish.js';
