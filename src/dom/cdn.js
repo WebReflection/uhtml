@@ -1,7 +1,7 @@
 const resolve = ({ protocol, host, pathname }) => {
   const dev = /[?&](?:dev|debug)(?:=|$)/.test(location.search);
   let path = pathname.replace(/\+\S*?$/, '');
-  path = path.replace(/\/cdn(?:\/|\.js\S*)$/, '/');
+  path = path.replace(/\/(?:auto|cdn)(?:\/|\.js\S*)$/, '/');
   path = path.replace(/\/(?:dist\/)?(?:dev|prod)\//, '/');
   return `${protocol}//${host}${path}dist/${dev ? 'dev' : 'prod'}/dom.js`;
 };

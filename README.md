@@ -29,7 +29,7 @@ A minimalistic library to create fast and reactive Web pages.
   * developers enhanced mode runtime debugging sessions
 
 
-<sub>see [codepen](https://codepen.io/WebReflection/pen/VYvbddv?editors=0010)</sub>
+<sub>test in [codepen](https://codepen.io/WebReflection/pen/VYvbddv?editors=0010)</sub>
 
 ```js
 import { html, signal } from 'https://esm.run/uhtml';
@@ -165,11 +165,12 @@ import { render, html } from 'https://esm.run/uhtml/debug';
 // https://cdn.jsdelivr.net/npm/uhtml/dist/dev/dom.js
 
 // automatic prod/dev version on ?dev or ?debug
+import { render, html } from 'https://esm.run/uhtml/auto';
 import { render, html } from 'https://esm.run/uhtml/cdn';
 // https://cdn.jsdelivr.net/npm/uhtml/dist/prod/cdn.js
 ```
 
-Using `https://esm.run/uhtml/cdn` or the fully qualified `https://cdn.jsdelivr.net/npm/uhtml/dist/prod/cdn.js` URL provides an automatic switch to *debug* mode if the current page location contains `?dev` or `?debug` or `?debug=1` query string parameter plus it guarantees the library will not be imported again if other scripts use a different *CDN* that points at the same file in a different location.
+Using `https://esm.run/uhtml/cdn` (or */auto*) or the fully qualified `https://cdn.jsdelivr.net/npm/uhtml/dist/prod/cdn.js` URL provides an automatic switch to *debug* mode if the current page location contains `?dev` or `?debug` or `?debug=1` query string parameter plus it guarantees the library will not be imported again if other scripts use a different *CDN* that points at the same file in a different location.
 
 This makes it easy to switch to *dev* mode by changing the location from `https://example.com` to `https://example.com?debug`.
 

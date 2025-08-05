@@ -28,6 +28,11 @@
       "types": "./types/dom/index.d.ts",
       "description": "uhtml default browsers' export"
     },
+    "./auto": {
+      "import": "./dist/prod/cdn.js",
+      "types": "./types/dom/index.d.ts",
+      "description": "uhtml browsers' export with automatic dev/prod switch on ?dev or ?debug pages' URLs"
+    },
     "./cdn": {
       "import": "./dist/prod/cdn.js",
       "types": "./types/dom/index.d.ts",
