@@ -2,49 +2,53 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>uhtml</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script type="module">
-  const testUHTML = () => import('./uhtml.js').then(({ render, html }) => {
-    console.time('parse uhtml');
-    render(uhtml, html`<div class=${'test'}>${'content'}</div>`);
-    console.timeEnd('parse uhtml');
-  });
+    import { render, html, svg, signal, unsafe } from '../dist/dev/dom.js';
 
-  // testUHTML();
+    let hello = 'hello';
+    const comp = () => html`<${Button} text=${hello}>world</>`;
+  
+    function Button(props) {
+      return html`<button key=${1}>${props.text} ${props.children}</button>`;
+    }
+  
+    function Counter({ count }) {
+      return html`<button @click=${() => count.value++}>${unsafe('<em>count</em>')} ${count.value}</button>`;
+    }
 
-  import('../keyed.js').then(async ({ render, html, svg, htmlFor }) => {
-    const { html: htmlNode } = await import('../node.js');
-    let i = 0;
-    const same = () => htmlFor(document, 'key')`<div class=${'test'} data=${{a: i}}>${'content ' + i}</div>`;
-    const diff = () => html`<div class=${'test'} data=${{a: i}}>${'content'}</div>`;
-    const node = () => htmlNode`<div class=${'test'} data=${{a: i}}>${'content'}</div>`;
-    const test = () => {
-      i++;
-      render(udomunderstand, html`
-        <div>
-          ${diff()}
-          ${[
-            same(),
-            diff(),
-            diff(),
-            node(),
-            diff(),
-            diff(),
-          ].concat(Math.random() < .5 ? [diff(), diff()] : [])}
-        </div>
-      `);
-    };
-    test();
-    render(uhtml, html`<button>a</button><button>b</button>`);
-    setInterval(test, 250);
-    console.assert(same() === same());
-    console.assert(diff() !== diff());
-  });
+    function LI(entries) {
+      return entries.map(key => html`<li key=${key}>Rando ${key}</li>`);
+    }
+
+    function UL(keys) {
+      return html`<ul>${LI(keys)}</ul>`;
+    }
+
+    document.body.appendChild(
+      html`<svg><rect fill="red" width=${100} height=${50} /></svg>`
+    );
+
+    document.body.appendChild(comp());
+  
+    setTimeout(render, 1000, document.body, comp);
+    setTimeout((...args) => {
+      hello = 'ahoi';
+      render(...args);
+    }, 2000, document.body, comp);
+    setTimeout((...args) => {
+      render(document.body, () => UL([1, 2, 3]));
+    }, 3000, document.body, comp);
+    setTimeout((...args) => {
+      render(document.body, () => UL([3, 2, 1]));
+    }, 4000, document.body, comp);
+
+    
+    setTimeout((...args) => {
+      const count = signal(0);
+      render(document.body, html`<${Counter} count=${count} />`);
+    }, 5000);
+
   </script>
 </head>
-<body>
-  <div id="udomunderstand"></div>
-  <div id="uhtml"></div>
-</body>
 </html>

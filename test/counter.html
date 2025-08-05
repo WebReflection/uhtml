@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script type="module">
+import { html, signal } from '../dist/dev/dom.js';
+
+function Counter() {
+  const count = signal(0);
+
+  return html`
+    <button onClick=${() => count.value++}>
+      Clicked ${count.value} times
+    </button>
+  `;
+}
+
+document.body.append(
+  html`<${Counter} />`
+);
+
+    // render(document.body, html`<${Counter} />`);
+    // render(document.body, () => html`<${Counter} />`);
+    // ... OR ...
+    // document.body.append(html`<${Counter} />`);
+  </script>
+</head>
+</html>
