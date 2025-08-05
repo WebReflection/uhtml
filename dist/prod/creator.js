@@ -1,0 +1,1 @@
+var e=(e=globalThis.document)=>{let t,n=e.createElement("template");return(r,a=!1)=>{if(a)return t||(t=e.createRange(),t.selectNodeContents(e.createElementNS("http://www.w3.org/2000/svg","svg"))),t.createContextualFragment(r);n.innerHTML=r;const o=n.content;return n=n.cloneNode(!1),o}};export{e as default};

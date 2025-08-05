@@ -1,65 +1,238 @@
-# <em>µ</em>html
+# uhtml
 
 [![Downloads](https://img.shields.io/npm/dm/uhtml.svg)](https://www.npmjs.com/package/uhtml) [![build status](https://github.com/WebReflection/uhtml/actions/workflows/node.js.yml/badge.svg)](https://github.com/WebReflection/uhtml/actions) [![Coverage Status](https://coveralls.io/repos/github/WebReflection/uhtml/badge.svg?branch=main)](https://coveralls.io/github/WebReflection/uhtml?branch=main) [![CSP strict](https://webreflection.github.io/csp/strict.svg)](https://webreflection.github.io/csp/#-csp-strict)
 
-![snow flake](./docs/uhtml-head.jpg)
 
-<sup>**Social Media Photo by [Andrii Ganzevych](https://unsplash.com/@odya_kun) on [Unsplash](https://unsplash.com/)**</sup>
+A minimalistic library to create fast and reactive Web pages.
 
-*uhtml* (micro *µ* html) is one of the smallest, fastest, memory consumption friendly, yet zero-tools based, library to safely help creating or manipulating DOM content.
+```html
+<!doctype html>
+<script type="module">
+  import { html } from 'https://esm.run/uhtml';
 
-### 📣 uhtml v4 is out
+  document.body.prepend(
+    html`<h1>Hello DOM !</h2>`
+  );
+</script>
+```
 
-**[Documentation](https://webreflection.github.io/uhtml/)**
+*uhtml* (micro *µ* html) offers the following features without needing specialized tools:
 
-**[Release Notes](https://github.com/WebReflection/uhtml/pull/86)**
+  * *JSX* inspired syntax through template literal `html` and `svg` tags
+  * *React* like components with *Preact* like *signals*
+  * compatible with native custom elements and other Web standards out of the box
+  * simplified accessibility via `aria` attribute and easy *dataset* handling via `data`
+  * developers enhanced mode runtime debugging sessions
+
+```js
+import { html, signal } from 'https://esm.run/uhtml';
+
+function Counter() {
+  const count = signal(0);
+
+  return html`
+    <button onClick=${() => count.value++}>
+      Clicked ${count.value} times
+    </button>
+  `;
+}
+
+document.body.append(
+  html`<${Counter} />`
+);
+```
 
 - - -
 
-### Exports
+## Syntax
 
-  * **[uhtml](https://cdn.jsdelivr.net/npm/uhtml/index.js)** as default `{ Hole, render, html, svg, attr }` with smart auto-keyed nodes - read [keyed or not ?](https://webreflection.github.io/uhtml/#keyed-or-not-) paragraph to know more
-  * **[uhtml/keyed](https://cdn.jsdelivr.net/npm/uhtml/keyed.js)** with extras `{ Hole, render, html, svg, htmlFor, svgFor, attr }`, providing keyed utilities - read [keyed or not ?](https://webreflection.github.io/uhtml/#keyed-or-not-) paragraph to know more
-  * **[uhtml/node](https://cdn.jsdelivr.net/npm/uhtml/node.js)** with *same default* exports but it's for *one-off* nodes creation only so that no cache or updates are available and it's just an easy way to hook *uhtml* into your existing project for DOM creation (not manipulation!)
-  * **[uhtml/init](https://cdn.jsdelivr.net/npm/uhtml/init.js)** which returns a `document => uhtml/keyed` utility that can be bootstrapped with `uhtml/dom`, [LinkeDOM](https://github.com/WebReflection/linkedom), [JSDOM](https://github.com/jsdom/jsdom) for either *SSR* or *Workers* support
-  * **uhtml/ssr** which exports an utility that both SSR or Workers can use to parse and serve documents. This export provides same keyed utilities except the keyed feature is implicitly disabled as that's usually not desirable at all for SSR or rendering use cases, actually just an overhead. This might change in the future but for now I want to benchmark and see how competitive is `uhtml/ssr` out there. The `uhtml/dom` is also embedded in this export because the `Comment` class needs an override to produce a super clean output (at least until hydro story is up and running).
-  * **[uhtml/dom](https://cdn.jsdelivr.net/npm/uhtml/dom.js)** which returns a specialized *uhtml* compliant DOM environment that can be passed to the `uhtml/init` export to have 100% same-thing running on both client or Web Worker / Server. This entry exports `{ Document, DOMParser }` where the former can be used to create a new *document* while the latter one can parse well formed HTML or SVG content and return the document out of the box.
-  * **[uhtml/reactive](https://cdn.jsdelivr.net/npm/uhtml/reactive.js)** which allows usage of symbols within the optionally *keyed* render function. The only difference with other exports, beside exporting a `reactive` field instead of `render`, so that `const render = reactive(effect)` creates a reactive render per each library, is that the `render(where, () => what)`, with a function as second argument is mandatory when the rendered stuff has signals in it, otherwise these can't side-effect properly.
-    * **[uhtml/signal](https://cdn.jsdelivr.net/npm/uhtml/signal.js)** is an already bundled `uhtml/reactive` with `@webreflection/signal` in it, so that its `render` exported function is already reactive. This is the smallest possible bundle as it's ~3.3Kb but it's not nearly as complete, in terms of features, as *preact* signals are.
-    * **[uhtml/preactive](https://cdn.jsdelivr.net/npm/uhtml/preactive.js)** is an already bundled `uhtml/reactive` with `@preact/signals-core` in it, so that its `render` exported function, among all other *preact* related exports, is already working. This is a *drop-in* replacement with extra *Preact signals* goodness in it so you can start small with *uhtml/signal* and switch any time to this more popular solution.
+If you are familiar with *JSX* you will find *uhtml* syntax very similar:
 
-### uhtml/init example
+  * self closing tags, such as `<p />`
+  * self closing elements, such as `<custom-element>...</>`
+  * object spread operation via `<${Component} ...=${{any: 'prop'}} />`
+  * `key` attribute to ensure *same DOM node* within a list of nodes
+  * `ref` attribute to retrieve the element via effects or by any other mean
+
+The main difference between *uhtml* and *JSX* is that *fragments* do **not** require `<>...</>` around:
 
 ```js
-import init from 'uhtml/init';
-import { Document } from 'uhtml/dom';
-
-const document = new Document;
-
-const {
-  Hole,
-  render,
-  html, svg,
-  htmlFor, svgFor,
-  attr
-} = init(document);
+// uhtml fragment example
+html`
+  <div>first element</div>
+  <p> ... </p>
+  <div>last element</div>
+`
 ```
 
-### uhtml/preactive example
+### Special Attributes
+
+On top of *JSX* like features, there are other attributes with a special meaning:
+
+  * `aria` attribute to simplify *a11y*, such as `<button aria=${{role: 'button', labelledBy: 'id'}} />`
+  * `data` attribute to simplify *dataset* handling, such as `<div data=${{any: 'data'}} />`
+  * `@event` attribute for generic events handling, accepting an array when *options* are meant to be passed, such as `<button @click=${[event => {}, { once: true }]} />`
+  * `on...` prefixed direct events, such as `<button onclick=${listener} />`
+  * `.direct` properties access, such as `<input .value=${content} />`, `<button .textContent=${value} />` or `<div .className=${value} />`
+  * `?toggle` boolean attributes, such as `<div ?hidden=${isHidden} />`
+
+All other attributes will be handled via standard `setAttribute` or `removeAttribute` when the passed value is either `null` or `undefined`.
+
+### Special Elements
+
+Elements that contain *data* such as `<script>` or `<style>`, or those that contains text such as `<textarea>` require *explicit closing tag* to avoid having in between templates able to break the layout.
+
+This is nothing new to learn, it's just how the Web works, so that one cannot have `</script>` within a `<script>` tag content and the same applies in here.
+
+In *debugging* mode, an error telling you which template is malformed will be triggered in these cases.
+
+### About Comments
+
+Useful for developers but never really relevant for end users, *comments* are ignored by default in *uhtml* except for those flagged as "*very important*".
+
+The syntax to preserve a comment in the layout is `<!--! important !-->`. Every other comment will not be part of the rendered tree.
 
 ```js
-import { render, html, signal, detach } from 'uhtml/preactive';
-
-const count = signal(0);
-
-render(document.body, () => html`
-  <button onclick=${() => { count.value++ }}>
-    Clicks: ${count.value}
-  </button>
-`);
-
-// stop reacting to signals in the future
-setTimeout(() => {
-  detach(document.body);
-}, 10000);
+html`
+  <!--! this is here to stay !-->
+  <!--// this will go -->
+  <!-- also this -->
+`
 ```
+
+The result will be a clear `<!-- this is here to stay -->` comment in the layout without starting and closing `!`.
+
+#### Other Comments
+
+There are two kind of "*logical comments*" in *uhtml*, intended to help its own functionality:
+
+  * `<!--◦-->` *holes*, used to *pin* in the DOM tree where changes need to happen.
+  * `<!--<>-->` and `<!--</>-->` persistent *fragments* delimeters
+
+The *hole* type might disappear once replaced with different content while persistent fragments delimeters are needed to confine and/or retrieve back fragments' content.
+
+Neither type will affect performance or change layout behavior.
+
+- - -
+
+## Exports
+
+```js
+import {
+  // DOM manipulation
+  render, html, svg, unsafe,
+  // Preact like signals, based on alien-signals library
+  signal, computed, effect, untracked, batch,
+  // extras
+  Hole, fragment,
+} from 'https://esm.run/uhtml';
+```
+
+**In details**
+
+  * `render(where:Element, what:Function|Hole|Node)` to orchestrate one-off or repeated content rendering, providing a scoped *effect* when a *function* is passed along, such as `render(document.body, () => App(data))`. This is the suggested way to enrich any element content with complex reactivity in it.
+  * `html` and `svg` [template literal tags](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) to create either *HTML* or *SVG* content.
+  * `unsafe(content:string)` to inject any content, even *HTML* or *SVG*, anywhere within a node: `<div>${unsafe('<em>value</em>')}</div>`
+  * `signal`, `computed`, `effect`, `untracked` and `batch` utilities with [Preact signals](https://github.com/preactjs/signals/blob/main/packages/core/README.md) inspired API, fueled by [alien-signals](https://github.com/stackblitz/alien-signals#readme)
+  * `Hole` class used internally to resolve `html` and `svg` tags' template and interpolations. This is exported mainly to simplify *TypeScript* relaed signatures.
+  * `fragment(content:string, svg?:boolean)` extra utility, used internally to create either *HTML* or *SVG* elements from a string. This is merely a simplification of a manually created `<template>` element, its `template.innerHTML = content` operation and retrieval of its `template.content` reference, use it if ever needed but remember it has no special meaning or logic attached, it's literally just standard DOM fragment creation out of a string.
+
+- - -
+
+## Loading from a CDN
+
+The easiest way to start using *uhtml* is via *CDN* and here a few exported variants:
+
+```js
+// implicit production version
+import { render, html } from 'https://esm.run/uhtml';
+// https://cdn.jsdelivr.net/npm/uhtml/dist/prod/dom.js
+
+// explicit production version
+import { render, html } from 'https://esm.run/uhtml/prod';
+// https://cdn.jsdelivr.net/npm/uhtml/dist/prod/dom.js
+
+// explicit developer/debugging version
+import { render, html } from 'https://esm.run/uhtml/dev';
+import { render, html } from 'https://esm.run/uhtml/debug';
+// https://cdn.jsdelivr.net/npm/uhtml/dist/dev/dom.js
+
+// automatic prod/dev version on ?dev or ?debug
+import { render, html } from 'https://esm.run/uhtml/cdn';
+// https://cdn.jsdelivr.net/npm/uhtml/dist/prod/cdn.js
+```
+
+Using `https://esm.run/uhtml/cdn` or the fully qualified `https://cdn.jsdelivr.net/npm/uhtml/dist/prod/cdn.js` URL provides an automatic switch to *debug* mode if the current page location contains `?dev` or `?debug` or `?debug=1` query string parameter plus it guarantees the library will not be imported again if other scripts use a different *CDN* that points at the same file in a different location.
+
+This makes it easy to switch to *dev* mode by changing the location from `https://example.com` to `https://example.com?debug`.
+
+Last, but not least, it is not recommended to bundle directly *uhtml* in your project because components portability becomes compromised, as example, if each component bundles within itself *uhtml*.
+
+### Import Map
+
+Another way to grant *CDN* and components portability is to use an import map and exclude *uhtml* from your bundler.
+
+```html
+<!-- defined on each page -->
+<script type="importmap">
+{
+  "imports": {
+    "uhtml": "https://cdn.jsdelivr.net/npm/uhtml/dist/prod/cdn.js"
+  }
+}
+</script>
+<!-- your library code -->
+<script type="module">
+import { html } from 'uhtml';
+
+document.body.append(
+  html`Import Maps are Awesome!`
+);
+</script>
+```
+
+- - -
+
+## Extra Tools
+
+Minification is still recommended for production use cases and not only for *JS*, also for the templates and their content.
+
+The [rollup-plugin-minify-template-literals](https://www.npmjs.com/package/rollup-plugin-minify-template-literals) is a wonderful example of a plugin that does not complain about *uhtml* syntax and minifies to its best *uhtml* templates in both *vite* and *rollup*.
+
+This is a *rollup* configuration example:
+
+```js
+import terser from "@rollup/plugin-terser";
+import templateMinifier from "rollup-plugin-minify-template-literals";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
+
+export default {
+  input: "src/your-component.js",
+  plugins: [
+    templateMinifier({
+      options: {
+        minifyOptions: {
+          // allow only explicit <!--! comments !-->
+          ignoreCustomComments: [/^!/],
+          keepClosingSlash: true,
+          caseSensitive: true,
+        },
+      },
+    }),
+    nodeResolve(),
+    terser(),
+  ],
+  output: {
+    esModule: true,
+    file: "dist/your-component.js",
+  },
+};
+```
+
+- - -
+
+## About SSR and hydration
+
+The current *pareser* is already environment agnostic, it runs on the client like it does in the server without needing dependencies at all.
+
+However, the current *SSR* story is still a **work in progress** but it's planned to land sooner than later.
