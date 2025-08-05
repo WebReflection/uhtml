@@ -106,6 +106,6 @@
   },
   "homepage": "https://github.com/WebReflection/uhtml#readme",
   "dependencies": {
-    "@webreflection/alien-signals": "^0.3.1"
+    "@webreflection/alien-signals": "^0.3.2"
   }
 }
