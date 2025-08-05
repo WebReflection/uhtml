@@ -30,6 +30,7 @@ export const TEXT = 1 << 11;
 export const TOGGLE = 1 << 12;
 export const UNSAFE = 1 << 13;
 export const REF = 1 << 14;
+export const SIGNAL = 1 << 15;
 
 // COMPONENT flags
 const COMPONENT_DIRECT = COMPONENT | DIRECT;
@@ -138,10 +139,9 @@ export const update = (node, type, path, name, hint) => {
     case TEMPLATE_COMPONENT: return [path, hint, COMPONENT];
     case TEMPLATE_COMMENT: {
       if (isArray(hint)) return [path, comment_array, COMMENT_ARRAY];
-      return hint instanceof Unsafe ?
-        [path, comment_unsafe(node.xml), UNSAFE] :
-        [path, hint instanceof Signal ? comment_signal : comment_hole, COMMENT]
-      ;
+      if (hint instanceof Unsafe) return [path, comment_unsafe(node.xml), UNSAFE];
+      if (hint instanceof Signal) return [path, comment_signal, COMMENT | SIGNAL];
+      return [path, comment_hole, COMMENT];
     }
     case TEMPLATE_TEXT: return [path, directFor('textContent'), TEXT];
     case TEMPLATE_ATTRIBUTE: {

@@ -13,6 +13,7 @@ export const TEXT: number;
 export const TOGGLE: number;
 export const UNSAFE: number;
 export const REF: number;
+export const SIGNAL: number;
 export const fragment: (content: string, xml?: boolean) => DocumentFragment;
 export const ref: unique symbol;
 export function isKeyed(): boolean;

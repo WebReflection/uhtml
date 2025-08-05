@@ -8,7 +8,7 @@ import { children } from './ish.js';
 import { effect } from './signals.js';
 import { isArray } from '../utils.js';
 import { PersistentFragment, diffFragment, nodes } from './persistent-fragment.js';
-import { ARRAY, COMMENT, COMPONENT, EVENT, KEY, REF, ref } from './update.js';
+import { ARRAY, COMMENT, COMPONENT, EVENT, KEY, REF, SIGNAL, ref } from './update.js';
 
 import { _get as getDirect, _set as setDirect } from './direct.js';
 import { Signal, _get as getSignal, _set as setSignal } from './signals.js';
@@ -146,7 +146,7 @@ export class Hole {
           let commit = true;
           //@ts-ignore
           if (DEBUG && (type & ARRAY) && !isArray(value)) throw errors.invalid_interpolation(this.t[3], value);
-          if (!direct && (type & COMMENT)) {
+          if (!direct && (type & COMMENT) && !(type & SIGNAL)) {
             if (type & ARRAY) {
               commit = false;
               //@ts-ignore
@@ -172,7 +172,7 @@ export class Hole {
           }
           //@ts-ignore
           changes[length] = [type, update, value, node];
-          if (direct && type === COMMENT) node.remove();
+          if (direct && (type & COMMENT)) node.remove();
         }
       }
       if (refs) {
@@ -236,15 +236,7 @@ export class Hole {
       }
       else {
         let change = value;
-        if (type === COMMENT) {
-          if (prev instanceof Hole) {
-            if (DEBUG && !(value instanceof Hole)) throw errors.invalid_interpolation([], value);
-            value = getHole(prev, /** @type {Hole} */(value));
-            //@ts-ignore
-            change = value.n;
-          }
-        }
-        else if (type & ARRAY) {
+        if (type & ARRAY) {
           if (DEBUG && !isArray(value)) throw errors.invalid_interpolation([], value);
           if (type & COMMENT) {
             //@ts-ignore
@@ -267,6 +259,20 @@ export class Hole {
           }
           //@ts-ignore
           else if ((type & EVENT) && (value[0] === prev[0])) continue;
+        }
+        else if (type & COMMENT) {
+          if (type & SIGNAL) {
+            if (value === prev) {
+              update(entry[3], change);
+              continue;
+            }
+          }
+          else if (prev instanceof Hole) {
+            if (DEBUG && !(value instanceof Hole)) throw errors.invalid_interpolation([], value);
+            value = getHole(prev, /** @type {Hole} */(value));
+            //@ts-ignore
+            change = value.n;
+          }
         }
         if (value !== prev) {
           entry[2] = value;
