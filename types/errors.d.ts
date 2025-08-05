@@ -14,6 +14,7 @@ declare namespace _default {
     function invalid_interpolation(template: any, value: any): SyntaxError;
     function invalid_hole(value: any): SyntaxError;
     function invalid_key(value: any): SyntaxError;
+    function invalid_ref(template: any): SyntaxError;
     function invalid_array(value: any): SyntaxError;
     function invalid_component(value: any): SyntaxError;
 }

@@ -8,7 +8,7 @@ import { children } from './ish.js';
 import { effect } from './signals.js';
 import { isArray } from '../utils.js';
 import { PersistentFragment, diffFragment, nodes } from './persistent-fragment.js';
-import { ARRAY, COMMENT, COMPONENT, EVENT, KEY, REF, SIGNAL, ref } from './update.js';
+import { ARRAY, COMMENT, COMPONENT, EVENT, KEY, REF, SIGNAL, HOLE, ref } from './update.js';
 
 import { _get as getDirect, _set as setDirect } from './direct.js';
 import { Signal, _get as getSignal, _set as setSignal } from './signals.js';
@@ -37,7 +37,7 @@ const component = (Component, obj, signals) => {
   const signal = getSignal();
   const length = signals.length;
   let i = 0;
-  setSignal(/** @param {unknown} value */ value => i < length ? signals[i++] : (signals[i++] = signal(value)));
+  setSignal((value, options) => i < length ? signals[i++] : (signals[i++] = signal(value, options)));
   const wasDirect = getDirect();
   if (wasDirect) setDirect(!wasDirect);
   try { return Component(obj, global); }
@@ -62,6 +62,30 @@ const getHole = (hole, value) => {
     hole = value;
   }
   return hole;
+};
+
+const notifyRefs = (refs, template) => {
+  for (const node of refs) {
+    const value = node[ref];
+    switch (typeof value) {
+      case 'object': {
+        if (value instanceof Signal)
+          value.value = node;
+        else {
+          //@ts-ignore
+          if (DEBUG && !value) throw errors.invalid_ref(template);
+          value.current = node;
+        }
+        break;
+      }
+      case 'function': {
+        value(node);
+        break;
+      }
+      //@ts-ignore
+      default: if (DEBUG) throw errors.invalid_ref(template);
+    }
+  }
 };
 
 const props = Symbol();
@@ -143,20 +167,25 @@ export class Hole {
           }
         }
         else {
-          let commit = true;
+          let t = type, commit = true, isComment = type & COMMENT;
           //@ts-ignore
           if (DEBUG && (type & ARRAY) && !isArray(value)) throw errors.invalid_interpolation(this.t[3], value);
-          if (!direct && (type & COMMENT) && !(type & SIGNAL)) {
+          if (!direct && isComment && !(type & SIGNAL)) {
             if (type & ARRAY) {
               commit = false;
               //@ts-ignore
               if (value.length) {
                 //@ts-ignore
-                node.before(...(node[nodes] = value[0] instanceof Hole ? value.map(dom) : value));
+                const isHole = value[0] instanceof Hole;
+                if (isHole) t |= HOLE;
+                //@ts-ignore
+                node.before(...(node[nodes] = isHole ? value.map(dom) : value));
               }
             }
             else if (value instanceof Hole) {
+              t |= HOLE;
               commit = false;
+              //@ts-ignore
               update(node, dom(value));
             }
           }
@@ -171,21 +200,12 @@ export class Hole {
             }
           }
           //@ts-ignore
-          changes[length] = [type, update, value, node];
-          if (direct && (type & COMMENT)) node.remove();
+          changes[length] = [t, update, value, node];
+          if (direct && isComment) node.remove();
         }
       }
-      if (refs) {
-        for (const node of refs) {
-          const value = node[ref];
-          if (typeof value === 'function')
-            value(node);
-          else if (value instanceof Signal)
-            value.value = node;
-          else if (value)
-            value.current = node;
-        }
-      }
+      //@ts-ignore
+      if (refs) notifyRefs(refs, DEBUG && this.t[3]);
     }
 
     const { childNodes } = root;
@@ -235,16 +255,16 @@ export class Hole {
         else update(prev, value);
       }
       else {
-        let change = value;
+        let change = value, isComment = type & COMMENT, isSignal = type & SIGNAL, isHole = type & HOLE;
         if (type & ARRAY) {
           if (DEBUG && !isArray(value)) throw errors.invalid_interpolation([], value);
-          if (type & COMMENT) {
+          if (isComment) {
             //@ts-ignore
             const l = value.length;
             const h = prev.length;
             // TODO: a smarter differ that does not require 2 loops
             //@ts-ignore
-            if (l && (value[0] instanceof Hole)) {
+            if (l && (isHole || (value[0] instanceof Hole && (entry[0] |= HOLE)))) {
               //@ts-ignore
               if (DEBUG && h && !(prev[0] instanceof Hole)) throw errors.invalid_interpolation([], value[0]);
               change = [];
@@ -260,21 +280,13 @@ export class Hole {
           //@ts-ignore
           else if ((type & EVENT) && (value[0] === prev[0])) continue;
         }
-        else if (type & COMMENT) {
-          if (type & SIGNAL) {
-            if (value === prev) {
-              update(entry[3], change);
-              continue;
-            }
-          }
-          else if (prev instanceof Hole) {
-            if (DEBUG && !(value instanceof Hole)) throw errors.invalid_interpolation([], value);
-            value = getHole(prev, /** @type {Hole} */(value));
-            //@ts-ignore
-            change = value.n;
-          }
+        else if (isHole && !isSignal) {
+          if (DEBUG && !(value instanceof Hole)) throw errors.invalid_interpolation([], value);
+          value = getHole(prev, /** @type {Hole} */(value));
+          //@ts-ignore
+          change = value.n;
         }
-        if (value !== prev) {
+        if (isSignal || value !== prev) {
           entry[2] = value;
           update(entry[3], change);
         }

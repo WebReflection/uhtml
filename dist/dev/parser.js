@@ -21,6 +21,7 @@ var errors = {
   invalid_interpolation: (template, value) => new SyntaxError(`Invalid interpolation - expected hole or array: ${String(value)} found in template ${asTemplate(template)}`),
   invalid_hole: value => new SyntaxError(`Invalid interpolation - expected hole: ${String(value)}`),
   invalid_key: value => new SyntaxError(`Invalid key attribute or position in template: ${String(value)}`),
+  invalid_ref: template => new SyntaxError(`Invalid ref attribute or position in template: ${asTemplate(template)}`),
   invalid_array: value => new SyntaxError(`Invalid array - expected html/svg but found something else: ${String(value)}`),
   invalid_component: value => new SyntaxError(`Invalid component: ${String(value)}`),
 };

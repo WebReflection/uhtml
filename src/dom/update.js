@@ -31,6 +31,7 @@ export const TOGGLE = 1 << 12;
 export const UNSAFE = 1 << 13;
 export const REF = 1 << 14;
 export const SIGNAL = 1 << 15;
+export const HOLE = 1 << 16;
 
 // COMPONENT flags
 const COMPONENT_DIRECT = COMPONENT | DIRECT;
