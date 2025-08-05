@@ -1,6 +1,6 @@
 {
   "name": "@webreflection/uhtml",
-  "version": "4.7.1",
+  "version": "5.0.0",
   "type": "module",
   "scripts": {
     "build": "npm run types && npm test && npm run build:prod && npm run build:dev && npm run size",
