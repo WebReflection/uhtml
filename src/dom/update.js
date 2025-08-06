@@ -64,14 +64,28 @@ const comment_array = (node, value) => {
   );
 };
 
+const text = new WeakMap;
+const getText = (ref, value) => {
+  let node = text.get(ref);
+  if (node) node.data = value;
+  else text.set(ref, (node = document.createTextNode(value)));
+  return node;
+};
+
 const comment_hole = (node, value) => {
-  const current = value == null ? node : (typeof value === 'object' ? value : document.createTextNode(value));
-  (node[nodes] || node).replaceWith(diffFragment(current, 1));
-  node[nodes] = current;
+  const current = typeof value === 'object' ? (value ?? node)  : getText(node, value);
+  const prev = node[nodes] ?? node;
+  if (current !== prev)
+    prev.replaceWith(diffFragment(node[nodes] = current, 1));
 };
 
 const comment_unsafe = xml => (node, value) => {
-  comment_hole(node, PersistentFragment(fragment(value, xml)));
+  const prev = node[ref] ?? (node[ref] = {});
+  if (prev.v !== value) {
+    prev.f = PersistentFragment(fragment(value, xml));
+    prev.v = value;
+  }
+  comment_hole(node, prev.f);
 };
 
 const comment_signal = (node, value) => {
@@ -103,7 +117,6 @@ const direct = name => (node, value) => {
 };
 
 const dots = (node, values) => {
-  const xml = 'ownerSVGElement' in node;
   for (const [name, value] of entries(values))
     attribute(name)(node, value);
 };

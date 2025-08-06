@@ -109,10 +109,16 @@ export default (a, b, get, before) => {
         while (i < bEnd)
           map.set(b[i], i++);
       }
-      // if it's a future node, hence it needs some handling
-      if (map.has(a[aStart])) {
-        // grab the index of such node, 'cause it might have been processed
-        const index = map.get(a[aStart]);
+
+      const index = map.get(a[aStart]) ?? -1;
+
+      // this node has no meaning in the future list, so it's more than safe
+      // to remove it, and check the next live node out instead, meaning
+      // that only the live list index should be forwarded
+      //@ts-ignore
+      if (index < 0) get(a[aStart++], -1).remove();
+      // it's a future node, hence it needs some handling
+      else {
         // if it's not already processed, look on demand for the next LCS
         if (bStart < index && index < bEnd) {
           let i = aStart;
@@ -150,11 +156,6 @@ export default (a, b, get, before) => {
         else
           aStart++;
       }
-      // this node has no meaning in the future list, so it's more than safe
-      // to remove it, and check the next live node out instead, meaning
-      // that only the live list index should be forwarded
-      //@ts-ignore
-      else get(a[aStart++], -1).remove();
     }
   }
   return b;
