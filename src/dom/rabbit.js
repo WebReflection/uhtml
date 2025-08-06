@@ -46,7 +46,7 @@ const component = (Component, obj, signals) => {
   const signal = getSignal();
   const length = signals.length;
   let i = 0;
-  setSignal(/** @param {unknown} value */ value => i < length ? signals[i++] : (signals[i++] = value instanceof Signal ? value : signal(value)));
+  setSignal(/** @param {unknown} value */ value => i < length ? signals[i++] : (signals[i++] = signal(value)));
   const wasDirect = getDirect();
   if (wasDirect) setDirect(!wasDirect);
   try { return Component(obj, global); }
