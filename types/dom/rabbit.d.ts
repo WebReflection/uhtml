@@ -7,10 +7,7 @@ export class Hole {
     constructor(template: [DocumentFragment, unknown[], import("./keyed.js").Keyed?], values: unknown[]);
     t: [DocumentFragment, unknown[], import("./keyed.js").Keyed?];
     v: unknown[];
-    c: readonly any[];
-    /** @type {Node?} */
-    n: Node | null;
-    /** @type {number} */
+    n: DocumentFragment | ChildNode;
     k: number;
     /**
      * @param {boolean} [direct]

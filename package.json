@@ -1,10 +1,10 @@
 {
   "name": "uhtml",
-  "version": "5.0.5",
+  "version": "5.0.6",
   "type": "module",
   "scripts": {
     "build": "npm run types && npm run build:js",
-    "build:js": "npm test && npm run build:prod && npm run build:dev && npm run size",
+    "build:js": "rm -rf dist && npm test && npm run build:prod && npm run build:dev && npm run size",
     "build:dev": "sed -i 's/false/true/' src/debug.js && rollup -c build/dev.js",
     "build:prod": "sed -i 's/true/false/' src/debug.js && rollup -c build/prod.js",
     "coverage": "mkdir -p ./coverage; c8 report --reporter=text-lcov > ./coverage/lcov.info",
@@ -12,7 +12,7 @@
     "test": "c8 node test/parser.js",
     "test:json": "node test/json.js",
     "test:all": "npm run test:json && npm run test",
-    "types": "tsc --allowJs --checkJs --lib dom,esnext --moduleResolution nodenext --module NodeNext --target esnext -d --emitDeclarationOnly --outDir ./types ./src/*.js ./src/*/*.js"
+    "types": "rm -rf types && tsc --allowJs --checkJs --lib dom,esnext --moduleResolution nodenext --module NodeNext --target esnext -d --emitDeclarationOnly --outDir ./types ./src/*.js ./src/*/*.js"
   },
   "files": [
     "dist",

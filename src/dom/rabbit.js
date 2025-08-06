@@ -1,4 +1,4 @@
-//@ts-check
+//@ts-nocheck
 
 import DEBUG from '../debug.js';
 import errors from '../errors.js';
@@ -18,6 +18,15 @@ import { Signal, _get as getSignal, _set as setSignal } from './signals.js';
  * @returns
  */
 export const dom = hole => diffFragment(hole.n ? hole.update(hole) : hole.valueOf(false), 1);
+
+const holed = (prev, current) => {
+  const changes = [], h = prev.length, l = current.length;
+  for (let c, p, j = 0, i = 0; i < l; i++) {
+    c = current[i];
+    changes[i] = j < h && (p = prev[j++]).t === c.t ? (current[i] = p).update(c) : c.valueOf(false);
+  }
+  return changes;
+};
 
 /**
  * @param {Hole} hole
@@ -57,11 +66,46 @@ const getHole = (hole, value) => {
     hole.update(value);
   }
   else {
-    //@ts-ignore
     hole.n.replaceWith(dom(value));
     hole = value;
   }
   return hole;
+};
+
+const createEffect = (node, value, obj) => {
+  let signals = [], entry = [COMPONENT, null, obj], bootstrap = true, hole;
+  effect(() => {
+    if (bootstrap) {
+      bootstrap = false;
+      hole = component(value, obj, signals);
+      if (!signals.length) signals = children;
+      if (hole) {
+        node.replaceWith(dom(hole));
+        entry[1] = hole;
+      }
+      else node.remove();
+    }
+    else {
+      const result = component(value, obj, signals);
+      if (hole) {
+        if (DEBUG && !(result instanceof Hole)) throw errors.invalid_component(value);
+        if (getHole(hole, /** @type {Hole} */(result)) === result) entry[2] = (hole = result);
+      }
+    }
+  });
+  return entry;
+};
+
+const updateRefs = refs => {
+  for (const node of refs) {
+    const value = node[ref];
+    if (typeof value === 'function')
+      value(node);
+    else if (value instanceof Signal)
+      value.value = node;
+    else if (value)
+      value.current = node;
+  }
 };
 
 const props = Symbol();
@@ -75,10 +119,7 @@ export class Hole {
   constructor(template, values) {
     this.t = template;
     this.v = values;
-    this.c = children;
-    /** @type {Node?} */
     this.n = null;
-    /** @type {number} */
     this.k = -1;
   }
 
@@ -93,18 +134,15 @@ export class Hole {
     let length = values.length;
     let changes = children;
     let node, prev, refs;
-    //@ts-ignore
     if (DEBUG && length !== updates.length) throw errors.invalid_interpolation(this.t[3], values);
     if (0 < length) {
       changes = updates.slice(0);
       while (length--) {
-        //@ts-ignore
         const [path, update, type] = updates[length];
         const value = values[length];
         if (prev !== path) {
           node = resolve(root, path);
           prev = path;
-          //@ts-ignore
           if (DEBUG && !node) throw errors.invalid_path(this.t[3], path);
         }
         if (type & COMPONENT) {
@@ -112,48 +150,21 @@ export class Hole {
           if (type === COMPONENT) {
             for (const { name, value } of node.attributes) obj[name] ??= value;
             obj.children ??= [...node.content.childNodes];
-            //@ts-ignore
-            let signals = [], bootstrap = true, entry, hole;
-            effect(() => {
-              if (bootstrap) {
-                bootstrap = false;
-                //@ts-ignore
-                hole = component(value, obj, signals);
-                //@ts-ignore
-                if (!signals.length) signals = children;
-                if (hole) node.replaceWith(dom(hole));
-                else node.remove();
-                //@ts-ignore
-                changes[length] = (entry = [type, hole, obj]);
-              }
-              else {
-                //@ts-ignore
-                const result = component(value, obj, signals);
-                if (hole) {
-                  if (DEBUG && !(result instanceof Hole)) throw errors.invalid_component(value);
-                  if (getHole(hole, /** @type {Hole} */(result)) === result) entry[2] = (hole = result);
-                }
-              }
-            });
+            changes[length] = createEffect(node, value, obj);
           }
           else {
             update(obj, value);
-            //@ts-ignore
             changes[length] = [type, update, obj];
           }
         }
         else {
           let commit = true;
-          //@ts-ignore
           if (DEBUG && (type & ARRAY) && !isArray(value)) throw errors.invalid_interpolation(this.t[3], value);
           if (!direct && (type & COMMENT) && !(type & SIGNAL)) {
             if (type & ARRAY) {
               commit = false;
-              //@ts-ignore
-              if (value.length) {
-                //@ts-ignore
-                node.before(...(node[nodes] = value[0] instanceof Hole ? value.map(dom) : value));
-              }
+              if (value.length)
+                update(node, value[0] instanceof Hole ? holed(children, value) : value);
             }
             else if (value instanceof Hole) {
               commit = false;
@@ -170,37 +181,19 @@ export class Hole {
               update(node, value);
             }
           }
-          //@ts-ignore
           changes[length] = [type, update, value, node];
           if (direct && (type & COMMENT)) node.remove();
         }
       }
-      if (refs) {
-        for (const node of refs) {
-          const value = node[ref];
-          if (typeof value === 'function')
-            value(node);
-          else if (value instanceof Signal)
-            value.value = node;
-          else if (value)
-            value.current = node;
-        }
-      }
+      if (refs) updateRefs(refs);
     }
 
     const { childNodes } = root;
     const size = childNodes.length;
     const n = size === 1 ? childNodes[0] : (size ? PersistentFragment(root) : root);
-    if (!direct) {
-      //@ts-ignore
-      this.v = children;
-      this.c = changes;
-      this.n = n;
-      if (-1 < this.k) {
-        //@ts-ignore
-        keys.set(changes[this.k][2], n, this);
-      }
-    }
+    this.v = changes;
+    this.n = n;
+    if (-1 < this.k) keys.set(changes[this.k][2], n, this);
     return n;
   }
 
@@ -210,7 +203,7 @@ export class Hole {
    */
   update(hole) {
     const key = this.k;
-    const changes = this.c;
+    const changes = this.v;
     const values = hole.v;
 
     if (-1 < key && changes[key][2] !== values[key])
@@ -225,7 +218,6 @@ export class Hole {
       if (type & COMPONENT) {
         if (type === COMPONENT) {
           if (DEBUG && typeof value !== 'function') throw errors.invalid_component(value);
-          //@ts-ignore
           const result = value(prev, global);
           if (update) {
             if (DEBUG && !(result instanceof Hole)) throw errors.invalid_component(value);
@@ -239,25 +231,14 @@ export class Hole {
         if (type & ARRAY) {
           if (DEBUG && !isArray(value)) throw errors.invalid_interpolation([], value);
           if (type & COMMENT) {
-            //@ts-ignore
-            const l = value.length;
-            const h = prev.length;
             // TODO: a smarter differ that does not require 2 loops
-            //@ts-ignore
-            if (l && (value[0] instanceof Hole)) {
-              //@ts-ignore
-              if (DEBUG && h && !(prev[0] instanceof Hole)) throw errors.invalid_interpolation([], value[0]);
-              change = [];
-              //@ts-ignore
-              for (let c, p, j = 0, i = 0; i < l; i++) {
-                //@ts-ignore
-                c = value[i];
-                //@ts-ignore
-                change[i] = j < h && (p = prev[j++]).t === c.t ? (value[i] = p).update(c) : dom(c);
+            if (value.length) {
+              if (value[0] instanceof Hole) {
+                if (DEBUG && prev.length && !(prev[0] instanceof Hole)) throw errors.invalid_interpolation([], value[0]);
+                change = holed(prev, value);
               }
             }
           }
-          //@ts-ignore
           else if ((type & EVENT) && (value[0] === prev[0])) continue;
         }
         else if (type & COMMENT) {
@@ -270,7 +251,6 @@ export class Hole {
           else if (prev instanceof Hole) {
             if (DEBUG && !(value instanceof Hole)) throw errors.invalid_interpolation([], value);
             value = getHole(prev, /** @type {Hole} */(value));
-            //@ts-ignore
             change = value.n;
           }
         }

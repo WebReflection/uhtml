@@ -13,7 +13,7 @@ import { Signal } from './signals.js';
 import { Unsafe, assign, entries, isArray } from '../utils.js';
 import { PersistentFragment, diffFragment, nodes } from './persistent-fragment.js';
 import creator from './creator.js';
-import domdiff from './diff.js';
+import diff from './diff.js';
 
 export const ARRAY = 1 << 0;
 export const ARIA = 1 << 1;
@@ -56,7 +56,7 @@ const attribute = name => (node, value) => {
 };
 
 const comment_array = (node, value) => {
-  node[nodes] = domdiff(
+  node[nodes] = diff(
     node[nodes] || children,
     value,
     diffFragment,
