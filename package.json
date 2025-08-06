@@ -1,6 +1,6 @@
 {
   "name": "uhtml",
-  "version": "5.0.6",
+  "version": "5.0.7",
   "type": "module",
   "scripts": {
     "build": "npm run types && npm run build:js",
