@@ -6,6 +6,25 @@
 
 <sup>**Social Media Photo by [Andrii Ganzevych](https://unsplash.com/@odya_kun) on [Unsplash](https://unsplash.com/)**</sup>
 
+- - -
+
+## Warning ⚠️
+
+I'm on vacation! The fastest version and most battle tested version of this library is **v4**.
+
+If you are using **v4**, please keep doing that!
+
+If you're happy to try **v5** please file issues in here, don't expect me to react out of tweets, and thank you for helping me out with use cases I couldn't even think about.
+
+**v5** is a rewrite from scratch based on another library (which is *Python based*) that works perfectly fine **but** it doesn't have a reactivity storey fully attached yet.
+
+This reqrite feels good, it avoids unnecessary loops, but it's also naively based on *signals* for everything that ways easier to control before ... *a whole render* each time, never atomic, never considering edge cases around conditional arrays and what not.
+
+I understand now that signals are in everyone is going to use signals for everything, as a distributed shared state of everything you are doing, but as a person that alaywas provided libraries to keep it simple, I couldn't even think about some of the scenarios you are "*abusing*" signals for, so my deepest apologies if the current state of **v5** cannot meet your expectations, I've tried my best, and rushed a little bit, with this release, but all the ideas behind is where I want to go from now on.
+
+Again, apologies for not delivering like I've done before, be assured all the dots will be soon connected in a better way, or at least one that works reliably 👋
+
+- - -
 
 A minimalistic library to create fast and reactive Web pages.
 
