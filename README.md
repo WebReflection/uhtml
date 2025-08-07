@@ -24,6 +24,8 @@ I understand, now that signals are in, everyone is going to use signals for ever
 
 Again, apologies for not delivering like I've done before but be assured all the dots will be soon connected in a better way, or at least one that works reliably 👋
 
+P.S. **v4** is right here: https://github.com/WebReflection/uhtml/tree/v4
+
 - - -
 
 A minimalistic library to create fast and reactive Web pages.
