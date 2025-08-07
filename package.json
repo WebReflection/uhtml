@@ -53,6 +53,11 @@
       "types": "./types/dom/index.d.ts",
       "description": "explicit uhtml browsers' production export"
     },
+    "./jsx": {
+      "import": "./dist/prod/jsx.js",
+      "types": "./types/jsx/index.d.ts",
+      "description": "experimental - transform templates into JSX compatible syntax"
+    },
     "./dom": {
       "import": "./src/dom/index.js",
       "types": "./types/dom/index.d.ts",
