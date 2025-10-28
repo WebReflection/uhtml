@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script type="module">
+      import { html, signal, render } from '../dist/dev/dom.js';
+
+      const items = signal([]);
+      const showList = signal(true);
+
+      const SPAN = ({ label }) =>
+        html`
+          <span>[${label}]</span>
+        `;
+
+      const LI = ({ text, label }) => html`
+        <li>
+          <${SPAN} label=${label} />
+          ${text}
+        </li>
+      `;
+
+      const UL = ({ items }) => html`
+        <ul>
+          ${items.value.map(
+            (item, index) =>
+              html`
+                <${LI} text=${item} label=${index} />
+              `
+          )}
+        </ul>
+      `;
+
+      const App = () => {
+        return html`
+          <div>
+            <h2>Nested Components Test</h2>
+            <button
+              @click=${() => {
+                showList.value = !showList.value;
+              }}
+            >
+              ${showList.value ? 'Hide' : 'Show'} List
+            </button>
+            ${showList.value
+              ? html`
+                  <${UL} items=${items} />
+                `
+              : html`
+                  <p>List is hidden</p>
+                `}
+          </div>
+        `;
+      };
+
+      document.body.append(
+        html`
+          <${App} />
+        `
+      );
+
+      const promisedTimeout = (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
+
+      // Add/hide items to trigger re-renders
+      for (let i = 0; i < 10; i++) {
+        await promisedTimeout(500);
+        showList.value = !showList.value;
+
+        await promisedTimeout(500);
+        items.value = [...items.value, `item ${i}`];
+      }
+    </script>
+  </head>
+</html>

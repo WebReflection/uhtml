@@ -218,7 +218,11 @@ export class Hole {
       if (type & COMPONENT) {
         if (type === COMPONENT) {
           if (DEBUG && typeof value !== 'function') throw errors.invalid_component(value);
-          const result = value(prev, global);
+          const wasDirect = getDirect();
+          if (wasDirect) setDirect(!wasDirect);
+          let result;
+          try { result = value(prev, global); }
+          finally { if (wasDirect) setDirect(wasDirect); }
           if (update) {
             if (DEBUG && !(result instanceof Hole)) throw errors.invalid_component(value);
             if (getHole(update, /** @type {Hole} */(result)) === result) entry[2] = result;
