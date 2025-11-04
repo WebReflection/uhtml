@@ -1,8 +1,25 @@
 <!doctype html>
+<meta charset="UTF-8">
+<style>body { font-family: sans-serif; }</style>
 <script type="module">
-  import { html } from '../dist/prod/dom.js';
+  import { render, html, unsafe } from '../src/dom/node.js';
 
-  document.body.prepend(
-    html`<h1>Hello DOM !</h2>`
-  );
+  const ref = { current: null };
+
+  function Button(props, state) {
+    console.log({ props, state });
+    return html`<button>${props.text}</button>`;
+  }
+
+  render(document.body, () => html`
+    <h1 key=${1} ref=${ref} class=${'title'} onclick=${() => alert('Hello DOM!')}>
+      Hello ${[html`DOM`]} !
+    </h2>
+    ${unsafe('<hr />')}
+    <${Button} text=${'👋'} />
+    <${Button} text=${'👋'} />
+    <${Button} text=${'👋'} />
+  `);
+
+  console.log(ref.current);
 </script>

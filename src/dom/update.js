@@ -6,12 +6,11 @@ import {
   COMMENT as TEMPLATE_COMMENT,
   COMPONENT as TEMPLATE_COMPONENT,
   TEXT as TEMPLATE_TEXT,
-  children,
 } from './ish.js';
 
-import { Signal } from './signals.js';
 import { Unsafe, assign, entries, isArray } from '../utils.js';
-import { PersistentFragment, diffFragment, nodes } from './persistent-fragment.js';
+import { PersistentFragment, diffFragment } from './persistent-fragment.js';
+import { ref } from './ref.js';
 import creator from './creator.js';
 import diff from './diff.js';
 
@@ -30,114 +29,94 @@ export const TEXT = 1 << 11;
 export const TOGGLE = 1 << 12;
 export const UNSAFE = 1 << 13;
 export const REF = 1 << 14;
-export const SIGNAL = 1 << 15;
 
 // COMPONENT flags
 const COMPONENT_DIRECT = COMPONENT | DIRECT;
 const COMPONENT_DOTS = COMPONENT | DOTS;
 const COMPONENT_PROP = COMPONENT | PROP;
+
+// ARRAY flags
 const EVENT_ARRAY = EVENT | ARRAY;
 const COMMENT_ARRAY = COMMENT | ARRAY;
 
 export const fragment = creator(document);
-export const ref = Symbol('ref');
 
-const aria = (node, values) => {
-  for (const [key, value] of entries(values)) {
-    const name = key === 'role' ? key : `aria-${key.toLowerCase()}`;
-    if (value == null) node.removeAttribute(name);
-    else node.setAttribute(name, value);
+// /**
+//  * @param {number[]} path
+//  * @param {unknown} detail
+//  * @param {typeof COMPONENT | typeof COMMENT_ARRAY | typeof UNSAFE | typeof COMMENT | typeof TEXT | typeof EVENT_ARRAY | typeof EVENT | typeof TOGGLE | typeof COMPONENT_DOTS | typeof DOTS | typeof COMPONENT_DIRECT | typeof DIRECT | typeof COMPONENT_PROP | typeof ARIA | typeof DATA | typeof KEY | typeof REF | typeof ATTRIBUTE} type
+//  * @returns
+//  */
+export const pdt = (path, detail, type) => ({ p: path, d: detail, t: type });
+
+const aria = (node, curr, prev) => {
+  if (prev !== curr) {
+    for (const [key, value] of entries(curr))
+      attribute.call(key === 'role' ? key : `aria-${key.toLowerCase()}`, node, value);
   }
+  return curr;
 };
 
-const attribute = name => (node, value) => {
-  if (value == null) node.removeAttribute(name);
-  else node.setAttribute(name, value);
-};
+const commentArray = (node, curr, prev) => diff(
+  prev,
+  curr,
+  diffFragment,
+  node
+);
 
-const comment_array = (node, value) => {
-  node[nodes] = diff(
-    node[nodes] || children,
-    value,
-    diffFragment,
-    node
-  );
-};
-
-const text = new WeakMap;
-const getText = (ref, value) => {
-  let node = text.get(ref);
-  if (node) node.data = value;
-  else text.set(ref, (node = document.createTextNode(value)));
-  return node;
-};
-
-const comment_hole = (node, value) => {
-  const current = typeof value === 'object' ? (value ?? node)  : getText(node, value);
-  const prev = node[nodes] ?? node;
+const commentHole = (node, curr, prev) => {
+  const current = typeof curr === 'object' ? (curr ?? node) : getText(node, curr);
   if (current !== prev)
-    prev.replaceWith(diffFragment(node[nodes] = current, 1));
+    prev.replaceWith(diffFragment(current, 1));
+  return current;
 };
 
-const comment_unsafe = xml => (node, value) => {
-  const prev = node[ref] ?? (node[ref] = {});
-  if (prev.v !== value) {
-    prev.f = PersistentFragment(fragment(value, xml));
-    prev.v = value;
-  }
-  comment_hole(node, prev.f);
-};
-
-const comment_signal = (node, value) => {
-  comment_hole(node, value instanceof Signal ? value.value : value);
-};
-
-const data = ({ dataset }, values) => {
-  for (const [key, value] of entries(values)) {
+const data = ({ dataset }, curr) => {
+  for (const [key, value] of entries(curr)) {
     if (value == null) delete dataset[key];
     else dataset[key] = value;
   }
+  return curr;
 };
 
-/** @type {Map<string|Symbol, Function>} */
-const directRefs = new Map;
-
-/**
- * @param {string|Symbol} name
- * @returns {Function}
- */
-const directFor = name => {
-  let fn = directRefs.get(name);
-  if (!fn) directRefs.set(name, (fn = direct(name)));
-  return fn;
+const dots = (node, curr) => {
+  for (const [name, value] of entries(curr))
+    attribute.call(name, node, value);
+  return curr;
 };
 
-const direct = name => (node, value) => {
-  node[name] = value;
-};
+const [
+  attributeFor,
+  directFor,
+  eventArrayFor,
+  eventFor,
+  toggleFor,
+] = [
+  attribute,
+  direct,
+  eventArray,
+  event,
+  toggle,
+].map(
+  fn => createFor.bind(fn, new Map)
+);
 
-const dots = (node, values) => {
-  for (const [name, value] of entries(values))
-    attribute(name)(node, value);
-};
+const [
+  unsafeSVG,
+  unsafeHTML,
+] = [
+  unsafe,
+  unsafe,
+].map(
+  (fn, i) => fn.bind([new WeakMap, !i])
+);
 
-const event = (type, at, array) => array ?
-  ((node, value) => {
-    const prev = node[at];
-    if (prev?.length) node.removeEventListener(type, ...prev);
-    if (value) node.addEventListener(type, ...value);
-    node[at] = value;
-  }) :
-  ((node, value) => {
-    const prev = node[at];
-    if (prev) node.removeEventListener(type, prev);
-    if (value) node.addEventListener(type, value);
-    node[at] = value;
-  })
-;
-
-const toggle = name => (node, value) => {
-  node.toggleAttribute(name, !!value);
+const getTextWM = new WeakMap;
+const getText = (node, text) => {
+  let dom = getTextWM.get(node);
+  if (dom) dom.data = text;
+  else getTextWM.set(node, (dom = document.createTextNode(text)));
+  return dom;
 };
 
 let k = false;
@@ -149,44 +128,91 @@ export const isKeyed = () => {
 
 export const update = (node, type, path, name, hint) => {
   switch (type) {
-    case TEMPLATE_COMPONENT: return [path, hint, COMPONENT];
+    case TEMPLATE_COMPONENT: return pdt(path, hint, COMPONENT);
     case TEMPLATE_COMMENT: {
-      if (isArray(hint)) return [path, comment_array, COMMENT_ARRAY];
-      if (hint instanceof Unsafe) return [path, comment_unsafe(node.xml), UNSAFE];
-      if (hint instanceof Signal) return [path, comment_signal, COMMENT | SIGNAL];
-      return [path, comment_hole, COMMENT];
+      if (isArray(hint)) return pdt(path, commentArray, COMMENT_ARRAY);
+      if (hint instanceof Unsafe) return pdt(path, node.xml ? unsafeSVG : unsafeHTML, UNSAFE);
+      return pdt(path, commentHole, COMMENT);
     }
-    case TEMPLATE_TEXT: return [path, directFor('textContent'), TEXT];
+    case TEMPLATE_TEXT: return pdt(path, directFor('textContent'), TEXT);
     case TEMPLATE_ATTRIBUTE: {
       const isComponent = node.type === TEMPLATE_COMPONENT;
       switch (name.at(0)) {
         case '@': {
           if (DEBUG && isComponent) throw errors.invalid_attribute([], name);
           const array = isArray(hint);
-          return [path, event(name.slice(1), Symbol(name), array), array ? EVENT_ARRAY : EVENT];
+          const cb = array ? eventArrayFor : eventFor;
+          return pdt(path, cb(name.slice(1)), array ? EVENT_ARRAY : EVENT);
         }
         case '?':
           if (DEBUG && isComponent) throw errors.invalid_attribute([], name);
-          return [path, toggle(name.slice(1)), TOGGLE];
+          return pdt(path, toggleFor(name.slice(1)), TOGGLE);
         case '.': {
           return name === '...' ?
-            [path, isComponent ? assign : dots, isComponent ? COMPONENT_DOTS : DOTS] :
-            [path, direct(name.slice(1)), isComponent ? COMPONENT_DIRECT : DIRECT]
+            pdt(path, isComponent ? assign : dots, isComponent ? COMPONENT_DOTS : DOTS) :
+            pdt(path, directFor(name.slice(1)), isComponent ? COMPONENT_DIRECT : DIRECT)
           ;
         }
         default: {
-          if (isComponent) return [path, direct(name), COMPONENT_PROP];
-          if (name === 'aria') return [path, aria, ARIA];
-          if (name === 'data' && !/^object$/i.test(node.name)) return [path, data, DATA];
+          if (isComponent) return pdt(path, directFor(name), COMPONENT_PROP);
+          if (name === 'aria') return pdt(path, aria, ARIA);
+          if (name === 'data' && !/^object$/i.test(node.name)) return pdt(path, data, DATA);
           if (name === 'key') {
             if (DEBUG && 1 < path.length) throw errors.invalid_key(hint);
-            return [path, (k = true), KEY];
+            return pdt(path, (k = true), KEY);
           };
-          if (name === 'ref') return [path, directFor(ref), REF];
-          if (name.startsWith('on')) return [path, directFor(name.toLowerCase()), DIRECT];
-          return [path, attribute(name), ATTRIBUTE];
+          if (name === 'ref') return pdt(path, ref, REF);
+          if (name.startsWith('on')) return pdt(path, directFor(name.toLowerCase()), DIRECT);
+          return pdt(path, attributeFor(name), ATTRIBUTE);
         }
       }
     }
   }
 };
+
+function createFor(map, name) {
+  let cb = map.get(name);
+  if (!cb) map.set(name, (cb = this.bind(name)));
+  return cb;
+}
+
+function attribute(node, curr) {
+  'use strict';
+  if (curr == null) node.removeAttribute(this);
+  else node.setAttribute(this, curr);
+  return curr;
+}
+
+function direct(node, curr) {
+  'use strict';
+  node[this] = curr;
+  return curr;
+}
+
+function eventArray(node, curr, prev) {
+  'use strict';
+  if (prev.length) node.removeEventListener(this, ...prev);
+  if (curr) node.addEventListener(this, ...curr);
+  return curr;
+}
+
+function event(node, curr, prev) {
+  'use strict';
+  if (prev) node.removeEventListener(this, prev);
+  if (curr) node.addEventListener(this, curr);
+  return curr;
+}
+
+function toggle(node, curr) {
+  'use strict';
+  node.toggleAttribute(this, !!curr);
+  return curr;
+}
+
+function unsafe(node, curr) {
+  const [wm, xml] = this;
+  const pf = PersistentFragment(fragment(curr, xml));
+  (wm.get(node) ?? node).replaceWith(pf);
+  wm.set(node, pf);
+  return curr;
+}

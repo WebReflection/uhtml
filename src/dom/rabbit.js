@@ -5,13 +5,11 @@ import errors from '../errors.js';
 
 import resolve from './resolve.js';
 import { children } from './ish.js';
-import { effect } from './signals.js';
 import { isArray } from '../utils.js';
 import { PersistentFragment, diffFragment, nodes } from './persistent-fragment.js';
-import { ARRAY, COMMENT, COMPONENT, EVENT, KEY, REF, SIGNAL, ref } from './update.js';
+import { ARRAY, COMMENT, COMPONENT, EVENT, KEY, REF } from './update.js';
 
 import { _get as getDirect, _set as setDirect } from './direct.js';
-import { Signal, _get as getSignal, _set as setSignal } from './signals.js';
 
 /**
  * @param {Hole} hole
@@ -43,17 +41,17 @@ const keyed = (hole, value) => /** @type {import('./keyed.js').Keyed} */(hole.t[
  * @returns {Hole}
  */
 const component = (Component, obj, signals) => {
-  const signal = getSignal();
-  const length = signals.length;
-  let i = 0;
-  setSignal(/** @param {unknown} value */ value => i < length ? signals[i++] : (signals[i++] = signal(value)));
-  const wasDirect = getDirect();
-  if (wasDirect) setDirect(!wasDirect);
-  try { return Component(obj, global); }
-  finally {
-    if (wasDirect) setDirect(wasDirect);
-    setSignal(signal);
-  }
+  // const signal = getSignal();
+  // const length = signals.length;
+  // let i = 0;
+  // setSignal(/** @param {unknown} value */ value => i < length ? signals[i++] : (signals[i++] = signal(value)));
+  // const wasDirect = getDirect();
+  // if (wasDirect) setDirect(!wasDirect);
+  // try { return Component(obj, global); }
+  // finally {
+  //   if (wasDirect) setDirect(wasDirect);
+  //   setSignal(signal);
+  // }
 };
 
 /**
@@ -99,12 +97,14 @@ const createEffect = (node, value, obj) => {
 const updateRefs = refs => {
   for (const node of refs) {
     const value = node[ref];
-    if (typeof value === 'function')
-      value(node);
-    else if (value instanceof Signal)
-      value.value = node;
-    else if (value)
-      value.current = node;
+    switch (typeof value) {
+      case 'function':
+        value(node);
+        break;
+      case 'object':
+        if (value) value.current = node;
+        break;
+    }
   }
 };
 
@@ -160,11 +160,12 @@ export class Hole {
         else {
           let commit = true;
           if (DEBUG && (type & ARRAY) && !isArray(value)) throw errors.invalid_interpolation(this.t[3], value);
-          if (!direct && (type & COMMENT) && !(type & SIGNAL)) {
+          if (!direct && (type & COMMENT)) {
             if (type & ARRAY) {
               commit = false;
-              if (value.length)
-                update(node, value[0] instanceof Hole ? holed(children, value) : value);
+              if (value.length) {
+                changes[length] = update(node, children, value[0] instanceof Hole ? holed(children, value) : value);
+              }
             }
             else if (value instanceof Hole) {
               commit = false;
@@ -242,13 +243,7 @@ export class Hole {
           else if ((type & EVENT) && (value[0] === prev[0])) continue;
         }
         else if (type & COMMENT) {
-          if (type & SIGNAL) {
-            if (value === prev) {
-              update(entry[3], change);
-              continue;
-            }
-          }
-          else if (prev instanceof Hole) {
+          if (prev instanceof Hole) {
             if (DEBUG && !(value instanceof Hole)) throw errors.invalid_interpolation([], value);
             value = getHole(prev, /** @type {Hole} */(value));
             change = value.n;

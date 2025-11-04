@@ -13,8 +13,15 @@ export const TEXT: number;
 export const TOGGLE: number;
 export const UNSAFE: number;
 export const REF: number;
-export const SIGNAL: number;
 export const fragment: (content: string, xml?: boolean) => DocumentFragment;
-export const ref: unique symbol;
+export function pdt(path: any, detail: any, type: any): {
+    p: any;
+    d: any;
+    t: any;
+};
 export function isKeyed(): boolean;
-export function update(node: any, type: any, path: any, name: any, hint: any): any[];
+export function update(node: any, type: any, path: any, name: any, hint: any): {
+    p: any;
+    d: any;
+    t: any;
+};

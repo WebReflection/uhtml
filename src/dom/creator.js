@@ -12,18 +12,18 @@ export default (document = /** @type {Document} */(globalThis.document)) => {
    * @returns {DocumentFragment}
    */
   return (content, xml = false) => {
-    if (xml) {
-      if (!range) {
-        range = document.createRange();
-        range.selectNodeContents(
-          document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-        );
-      }
-      return range.createContextualFragment(content);
+    if (!xml) {
+      tpl.innerHTML = content;
+      const fragment = tpl.content;
+      tpl = /** @type {HTMLTemplateElement} */(tpl.cloneNode(false));
+      return fragment;
     }
-    tpl.innerHTML = content;
-    const fragment = tpl.content;
-    tpl = /** @type {HTMLTemplateElement} */(tpl.cloneNode(false));
-    return fragment;
+    if (!range) {
+      range = document.createRange();
+      range.selectNodeContents(
+        document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+      );
+    }
+    return range.createContextualFragment(content);
   };
 };

@@ -38,7 +38,7 @@ const ATTRS = /([^\s/>=]+)(?:=(\x00|(?:(['"])[\s\S]*?\3)))?/g;
 /** @typedef {Element | Component} Container */
 
 /** @type {update} */
-const defaultUpdate = (_, type, path, name, hint) => [type, path, name];
+const defaultUpdate = (...args) => args;
 
 /**
  * @param {Node} node
