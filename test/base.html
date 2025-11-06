@@ -1,24 +1,42 @@
 <!doctype html>
 <meta charset="UTF-8">
 <style>body { font-family: sans-serif; }</style>
+<script type="importmap">
+  {
+    "imports": {
+      "uhtml": "../src/dom/node.js",
+      "dom-cue": "https://esm.run/dom-cue"
+    }
+  }
+</script>
 <script type="module">
-  import { render, html, unsafe } from '../src/dom/node.js';
-
-  const ref = { current: null };
+  import { render, html, unsafe } from 'uhtml';
+  import { effect, signal } from 'dom-cue';
 
   function Button(props, state) {
-    console.log({ props, state });
-    return html`<button>${props.text}</button>`;
+    const counter = document.createTextNode('0');
+
+    const cleanup = effect(() => {
+      counter.data = props.signal.value;
+    });
+
+    return html`
+      <button onclick=${() => props.signal.value++}>
+        ${props.text}
+        ${counter}
+      </button>
+    `;
   }
 
+  const ref = { current: null };
   render(document.body, () => html`
     <h1 key=${1} ref=${ref} class=${'title'} onclick=${() => alert('Hello DOM!')}>
       Hello ${[html`DOM`]} !
     </h2>
     ${unsafe('<hr />')}
-    <${Button} text=${'👋'} />
-    <${Button} text=${'👋'} />
-    <${Button} text=${'👋'} />
+    <${Button} text=${'👋'} signal=${signal(0)} />
+    <${Button} text=${'👋'} signal=${signal(0)} />
+    <${Button} text=${'👋'} signal=${signal(0)} />
   `);
 
   console.log(ref.current);

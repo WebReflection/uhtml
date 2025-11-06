@@ -1,3 +1,5 @@
+// TODO align with the new parser/updates expectations
+
 import {
   ATTRIBUTE as TEMPLATE_ATTRIBUTE,
   COMMENT as TEMPLATE_COMMENT,

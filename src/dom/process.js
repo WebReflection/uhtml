@@ -10,6 +10,7 @@ import {
 } from './ish.js';
 
 import parser from '../parser/index.js';
+import templates from './templates.js';
 import { isKeyed, fragment, update, pdt } from './update.js';
 
 const parse = parser({
@@ -30,7 +31,10 @@ export default (xml, cache, template, values) => {
     console.time('creating fragment');
   }
   const parsed = pdt(fragment(domish.toString(), xml), updates, isKeyed());
-  if (DEBUG) console.timeEnd('creating fragment');
+  if (DEBUG) {
+    console.timeEnd('creating fragment');
+    templates.set(parsed.p, template);
+  }
   cache.set(template, parsed);
   return parsed;
 };
