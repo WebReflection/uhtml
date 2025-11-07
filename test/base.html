@@ -5,39 +5,48 @@
   {
     "imports": {
       "uhtml": "../src/dom/node.js",
-      "dom-cue": "https://esm.run/dom-cue"
+      "dom-cue": "https://esm.run/dom-cue",
+      "weaky": "https://esm.run/weaky"
     }
   }
 </script>
 <script type="module">
-  import { render, html, unsafe } from 'uhtml';
-  import { effect, signal } from 'dom-cue';
+import { render, html, unsafe } from 'uhtml';
+import { effect, signal } from 'dom-cue';
+import { proxy, deref } from 'weaky';
 
-  function Button(props, state) {
-    const counter = document.createTextNode('0');
+const fr = new FinalizationRegistry(cleanup => {
+  console.log('cleaning up');
+  cleanup();
+});
 
-    const cleanup = effect(() => {
-      counter.data = props.signal.value;
-    });
+function Button(props, state) {
+  const counter = proxy(html`0`);
+  const node = html`
+    <button class="counter" onclick=${() => props.signal.value++}>
+      ${props.text}
+      ${deref(counter)}
+    </button>
+  `;
 
-    return html`
-      <button onclick=${() => props.signal.value++}>
-        ${props.text}
-        ${counter}
-      </button>
-    `;
-  }
+  fr.register(node, effect(() => {
+    counter.data = props.signal.value;
+  }));
 
-  const ref = { current: null };
-  render(document.body, () => html`
-    <h1 key=${1} ref=${ref} class=${'title'} onclick=${() => alert('Hello DOM!')}>
-      Hello ${[html`DOM`]} !
-    </h2>
-    ${unsafe('<hr />')}
-    <${Button} text=${'👋'} signal=${signal(0)} />
-    <${Button} text=${'👋'} signal=${signal(0)} />
-    <${Button} text=${'👋'} signal=${signal(0)} />
-  `);
+  return node;
+}
 
-  console.log(ref.current);
+const ref = { current: null };
+render(document.body, () => html`
+  <h1 key=${1} ref=${ref} class=${'title'} onclick=${() => alert('Hello DOM!')}>
+    Hello ${[html`DOM`]} !
+  </h2>
+  ${unsafe('<hr />')}
+  <${Button} text=${'👋'} signal=${signal(0)} />
+  <${Button} text=${'👋'} signal=${signal(0)} />
+  <${Button} text=${'👋'} signal=${signal(0)} />
+`);
+
+console.log(ref.current);
+ref.current = null;
 </script>
