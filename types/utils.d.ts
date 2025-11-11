@@ -5,7 +5,8 @@ export class Unsafe {
     toString(): string;
     #private;
 }
-export function unsafe(data: any): Unsafe;
+export function reduce(node: any): any;
+export function unsafe(template: any, ...values: any[]): Unsafe;
 export function createComment(value: any): Comment;
 export const assign: {
     <T extends {}, U>(target: T, source: U): T & U;

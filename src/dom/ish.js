@@ -5,6 +5,7 @@ import { assign, freeze, isArray } from '../utils.js';
 export const ELEMENT = 1;
 export const ATTRIBUTE = 2;
 export const TEXT = 3;
+export const DATA = 4;
 export const COMMENT = 8;
 export const DOCUMENT_TYPE = 10;
 export const FRAGMENT = 11;

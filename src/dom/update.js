@@ -5,10 +5,11 @@ import {
   ATTRIBUTE as TEMPLATE_ATTRIBUTE,
   COMMENT as TEMPLATE_COMMENT,
   COMPONENT as TEMPLATE_COMPONENT,
+  DATA as TEMPLATE_DATA,
   TEXT as TEMPLATE_TEXT,
 } from './ish.js';
 
-import { Unsafe, assign, entries, isArray } from '../utils.js';
+import { Unsafe, assign, entries, reduce, isArray } from '../utils.js';
 import { PersistentFragment, diffFragment } from './persistent-fragment.js';
 import { ref } from './ref.js';
 import creator from './creator.js';
@@ -167,6 +168,7 @@ export const update = (node, type, path, name, hint) => {
         }
       }
     }
+    case TEMPLATE_DATA: return pdt(path, directFor('data'), TEXT);
   }
 };
 
@@ -211,8 +213,10 @@ function toggle(node, curr) {
 
 function unsafe(node, curr) {
   const [wm, xml] = this;
-  const pf = PersistentFragment(fragment(curr, xml));
-  (wm.get(node) ?? node).replaceWith(pf);
-  wm.set(node, pf);
+  const f = fragment(curr, xml);
+  const u = reduce(f);
+  const n = u === f ? PersistentFragment(u) : u;
+  (wm.get(node) ?? node).replaceWith(n);
+  wm.set(node, n);
   return curr;
 }

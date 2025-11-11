@@ -34,7 +34,16 @@ export class Unsafe {
   }
 }
 
-export const unsafe = data => new Unsafe(data);
+export const reduce = node => {
+  const { childNodes } = node;
+  return childNodes.length === 1 ? childNodes[0] : node;
+};
+
+export const unsafe = (template, ...values) => new Unsafe(
+  typeof template === 'string' ?
+    template :
+    [template[0], ...values.map((v, i) => v + template[i + 1])].join('')
+);
 
 export const createComment = value => document.createComment(value);
 /* c8 ignore stop */

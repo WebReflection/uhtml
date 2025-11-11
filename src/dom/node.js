@@ -1,6 +1,6 @@
 import DEBUG from '../debug.js';
 import errors from '../errors.js';
-
+import { reduce } from '../utils.js';
 import resolve from './resolve.js';
 import set from './process.js';
 import props from './props.js';
@@ -51,9 +51,7 @@ const create = ({ p: fragment, d: updates }, values) => {
   if (refs) setRefs(refs);
 
   if (DEBUG && values.length) console.timeEnd(`mapping ${values.length} updates`);
-  const { childNodes } = root;
-  length = childNodes.length;
-  return length === 1 ? childNodes[0] : root;
+  return reduce(root);
 };
 
 const tag = (xml, cache = new WeakMap) =>

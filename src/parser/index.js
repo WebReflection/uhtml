@@ -7,6 +7,7 @@ import {
   ATTRIBUTE,
   COMMENT,
   COMPONENT,
+  DATA,
   ELEMENT,
   TEXT,
   TEXT_ELEMENTS,
@@ -34,7 +35,7 @@ const ATTRS = /([^\s/>=]+)(?:=(\x00|(?:(['"])[\s\S]*?\3)))?/g;
 /** @typedef {import('../dom/ish.js').Node} Node */
 /** @typedef {import('../dom/ish.js').Element} Element */
 /** @typedef {import('../dom/ish.js').Component} Component */
-/** @typedef {(node: import('../dom/ish.js').Node, type: typeof ATTRIBUTE | typeof TEXT | typeof COMMENT | typeof COMPONENT, path: number[], name: string, hint: unknown) => unknown} update */
+/** @typedef {(node: import('../dom/ish.js').Node, type: typeof ATTRIBUTE | typeof DATA | typeof TEXT | typeof COMMENT | typeof COMPONENT, path: number[], name: string, hint: unknown) => unknown} update */
 /** @typedef {Element | Component} Container */
 
 /** @type {update} */
@@ -130,6 +131,11 @@ export default ({
         if (DEBUG && (i - index) < 6) throw errors.invalid_comment(template);
         const data = content.slice(index + 4, i - 2);
         if (data[0] === '!') append(node, new Comment(data.slice(1).replace(/!$/, '')));
+        else if (data === NUL) {
+          const comment = append(node, new Comment('◦'));
+          values.push(update(comment, DATA, path(comment), '', holes[hole++]));
+          pos = i + 1;
+        }
       }
       else {
         if (DEBUG && !content.slice(index + 2, i).toLowerCase().startsWith('doctype')) throw errors.invalid_doctype(template, content.slice(index + 2, i));
