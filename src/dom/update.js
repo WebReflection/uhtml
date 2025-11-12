@@ -9,46 +9,34 @@ import {
   TEXT as TEMPLATE_TEXT,
 } from './ish.js';
 
-import { Unsafe, assign, entries, reduce, isArray } from '../utils.js';
+import { Unsafe, assign, entries, pdt, reduce, isArray } from '../utils.js';
 import { PersistentFragment, diffFragment } from './persistent-fragment.js';
 import { ref } from './ref.js';
 import creator from './creator.js';
 import diff from './diff.js';
 
-export const ARRAY = 1 << 0;
-export const ARIA = 1 << 1;
-export const ATTRIBUTE = 1 << 2;
-export const COMMENT = 1 << 3;
-export const COMPONENT = 1 << 4;
-export const DATA = 1 << 5;
-export const DIRECT = 1 << 6;
-export const DOTS = 1 << 7;
-export const EVENT = 1 << 8;
-export const KEY = 1 << 9;
-export const PROP = 1 << 10;
-export const TEXT = 1 << 11;
-export const TOGGLE = 1 << 12;
-export const UNSAFE = 1 << 13;
-export const REF = 1 << 14;
-
-// COMPONENT flags
-const COMPONENT_DIRECT = COMPONENT | DIRECT;
-const COMPONENT_DOTS = COMPONENT | DOTS;
-const COMPONENT_PROP = COMPONENT | PROP;
-
-// ARRAY flags
-const EVENT_ARRAY = EVENT | ARRAY;
-const COMMENT_ARRAY = COMMENT | ARRAY;
+import {
+  ARIA,
+  ATTRIBUTE,
+  COMMENT,
+  COMPONENT,
+  DATA,
+  DIRECT,
+  DOTS,
+  EVENT,
+  KEY,
+  TEXT,
+  TOGGLE,
+  UNSAFE,
+  REF,
+  COMPONENT_DIRECT,
+  COMPONENT_DOTS,
+  COMPONENT_PROP,
+  EVENT_ARRAY,
+  COMMENT_ARRAY,
+} from '../constants.js';
 
 export const fragment = creator(document);
-
-// /**
-//  * @param {number[]} path
-//  * @param {unknown} detail
-//  * @param {typeof COMPONENT | typeof COMMENT_ARRAY | typeof UNSAFE | typeof COMMENT | typeof TEXT | typeof EVENT_ARRAY | typeof EVENT | typeof TOGGLE | typeof COMPONENT_DOTS | typeof DOTS | typeof COMPONENT_DIRECT | typeof DIRECT | typeof COMPONENT_PROP | typeof ARIA | typeof DATA | typeof KEY | typeof REF | typeof ATTRIBUTE} type
-//  * @returns
-//  */
-export const pdt = (path, detail, type) => ({ p: path, d: detail, t: type });
 
 const aria = (node, curr, prev) => {
   if (prev !== curr) {
@@ -185,9 +173,9 @@ function attribute(node, curr) {
   return curr;
 }
 
-function direct(node, curr) {
+function direct(ref, curr) {
   'use strict';
-  node[this] = curr;
+  ref[this] = curr;
   return curr;
 }
 

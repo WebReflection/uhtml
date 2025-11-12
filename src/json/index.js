@@ -3,68 +3,80 @@
 import DEBUG from '../debug.js';
 import errors from '../errors.js';
 import { assign } from '../utils.js';
+import set from './process.js';
+import props from '../dom/props.js';
+import { set as setRefs } from '../dom/ref.js';
 
 import {
-  Comment,
-  DocumentType,
-  Text,
-  Fragment,
-  Element,
-  Component,
   fromJSON,
+  replaceWith,
+  remove,
+  children,
 } from '../dom/ish.js';
 
-import parser from '../parser/index.js';
 import resolve from './resolve.js';
-import { COMPONENT, KEY, comment, update } from './update.js';
+import { ARRAY, COMMENT, COMPONENT, KEY, REF } from '../constants.js';
 
-const textParser = parser({
-  Comment,
-  DocumentType,
-  Text,
-  Fragment,
-  Element,
-  Component,
-  update,
-});
-
-const { parse, stringify } = JSON;
-
-const create = xml => {
-  const twm = new WeakMap;
-  const cache = (template, values) => {
-    const parsed = textParser(template, values, xml);
-    parsed[0] = parse(stringify(parsed[0]));
-    twm.set(template, parsed);
-    return parsed;
-  };
-  return (template, ...values) => {
-    const [json, updates] = twm.get(template) || cache(template, values);
-    const root = fromJSON(json);
-    const length = values.length;
-    if (length === updates.length) {
-      const components = [];
-      for (let node, prev, i = 0; i < length; i++) {
-        const [path, update, type] = updates[i];
-        const value = values[i];
-        if (prev !== path) {
-          node = resolve(root, path);
-          prev = path;
-          if (DEBUG && !node) throw errors.invalid_path(path);
-        }
-        if (type === KEY) continue;
-        if (type === COMPONENT) components.push(update(node, value));
-        else update(node, value);
-      }
-      for (const [node, Component] of components) {
-        const props = assign({ children: node.children }, node.props);
-        comment(node, Component(props));
-      }
+const create = ({ p: json, d: updates }, values) => {
+  if (DEBUG && values.length) console.time(`mapping ${values.length} updates`);
+  const root = fromJSON(json);
+  let length = values.length;
+  let node, prev, refs;
+  // if (DEBUG && length !== updates.length) throw errors.invalid_interpolation(templates.get(fragment), values);
+  while (length--) {
+    const { p: path, d: update, t: type } = updates[length];
+    const value = values[length];
+    if (prev !== path) {
+      node = resolve(root, path);
+      prev = path;
+      // if (DEBUG && !node) throw errors.invalid_path(templates.get(fragment), path);
     }
-    else if (DEBUG) throw errors.invalid_template();
-    return root;
-  };
+
+    if (type & COMPONENT) {
+      const obj = props(node);
+      if (type === COMPONENT) {
+        if (DEBUG && typeof value !== 'function') throw errors.invalid_component(value);
+        const result = value(assign({}, node.props, { children: node.children }, obj), {});
+        if (result) replaceWith(node, result);
+        else remove(node);
+      }
+      else update(obj, value);
+    }
+    else if (type !== KEY) {
+      // if (DEBUG && (type & ARRAY) && !isArray(value)) throw errors.invalid_interpolation(templates.get(fragment), value);
+      if (type === REF) (refs ??= []).push(node);
+      const prev = type === COMMENT ? node : (type & ARRAY ? children : null);
+      update(node, value, prev);
+    }
+    if (type & COMMENT) remove(node);
+  }
+
+  if (refs) setRefs(refs);
+
+  if (DEBUG && values.length) console.timeEnd(`mapping ${values.length} updates`);
+  return root.children.length === 1 ? root.children[0] : root;
 };
 
-export const html = create(false);
-export const svg = create(true);
+const tag = (xml, cache = new WeakMap) =>
+  /**
+   * @param {TemplateStringsArray | string[]} template
+   * @param {unknown[]} values
+   * @returns {import("../dom/ish.js").Node}
+   */
+  (template, ...values) => create(
+    cache.get(template) ?? set(xml, cache, template, values),
+    values,
+  );
+;
+
+export const html = tag(false);
+export const svg = tag(true);
+
+export const render = (where, what) => {
+  const content = (typeof what === 'function' ? what() : what).toString();
+  if (!where.write) return where(content);
+  where.write(content);
+  return where;
+};
+
+export { unsafe } from '../utils.js';

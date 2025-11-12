@@ -46,4 +46,6 @@ export const unsafe = (template, ...values) => new Unsafe(
 );
 
 export const createComment = value => document.createComment(value);
+
+export const pdt = (path, detail, type) => ({ p: path, d: detail, t: type });
 /* c8 ignore stop */

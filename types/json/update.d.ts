@@ -10,4 +10,5 @@ export const EVENT: 7;
 export const KEY: 8;
 export const TEXT: 9;
 export const TOGGLE: 10;
+export function isKeyed(): boolean;
 export function update(node: any, type: any, path: any, name: any): any[];

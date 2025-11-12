@@ -54,6 +54,22 @@ export const prop = (node, name, value) => {
   node.props[name] = value;
 };
 
+export const replaceWith = (source, target) => {
+  const { children } = source.parent;
+  children[children.indexOf(source)] = target;
+  target.parent = source.parent;
+  source.parent = null;
+};
+
+export const remove = node => {
+  const { parent } = node;
+  if (parent) {
+    const { children } = parent;
+    children.splice(children.indexOf(node), 1);
+    node.parent = null;
+  }
+};
+
 const addJSON = (value, comp, json) => {
   if (value !== comp) json.push(value);
 };

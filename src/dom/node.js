@@ -8,7 +8,14 @@ import props from './props.js';
 // import { isArray } from '../utils.js';
 import { children } from './ish.js';
 import { set as setRefs } from './ref.js';
-import { ARRAY, COMMENT, COMPONENT, KEY, REF } from './update.js';
+
+import {
+  ARRAY,
+  COMMENT,
+  COMPONENT,
+  KEY,
+  REF,
+} from '../constants.js';
 
 /** @typedef {globalThis.Element | globalThis.HTMLElement | globalThis.SVGSVGElement | globalThis.DocumentFragment} Container */
 

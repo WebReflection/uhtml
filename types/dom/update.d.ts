@@ -1,24 +1,4 @@
-export const ARRAY: number;
-export const ARIA: number;
-export const ATTRIBUTE: number;
-export const COMMENT: number;
-export const COMPONENT: number;
-export const DATA: number;
-export const DIRECT: number;
-export const DOTS: number;
-export const EVENT: number;
-export const KEY: number;
-export const PROP: number;
-export const TEXT: number;
-export const TOGGLE: number;
-export const UNSAFE: number;
-export const REF: number;
 export const fragment: (content: string, xml?: boolean) => DocumentFragment;
-export function pdt(path: any, detail: any, type: any): {
-    p: any;
-    d: any;
-    t: any;
-};
 export function isKeyed(): boolean;
 export function update(node: any, type: any, path: any, name: any, hint: any): {
     p: any;

@@ -12,6 +12,8 @@ export const props: Readonly<{}>;
 export const children: readonly any[];
 export function append(node: any, child: any): any;
 export function prop(node: any, name: any, value: any): void;
+export function replaceWith(source: any, target: any): void;
+export function remove(node: any): void;
 export function fromJSON(json: any): any;
 export class Node {
     constructor(type: any);

@@ -108,6 +108,13 @@ const toggle = name => (node, value) => {
   else props[name] = !!value;
 };
 
+let k = false;
+export const isKeyed = () => {
+  const wasKeyed = k;
+  k = false;
+  return wasKeyed;
+};
+
 export const update = (node, type, path, name) => {
   switch (type) {
     case TEMPLATE_COMPONENT: {

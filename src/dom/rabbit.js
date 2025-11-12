@@ -7,7 +7,7 @@ import resolve from './resolve.js';
 import { children } from './ish.js';
 import { isArray } from '../utils.js';
 import { PersistentFragment, diffFragment, nodes } from './persistent-fragment.js';
-import { ARRAY, COMMENT, COMPONENT, EVENT, KEY, REF } from './update.js';
+import { ARRAY, COMMENT, COMPONENT, EVENT, KEY, REF } from '../constants.js';
 
 import { _get as getDirect, _set as setDirect } from './direct.js';
 

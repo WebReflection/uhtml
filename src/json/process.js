@@ -7,11 +7,11 @@ import {
   Fragment,
   Element,
   Component,
-} from './ish.js';
+} from '../dom/ish.js';
 
 import parser from '../parser/index.js';
-import templates from './templates.js';
-import { isKeyed, fragment, update } from './update.js';
+import templates from '../dom/templates.js';
+import { isKeyed, update } from './update.js';
 import { pdt } from '../utils.js';
 
 const parse = parser({
@@ -31,7 +31,7 @@ export default (xml, cache, template, values) => {
     console.timeEnd(`parsing ${values.length} holes`);
     console.time('creating fragment');
   }
-  const parsed = pdt(fragment(domish.toString(), xml), updates, isKeyed());
+  const parsed = pdt(domish.toJSON(), updates, isKeyed());
   if (DEBUG) {
     console.timeEnd('creating fragment');
     templates.set(parsed.p, template);
