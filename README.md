@@ -162,7 +162,7 @@ import {
   * `html` and `svg` [template literal tags](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals#tagged_templates) to create either *HTML* or *SVG* content.
   * `unsafe(content:string)` to inject any content, even *HTML* or *SVG*, anywhere within a node: `<div>${unsafe('<em>value</em>')}</div>`
   * `signal`, `computed`, `effect`, `untracked` and `batch` utilities with [Preact signals](https://github.com/preactjs/signals/blob/main/packages/core/README.md) inspired API, fueled by [alien-signals](https://github.com/stackblitz/alien-signals#readme)
-  * `Hole` class used internally to resolve `html` and `svg` tags' template and interpolations. This is exported mainly to simplify *TypeScript* relaed signatures.
+  * `Hole` class used internally to resolve `html` and `svg` tags' template and interpolations. This is exported mainly to simplify *TypeScript* related signatures.
   * `fragment(content:string, svg?:boolean)` extra utility, used internally to create either *HTML* or *SVG* elements from a string. This is merely a simplification of a manually created `<template>` element, its `template.innerHTML = content` operation and retrieval of its `template.content` reference, use it if ever needed but remember it has no special meaning or logic attached, it's literally just standard DOM fragment creation out of a string.
 
 - - -
