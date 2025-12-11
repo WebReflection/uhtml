@@ -17,6 +17,14 @@ export default (target, plugins) => [
   },
   {
     plugins,
+    input: './src/jsx/index.js',
+    output: {
+      esModule: true,
+      file: `./dist/${target}/jsx.js`,
+    }
+  },
+  {
+    plugins,
     input: './src/json/index.js',
     output: {
       esModule: true,

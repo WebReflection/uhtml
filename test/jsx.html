@@ -1,0 +1,13 @@
+<!doctype html>
+<script type="module">
+  import { jsx, jsxs } from 'https://esm.run/react/jsx-runtime';
+  import { createRoot } from 'https://esm.run/react-dom/client';
+
+  import uhtml from '../src/jsx/index.js';
+  // const x = uhtml((...args) => args);
+  const x = uhtml(jsx, jsxs);
+
+  createRoot(document.body).render(
+    x`<div a="1" b=${2}>Hello</div>`
+  );
+</script>
