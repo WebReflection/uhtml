@@ -66,9 +66,8 @@ const valueOf = {
  * @returns {DocumentFragment}
  */
 export function PersistentFragment(fragment) {
-  const firstChild = createComment('<>'), lastChild = createComment('</>');
-  //@ts-ignore
-  fragment.replaceChildren(firstChild, ...fragment.childNodes, lastChild);
+  const firstChild = fragment.insertBefore(createComment('<>'), fragment.firstChild);
+  const lastChild = fragment.appendChild(createComment('</>'));
   checkType = true;
   return defineProperties(fragment, {
     [nodes]: { writable: true, value: children },

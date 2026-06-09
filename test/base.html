@@ -1,8 +1,18 @@
 <!doctype html>
+<meta charset="UTF-8">
+<style>body { font-family: sans-serif; }</style>
+<script type="importmap">
+  {
+    "imports": {
+      "uhtml": "../src/dom/node.js",
+      "dom-cue": "https://esm.run/dom-cue",
+      "weaky": "https://esm.run/weaky"
+    }
+  }
+</script>
 <script type="module">
-  import { html } from '../dist/prod/dom.js';
+import { render, html, unsafe } from 'uhtml';
 
-  document.body.prepend(
-    html`<h1>Hello DOM !</h2>`
-  );
+debugger;
+render(document.body, html`${unsafe`<hr /><hr />`} ah, <em>ok</em>`);
 </script>

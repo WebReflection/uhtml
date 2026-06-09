@@ -9,6 +9,14 @@ export default (target, plugins) => [
   },
   {
     plugins,
+    input: './src/dom/node.js',
+    output: {
+      esModule: true,
+      file: `./dist/${target}/node.js`,
+    }
+  },
+  {
+    plugins,
     input: './src/dom/cdn.js',
     output: {
       esModule: true,

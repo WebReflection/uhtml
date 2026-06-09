@@ -1,25 +1,27 @@
-// TODO align with the new parser/updates expectations
-
 import DEBUG from '../debug.js';
 import errors from '../errors.js';
-import { assign } from '../utils.js';
+import { reduce } from '../utils.js';
+import resolve from './resolve.js';
 import set from './process.js';
-import props from '../dom/props.js';
-import { set as setRefs } from '../dom/ref.js';
+import props from './props.js';
+// import templates from './templates.js';
+// import { isArray } from '../utils.js';
+import { children } from './ish.js';
+import { set as setRefs } from './ref.js';
 
 import {
-  fromJSON,
-  replaceWith,
-  remove,
-  children,
-} from '../dom/ish.js';
+  ARRAY,
+  COMMENT,
+  COMPONENT,
+  KEY,
+  REF,
+} from '../constants.js';
 
-import resolve from './resolve.js';
-import { ARRAY, COMMENT, COMPONENT, KEY, REF } from '../constants.js';
+/** @typedef {globalThis.Element | globalThis.HTMLElement | globalThis.SVGSVGElement | globalThis.DocumentFragment} Container */
 
-const create = ({ p: json, d: updates }, values) => {
+const create = ({ p: fragment, d: updates }, values) => {
   if (DEBUG && values.length) console.time(`mapping ${values.length} updates`);
-  const root = fromJSON(json);
+  const root = document.importNode(fragment, true);
   let length = values.length;
   let node, prev, refs;
   // if (DEBUG && length !== updates.length) throw errors.invalid_interpolation(templates.get(fragment), values);
@@ -36,9 +38,11 @@ const create = ({ p: json, d: updates }, values) => {
       const obj = props(node);
       if (type === COMPONENT) {
         if (DEBUG && typeof value !== 'function') throw errors.invalid_component(value);
-        const result = value(assign({}, node.props, { children: node.children }, obj), {});
-        if (result) replaceWith(node, result);
-        else remove(node);
+        for (const { name, value } of node.attributes) obj[name] ??= value;
+        obj.children ??= [...node.content.childNodes];
+        const result = value(obj, {});
+        if (result) node.replaceWith(result);
+        else node.remove();
       }
       else update(obj, value);
     }
@@ -48,20 +52,20 @@ const create = ({ p: json, d: updates }, values) => {
       const prev = type === COMMENT ? node : (type & ARRAY ? children : null);
       update(node, value, prev);
     }
-    if (type & COMMENT) remove(node);
+    if (type & COMMENT) node.remove();
   }
 
   if (refs) setRefs(refs);
 
   if (DEBUG && values.length) console.timeEnd(`mapping ${values.length} updates`);
-  return root.children.length === 1 ? root.children[0] : root;
+  return reduce(root);
 };
 
 const tag = (xml, cache = new WeakMap) =>
   /**
    * @param {TemplateStringsArray | string[]} template
    * @param {unknown[]} values
-   * @returns {import("../dom/ish.js").Node}
+   * @returns {Container | Node}
    */
   (template, ...values) => create(
     cache.get(template) ?? set(xml, cache, template, values),
@@ -72,10 +76,15 @@ const tag = (xml, cache = new WeakMap) =>
 export const html = tag(false);
 export const svg = tag(true);
 
+/**
+ * @param {Container} where
+ * @param {Function | Container | Node} what
+ * @returns
+ */
 export const render = (where, what) => {
-  const content = (typeof what === 'function' ? what() : what).toString();
-  if (!where.write) return where(content);
-  where.write(content);
+  const node = typeof what === 'function' ? what() : what;
+  where.replaceChildren(node);
+  // where.normalize(); can be performed, arbitrarily, after
   return where;
 };
 

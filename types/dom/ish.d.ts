@@ -1,6 +1,7 @@
 export const ELEMENT: 1;
 export const ATTRIBUTE: 2;
 export const TEXT: 3;
+export const DATA: 4;
 export const COMMENT: 8;
 export const DOCUMENT_TYPE: 10;
 export const FRAGMENT: 11;
@@ -11,6 +12,8 @@ export const props: Readonly<{}>;
 export const children: readonly any[];
 export function append(node: any, child: any): any;
 export function prop(node: any, name: any, value: any): void;
+export function replaceWith(source: any, target: any): void;
+export function remove(node: any): void;
 export function fromJSON(json: any): any;
 export class Node {
     constructor(type: any);

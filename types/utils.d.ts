@@ -5,8 +5,14 @@ export class Unsafe {
     toString(): string;
     #private;
 }
-export function unsafe(data: any): Unsafe;
+export function reduce(node: any): any;
+export function unsafe(template: any, ...values: any[]): Unsafe;
 export function createComment(value: any): Comment;
+export function pdt(path: any, detail: any, type: any): {
+    p: any;
+    d: any;
+    t: any;
+};
 export const assign: {
     <T extends {}, U>(target: T, source: U): T & U;
     <T extends {}, U, V>(target: T, source1: U, source2: V): T & U & V;

@@ -5,6 +5,7 @@ import { assign, freeze, isArray } from '../utils.js';
 export const ELEMENT = 1;
 export const ATTRIBUTE = 2;
 export const TEXT = 3;
+export const DATA = 4;
 export const COMMENT = 8;
 export const DOCUMENT_TYPE = 10;
 export const FRAGMENT = 11;
@@ -51,6 +52,22 @@ export const append = (node, child) => {
 export const prop = (node, name, value) => {
   if (node.props === props) node.props = {};
   node.props[name] = value;
+};
+
+export const replaceWith = (source, target) => {
+  const { children } = source.parent;
+  children[children.indexOf(source)] = target;
+  target.parent = source.parent;
+  source.parent = null;
+};
+
+export const remove = node => {
+  const { parent } = node;
+  if (parent) {
+    const { children } = parent;
+    children.splice(children.indexOf(node), 1);
+    node.parent = null;
+  }
 };
 
 const addJSON = (value, comp, json) => {

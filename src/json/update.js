@@ -1,3 +1,5 @@
+// TODO align with the new parser/updates expectations
+
 import {
   ATTRIBUTE as TEMPLATE_ATTRIBUTE,
   COMMENT as TEMPLATE_COMMENT,
@@ -104,6 +106,13 @@ const toggle = name => (node, value) => {
     if (keys(props).length === 0) node.props = props;
   }
   else props[name] = !!value;
+};
+
+let k = false;
+export const isKeyed = () => {
+  const wasKeyed = k;
+  k = false;
+  return wasKeyed;
 };
 
 export const update = (node, type, path, name) => {

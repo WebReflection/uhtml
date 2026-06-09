@@ -9,11 +9,9 @@ const resolve = ({ protocol, host, pathname }) => {
 const uhtml = Symbol.for('µhtml');
 
 const {
-  render, html, svg,
-  computed, signal, batch, effect, untracked,
+  render, html, svg, unsafe,
 } = globalThis[uhtml] || (globalThis[uhtml] = await import(/* webpackIgnore: true */resolve(new URL(import.meta.url))));
 
 export {
-  render, html, svg,
-  computed, signal, batch, effect, untracked,
+  render, html, svg, unsafe,
 };

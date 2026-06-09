@@ -2,10 +2,6 @@
 
 import DEBUG from '../debug.js';
 
-//@ts-ignore
-import { effectScope } from '@webreflection/alien-signals';
-export { signal, computed, effect, untracked, batch } from './signals.js';
-
 import {
   Comment,
   DocumentType,
@@ -41,50 +37,46 @@ const parse = parser({
 /**
  * @param {boolean} xml
  * @param {WeakMap<TemplateStringsArray | string[], [any, any[], Keyed?]>} twm
+ * @param {TemplateStringsArray | string[]} template
+ * @param {unknown[]} values
+ * @returns
+ */
+const set = (xml, twm, template, values) => {
+  const parsed = parse(template, values, xml);
+  //@ts-ignore
+  parsed.push(isKeyed() ? new Keyed : null);
+  //@ts-ignore
+  if (DEBUG) parsed.push(template);
+  //@ts-ignore
+  parsed[0] = fragment(parsed[0].toString(), xml);
+  twm.set(template, parsed);
+  return parsed;
+};
+
+/**
+ * @param {boolean} xml
+ * @param {WeakMap<TemplateStringsArray | string[], [any, any[], Keyed?]>} twm
  * @returns
  */
 const create = (xml, twm = new WeakMap) =>
   /**
    * @param {TemplateStringsArray | string[]} template
    * @param {unknown[]} values
-   * @returns {Hole}
+   * @returns {Node | HTMLElement | SVGSVGElement | Hole}
    */
   (template, ...values) => {
-    let parsed = twm.get(template);
-    if (!parsed) {
-      parsed = parse(template, values, xml);
-      parsed.push(isKeyed() ? new Keyed : null);
-      if (DEBUG) parsed.push(template);
-      parsed[0] = fragment(parsed[0].toString(), xml);
-      twm.set(template, parsed);
-    }
-    return new Hole(parsed, values);
-  };
+    const hole = new Hole(
+      twm.get(template) ?? set(xml, twm, template, values),
+      values,
+    );
+    return getDirect() ? hole.valueOf(true) : hole;
+  }
+;
 
-const htmlHole = create(false);
-const svgHole = create(true);
+export const html = create(false);
+export const svg = create(true);
 
 const rendered = new WeakMap;
-
-/**
- * @param {TemplateStringsArray | string[]} template
- * @param {any[]} values
- * @returns {Node | HTMLElement | Hole}
- */
-export function html(template, ...values) {
-  const hole = htmlHole.apply(null, arguments);
-  return getDirect() ? hole.valueOf(true) : hole;
-}
-
-/**
- * @param {TemplateStringsArray | string[]} template
- * @param {any[]} values
- * @returns {Node | SVGSVGElement | Hole}
- */
-export function svg(template, ...values) {
-  const hole = svgHole.apply(null, arguments);
-  return getDirect() ? hole.valueOf(true) : hole;
-}
 
 /**
  * @param {Container} where
@@ -93,19 +85,14 @@ export function svg(template, ...values) {
  */
 export const render = (where, what) => {
   const known = rendered.get(where);
-  if (known) known[0]();
   if (typeof what === 'function') {
     setDirect(false);
-    let hole;
-    const scope = effectScope(() => { hole = what() });
-    //@ts-ignore
-    if (!known || known[1].t !== hole.t) {
-      //@ts-ignore
-      const d = hole.valueOf(false);
-      where.replaceChildren(d);
+    let hole = what();
+    if (known?.t !== hole.t) {
+      where.replaceChildren(hole.valueOf(false));
+      rendered.set(where, hole);
     }
-    else known[1].update(hole);
-    rendered.set(where, [scope, hole]);
+    else known.update(hole);
   }
   else {
     setDirect(true);
